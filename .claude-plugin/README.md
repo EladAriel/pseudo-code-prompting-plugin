@@ -9,12 +9,12 @@
 /plugin marketplace add EladAriel/pseudo-code-prompting-plugin
 
 # Step 2: Install (choose one)
-/plugin install pseudo-code-prompting@complete       # Everything (6 skills, 5 agents, 4 commands, 3 hooks)
-/plugin install pseudo-code-prompting@transformation # Core transformation (2 skills)
-/plugin install pseudo-code-prompting@validation     # Validation & quality (1 skill)
-/plugin install pseudo-code-prompting@optimization   # Optimization & enhancement (1 skill)
-/plugin install pseudo-code-prompting@compression    # Context compression (1 skill)
-/plugin install pseudo-code-prompting@workflow       # Workflow integration (1 skill)
+/plugin install pseudo-code-prompting-plugin@complete       # Everything (6 skills, 5 agents, 4 commands, 3 hooks)
+/plugin install pseudo-code-prompting-plugin@transformation # Core transformation (2 skills)
+/plugin install pseudo-code-prompting-plugin@validation     # Validation & quality (1 skill)
+/plugin install pseudo-code-prompting-plugin@optimization   # Optimization & enhancement (1 skill)
+/plugin install pseudo-code-prompting-plugin@compression    # Context compression (1 skill)
+/plugin install pseudo-code-prompting-plugin@workflow       # Workflow integration (1 skill)
 ```
 
 ### From GitHub

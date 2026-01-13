@@ -1,17 +1,12 @@
 {
   "name": "pseudo-code-prompting-plugin",
   "displayName": "@pseudo-code/prompting",
-  "owner": {
-    "name": "EladAriel"
-  },
+  "owner": "EladAriel",
   "version": "2.1.0",
   "description": "Transform natural language into structured, validated pseudo-code - 6 skills, 5 agents, 4 commands, 3 hooks",
-  "source": {
-    "source": "url",
-    "url": "https://github.com/EladAriel/pseudo-code-prompting-plugin.git"
-  },
+  "repository": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
   "license": "MIT",
-  "strict": true,
+  "strict": false,
 
   "plugins": [
     {

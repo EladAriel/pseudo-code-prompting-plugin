@@ -2,12 +2,15 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 
 ## Overview
 
 The Pseudo-Code Prompting Plugin enhances Claude Code with automated conversion, validation, and optimization of natural language requirements into concise, function-like pseudo-code. This structured approach eliminates ambiguity, ensures completeness, and accelerates development.
+
+**Architecture:** Utilizes Claude Code's auto-discovery system - all skills, agents, and commands are automatically loaded based on your project context. No manual configuration required.
 
 ## Why Pseudo-Code Prompting?
 
@@ -87,35 +90,42 @@ create_endpoint(
 
 ## Installation
 
-### Option 1: Local Development
+### Requirements
+
+- Claude Code v2.1.0 or higher
+
+### From Marketplace
 
 ```bash
-# Clone the repository
-git clone https://github.com/EladAriel/pseudo-code-prompting-plugin.git
-cd pseudo-code-prompting-plugin
+# Step 1: Add the marketplace
+/plugin marketplace add EladAriel/pseudo-code-prompting-plugin
 
-# Symlink to Claude Code plugins directory
-ln -s $(pwd) ~/.claude/plugins/pseudo-code-prompting
-
-# Restart Claude Code
-claude-code
+# Step 2: Install the plugin
+/plugin install pseudo-code-prompting
 ```
 
-### Option 2: Direct Install (Future)
+### From GitHub (Manual)
 
 ```bash
-# From Claude Code Marketplace (coming soon)
-/plugin marketplace add EladAriel/pseudo-code-prompting-plugin
-/plugin install pseudo-code-prompting-plugin
+# Clone to your Claude plugins directory
+git clone https://github.com/EladAriel/pseudo-code-prompting-plugin ~/.claude/plugins/pseudo-code-prompting
+```
+
+### Project-Scoped Installation
+
+```bash
+# Copy plugin to your project
+cp -r pseudo-code-prompting-plugin/.claude your-project/.claude
 ```
 
 ### Verify Installation
 
+After installation, skills and commands are auto-discovered. Verify by checking available commands:
+
 ```bash
-# Check available commands
 /help
 
-# Should see:
+# You should see:
 ✓ /transform-query
 ✓ /validate-requirements
 ✓ /optimize-prompt

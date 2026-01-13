@@ -2,37 +2,34 @@
 
 ## Quick Start
 
+### Requirements
+
+- Claude Code v2.1.0 or higher
+
 ### From Marketplace
 
 ```bash
 # Step 1: Add the marketplace
 /plugin marketplace add EladAriel/pseudo-code-prompting-plugin
 
-# Step 2: Install (choose one)
-/plugin install pseudo-code-prompting-plugin@complete       # Everything (6 skills, 5 agents, 4 commands, 3 hooks)
-/plugin install pseudo-code-prompting-plugin@transformation # Core transformation (2 skills)
-/plugin install pseudo-code-prompting-plugin@validation     # Validation & quality (1 skill)
-/plugin install pseudo-code-prompting-plugin@optimization   # Optimization & enhancement (1 skill)
-/plugin install pseudo-code-prompting-plugin@compression    # Context compression (1 skill)
-/plugin install pseudo-code-prompting-plugin@workflow       # Workflow integration (1 skill)
+# Step 2: Install the plugin
+/plugin install pseudo-code-prompting
 ```
 
-### From GitHub
+All features (6 skills, 5 agents, 4 commands, 3 hooks) are automatically available after installation.
+
+### From GitHub (Manual)
 
 ```bash
 git clone https://github.com/EladAriel/pseudo-code-prompting-plugin ~/.claude/plugins/pseudo-code-prompting
 ```
 
-## Plugin Bundles
+### Project-Scoped Installation
 
-| Bundle | Skills | Description |
-|--------|--------|-------------|
-| `complete` | 6 | Full toolkit with agents, commands, hooks |
-| `transformation` | 2 | Analyze and transform natural language to pseudo-code |
-| `validation` | 1 | Validate completeness, security, edge cases |
-| `optimization` | 1 | Optimize pseudo-code for implementation readiness |
-| `compression` | 1 | Compress verbose requirements (60-95% reduction) |
-| `workflow` | 1 | Integrate with feature-dev workflow |
+```bash
+# Copy to your project directory
+cp -r pseudo-code-prompting-plugin/.claude your-project/.claude
+```
 
 ## Features
 
@@ -121,5 +118,5 @@ See the main [README.md](../README.md) for full documentation, examples, and adv
 
 ## Version
 
-**Current Version:** 2.1.0
+**Current Version:** 1.1.0
 **Last Updated:** 2026-01-13

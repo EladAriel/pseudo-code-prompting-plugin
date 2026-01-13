@@ -5,16 +5,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/user-prompt-submit.sh",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/.claude/hooks/user-prompt-submit.sh",
             "statusMessage": "Checking for pseudo-code transformation commands..."
           },
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-transform-validation.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/.claude/hooks/post-transform-validation.sh"
           },
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/context-compression-helper.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/.claude/hooks/context-compression-helper.sh"
           }
         ]
       }

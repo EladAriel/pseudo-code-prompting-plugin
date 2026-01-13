@@ -1,70 +1,21 @@
 {
-  "name": "pseudo-code-prompting-plugin",
-  "displayName": "@pseudo-code/prompting",
-  "owner": "EladAriel",
-  "version": "2.1.0",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pseudo-code-prompting",
+  "version": "1.1.0",
   "description": "Transform natural language into structured, validated pseudo-code - 6 skills, 5 agents, 4 commands, 3 hooks",
-  "repository": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
-  "license": "MIT",
-  "strict": false,
-
+  "owner": {
+    "name": "Elad Ariel"
+  },
   "plugins": [
     {
-      "name": "complete",
-      "description": "Full toolkit - all 6 skills, 5 agents, 4 commands, 3 hooks",
-      "skills": ["*"],
-      "includes_agents": true,
-      "includes_commands": true,
-      "includes_hooks": true
-    },
-    {
-      "name": "transformation",
-      "description": "Core transformation: analyze, transform, structure natural language to pseudo-code",
-      "skills": [
-        "prompt-structurer",
-        "prompt-analyzer"
-      ]
-    },
-    {
-      "name": "validation",
-      "description": "Validation & quality: validate completeness, security, edge cases",
-      "skills": [
-        "requirement-validator"
-      ]
-    },
-    {
-      "name": "optimization",
-      "description": "Optimization & enhancement: optimize pseudo-code, add missing parameters",
-      "skills": [
-        "prompt-optimizer"
-      ]
-    },
-    {
-      "name": "compression",
-      "description": "Context compression: compress verbose requirements (60-95% reduction)",
-      "skills": [
-        "context-compressor"
-      ]
-    },
-    {
-      "name": "workflow",
-      "description": "Workflow integration: integrate with feature-dev workflow",
-      "skills": [
-        "feature-dev-enhancement"
-      ]
+      "name": "pseudo-code-prompting",
+      "description": "Transform natural language requirements into structured, validated pseudo-code with 6 skills, 5 agents, 4 commands, and 3 hooks for optimal implementation clarity.",
+      "version": "1.1.0",
+      "author": {
+        "name": "Elad Ariel"
+      },
+      "source": "./",
+      "category": "development"
     }
-  ],
-
-  "features": {
-    "agents": 5,
-    "commands": 4,
-    "hooks": 3,
-    "progressive_loading": true,
-    "capabilities_json": true
-  },
-
-  "installation": {
-    "full": "/plugin install pseudo-code-prompting-plugin@complete",
-    "category": "/plugin install pseudo-code-prompting-plugin@transformation"
-  }
+  ]
 }

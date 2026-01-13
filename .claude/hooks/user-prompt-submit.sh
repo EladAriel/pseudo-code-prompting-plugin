@@ -24,32 +24,28 @@ if [[ -z "$PROMPT" ]]; then
   exit 0
 fi
 
-# Detect if this is a feature-dev or pseudo-prompt command
-# Match patterns: /feature-dev ..., /pseudo-prompt ...
-if [[ "$PROMPT" =~ ^/feature-dev[[:space:]]+(.+)$ ]] || [[ "$PROMPT" =~ ^/pseudo-prompt[[:space:]]+(.+)$ ]]; then
-  # Extract the query text (everything after the command)
-  QUERY="${BASH_REMATCH[1]}"
-  
-  # Build context to inject that activates the prompt-structurer Skill
-  # Use plain stdout (exit code 0) which Claude automatically adds as context
+# Detect transformation trigger keywords
+# Match patterns: "transform", "convert to pseudo", "structure", etc.
+if [[ "$PROMPT" =~ (transform|convert).*(pseudo|pseudo-code|pseudocode) ]] || \
+   [[ "$PROMPT" =~ ^(structure|formalize).*(request|requirement|query) ]]; then
+
+  # Build context to inject that tells Claude to use the prompt-transformer agent
   cat <<EOF
 
-[PSEUDO-CODE TRANSFORMATION ACTIVATED]
+<transformation-context>
+The user is requesting pseudo-code transformation using the PROMPTCONVERTER methodology.
 
-Your request should be transformed using the prompt-structurer Skill to convert it into PROMPTCONVERTER format.
+You should use the Task tool to launch the prompt-transformer agent to convert this request into function-like pseudo-code format.
 
-Original request: $QUERY
+Use: Task tool with subagent_type="prompt-transformer" and provide the user's request as the prompt.
 
-Transform this using the 5 PROMPTCONVERTER rules:
-1. Analyze Intent: Identify core action (verb) and subject (noun)
-2. Create Function Name: Combine into snake_case (e.g., implement_authentication)
-3. Extract Parameters: Convert details into named parameters (e.g., providers=["google"])
-4. Infer Constraints: Detect implicit requirements as additional parameters
-5. Output Format: Return ONLY single-line pseudo-code: Transformed: function_name(param="value")
+The agent will apply the 5 PROMPTCONVERTER rules to produce output like:
+function_name(param="value", param2="value2", ...)
 
-Provide the transformed pseudo-code, then proceed with the feature-dev workflow.
+After transformation, you can proceed with implementation if requested.
+</transformation-context>
 EOF
-  
+
   exit 0
 fi
 

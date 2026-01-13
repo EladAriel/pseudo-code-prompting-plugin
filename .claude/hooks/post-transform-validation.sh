@@ -15,8 +15,12 @@ set -e
 # Read hook input from stdin (JSON format)
 INPUT=$(cat)
 
-# Extract the user prompt and any assistant responses
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
+# Extract the user prompt using pure bash (no jq dependency)
+if [[ "$INPUT" =~ \"prompt\":[[:space:]]*\"([^\"]*)\" ]]; then
+  PROMPT="${BASH_REMATCH[1]}"
+else
+  exit 0
+fi
 
 # Check if this is a response that contains transformed pseudo-code
 # Look for the "Transformed:" marker that indicates PROMPTCONVERTER output

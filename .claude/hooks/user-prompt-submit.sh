@@ -16,8 +16,14 @@ set -e
 # Schema: { session_id, transcript_path, cwd, permission_mode, hook_event_name, prompt }
 INPUT=$(cat)
 
-# Extract the user prompt
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
+# Extract the user prompt using pure bash (no jq dependency)
+# Look for "prompt":"..." pattern and extract the value
+if [[ "$INPUT" =~ \"prompt\":[[:space:]]*\"([^\"]*)\" ]]; then
+  PROMPT="${BASH_REMATCH[1]}"
+else
+  # No prompt found, exit
+  exit 0
+fi
 
 # Check if prompt is empty
 if [[ -z "$PROMPT" ]]; then

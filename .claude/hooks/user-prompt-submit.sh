@@ -29,21 +29,55 @@ fi
 if [[ "$PROMPT" =~ (transform|convert).*(pseudo|pseudo-code|pseudocode) ]] || \
    [[ "$PROMPT" =~ ^(structure|formalize).*(request|requirement|query) ]]; then
 
-  # Build context to inject that tells Claude to use the prompt-transformer agent
+  # Extract the actual request (everything after "transform to pseudo code:" or similar)
+  REQUEST=$(echo "$PROMPT" | sed -E 's/^(transform|convert).*(pseudo|pseudo-code|pseudocode):?\s*//i')
+
+  # Inject PROMPTCONVERTER transformation instructions directly
   cat <<EOF
 
-<transformation-context>
-The user is requesting pseudo-code transformation using the PROMPTCONVERTER methodology.
+<promptconverter-mode>
+CRITICAL: You MUST transform the user's request into PROMPTCONVERTER pseudo-code format.
 
-You should use the Task tool to launch the prompt-transformer agent to convert this request into function-like pseudo-code format.
+USER REQUEST TO TRANSFORM:
+$REQUEST
 
-Use: Task tool with subagent_type="prompt-transformer" and provide the user's request as the prompt.
+TRANSFORMATION RULES (apply in order):
 
-The agent will apply the 5 PROMPTCONVERTER rules to produce output like:
-function_name(param="value", param2="value2", ...)
+1. ANALYZE INTENT: Identify core action (verb) + subject (noun)
+   - Action: What operation? (create, implement, add, debug, optimize, fix)
+   - Subject: What target? (api, authentication, database, function)
 
-After transformation, you can proceed with implementation if requested.
-</transformation-context>
+2. CREATE FUNCTION NAME: Combine into snake_case
+   - Format: {action}_{subject} (e.g., create_api, implement_auth)
+   - Use descriptive, unambiguous names
+
+3. EXTRACT PARAMETERS: Convert ALL details to named parameters
+   - Explicit requirements → direct parameters (language="python")
+   - Technologies → framework, database, library parameters
+   - Implicit requirements → inferred parameters (operations=["create","read","update","delete"])
+   - Scale/performance → add constraint parameters
+
+4. INFER CONSTRAINTS: Add missing but critical parameters
+   - Security: authentication, authorization, validation
+   - Data: schema, types, formats
+   - Performance: caching, pagination, rate_limiting
+   - Error handling: error_responses, logging
+
+5. OUTPUT FORMAT: Return EXACTLY this format on a single line:
+   function_name(param1="value1", param2=["val2a","val2b"], param3="value3", ...)
+
+REQUIREMENTS:
+- Output must be ONE line only
+- No code blocks, no markdown, no explanations BEFORE the output
+- Format: function_name(param="value", ...)
+- After the transformation, you may explain the parameters
+
+EXAMPLE:
+Input: "create api for crud operations using python"
+Output: create_crud_api(language="python", operations=["create","read","update","delete"], architecture="rest", framework="fastapi", database="postgresql", authentication="jwt", validation="pydantic", error_handling=true, pagination=true)
+
+Now transform the user's request following these rules exactly.
+</promptconverter-mode>
 EOF
 
   exit 0

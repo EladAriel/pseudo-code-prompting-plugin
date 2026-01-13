@@ -60,74 +60,11 @@
     "commands": 4,
     "hooks": 3,
     "progressive_loading": true,
-    "capabilities_json": true,
-    "compression_ratio": "60-95%",
-    "validation_coverage": {
-      "security": "95% OWASP Top 10",
-      "completeness": "90% common parameters",
-      "edge_cases": "85% typical scenarios"
-    }
-  },
-
-  "workflows": {
-    "full_transformation": {
-      "description": "Analyze → Transform → Validate",
-      "tokens": 900,
-      "agents": ["prompt-analyzer", "prompt-transformer", "requirement-validator"]
-    },
-    "quick_transform": {
-      "description": "Fast transformation without deep analysis",
-      "tokens": 200,
-      "agents": ["prompt-transformer"]
-    },
-    "optimize_and_validate": {
-      "description": "Enhance and validate existing pseudo-code",
-      "tokens": 700,
-      "agents": ["prompt-optimizer", "requirement-validator"]
-    },
-    "compress_transform_validate": {
-      "description": "Compress verbose requirements to validated pseudo-code",
-      "tokens": 1000,
-      "agents": ["context-compressor", "prompt-transformer", "requirement-validator"]
-    }
+    "capabilities_json": true
   },
 
   "installation": {
     "full": "/plugin install pseudo-code-prompting-plugin@complete",
     "category": "/plugin install pseudo-code-prompting-plugin@transformation"
-  },
-
-  "use_cases": [
-    "Transform verbose requirements into concise pseudo-code (60-95% compression)",
-    "Validate pseudo-code for completeness, security, and edge cases",
-    "Optimize requirements for implementation readiness",
-    "Eliminate ambiguity from natural language specifications",
-    "Structure feature requests before development",
-    "Ensure security requirements are not missed"
-  ],
-
-  "methodology": "PROMPTCONVERTER",
-
-  "progressive_loading_tiers": {
-    "tier_1": {
-      "file": "capabilities.json",
-      "tokens": "100-110",
-      "purpose": "Discovery and relevance matching"
-    },
-    "tier_2": {
-      "file": "SKILL.md",
-      "tokens": "300-800",
-      "purpose": "Methodology and patterns"
-    },
-    "tier_3": {
-      "file": "references/*.md",
-      "tokens": "90-300",
-      "purpose": "Specific patterns and checklists"
-    },
-    "tier_4": {
-      "file": "templates/*",
-      "tokens": "150-400",
-      "purpose": "Code generation templates"
-    }
   }
 }

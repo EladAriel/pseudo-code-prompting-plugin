@@ -19,32 +19,32 @@
     {
       "name": "complete",
       "description": "Full toolkit - all 6 skills, 5 agents, 4 commands, 3 hooks",
-      "source": "../plugin.json"
+      "skills": ["*"]
     },
     {
       "name": "transformation",
       "description": "Core transformation: analyze, transform, structure natural language to pseudo-code",
-      "source": "./.claude/skills/prompt-structurer/SKILL.md"
+      "skills": ["prompt-structurer", "prompt-analyzer"]
     },
     {
       "name": "validation",
       "description": "Validation & quality: validate completeness, security, edge cases",
-      "source": "./.claude/skills/requirement-validator/SKILL.md"
+      "skills": ["requirement-validator"]
     },
     {
       "name": "optimization",
       "description": "Optimization & enhancement: optimize pseudo-code, add missing parameters",
-      "source": "./.claude/skills/prompt-optimizer/SKILL.md"
+      "skills": ["prompt-optimizer"]
     },
     {
       "name": "compression",
       "description": "Context compression: compress verbose requirements (60-95% reduction)",
-      "source": "./.claude/skills/context-compressor/SKILL.md"
+      "skills": ["context-compressor"]
     },
     {
       "name": "workflow",
       "description": "Workflow integration: integrate with feature-dev workflow",
-      "source": "./.claude/skills/feature-dev-enhancement/SKILL.md"
+      "skills": ["feature-dev-enhancement"]
     }
   ],
 

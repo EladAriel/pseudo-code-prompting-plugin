@@ -105,8 +105,8 @@ claude-code
 
 ```bash
 # From Claude Code Marketplace (coming soon)
-/plugin marketplace add pseudo-code-prompting
-/plugin install pseudo-code-prompting
+/plugin marketplace add EladAriel/pseudo-code-prompting-plugin
+/plugin install pseudo-code-prompting-plugin
 ```
 
 ### Verify Installation

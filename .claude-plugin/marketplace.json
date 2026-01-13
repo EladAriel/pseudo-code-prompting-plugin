@@ -1,10 +1,17 @@
 {
+  "$schema": "https://claude-plugins.dev/schemas/marketplace.schema.json",
   "name": "pseudo-code-prompting",
   "displayName": "@pseudo-code/prompting",
-  "owner": "pseudo-code-prompting",
+  "owner": {
+    "name": "EladAriel",
+    "url": "https://github.com/EladAriel"
+  },
   "version": "2.1.0",
   "description": "Transform natural language into structured, validated pseudo-code - 6 skills, 5 agents, 4 commands, 3 hooks",
-  "repository": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EladAriel/pseudo-code-prompting-plugin"
+  },
   "license": "MIT",
   "strict": true,
 
@@ -12,46 +19,32 @@
     {
       "name": "complete",
       "description": "Full toolkit - all 6 skills, 5 agents, 4 commands, 3 hooks",
-      "skills": ["*"],
-      "includes_agents": true,
-      "includes_commands": true,
-      "includes_hooks": true
+      "source": "../plugin.json"
     },
     {
       "name": "transformation",
       "description": "Core transformation: analyze, transform, structure natural language to pseudo-code",
-      "skills": [
-        "prompt-structurer",
-        "prompt-analyzer"
-      ]
+      "source": "./.claude/skills/prompt-structurer/SKILL.md"
     },
     {
       "name": "validation",
       "description": "Validation & quality: validate completeness, security, edge cases",
-      "skills": [
-        "requirement-validator"
-      ]
+      "source": "./.claude/skills/requirement-validator/SKILL.md"
     },
     {
       "name": "optimization",
       "description": "Optimization & enhancement: optimize pseudo-code, add missing parameters",
-      "skills": [
-        "prompt-optimizer"
-      ]
+      "source": "./.claude/skills/prompt-optimizer/SKILL.md"
     },
     {
       "name": "compression",
       "description": "Context compression: compress verbose requirements (60-95% reduction)",
-      "skills": [
-        "context-compressor"
-      ]
+      "source": "./.claude/skills/context-compressor/SKILL.md"
     },
     {
       "name": "workflow",
       "description": "Workflow integration: integrate with feature-dev workflow",
-      "skills": [
-        "feature-dev-enhancement"
-      ]
+      "source": "./.claude/skills/feature-dev-enhancement/SKILL.md"
     }
   ],
 

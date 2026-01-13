@@ -22,12 +22,5 @@
     "compression",
     "security-validation"
   ],
-  "skills": {
-    "prompt-structurer": "./.claude/skills/prompt-structurer",
-    "prompt-analyzer": "./.claude/skills/prompt-analyzer",
-    "requirement-validator": "./.claude/skills/requirement-validator",
-    "prompt-optimizer": "./.claude/skills/prompt-optimizer",
-    "context-compressor": "./.claude/skills/context-compressor",
-    "feature-dev-enhancement": "./.claude/skills/feature-dev-enhancement"
-  }
+  "skills": "./.claude/skills/"
 }

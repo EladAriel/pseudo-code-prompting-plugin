@@ -22,6 +22,5 @@
     "compression",
     "security-validation"
   ],
-  "skills": "./.claude/skills/",
-  "agents": "./.claude/agents/"
+  "skills": "./.claude/skills/"
 }

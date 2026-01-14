@@ -576,24 +576,11 @@ Transformed: implement_payment_processing(
 
 ## Configuration
 
-### Agent Discovery
+This plugin uses auto-discovery and requires no manual configuration. All skills, agents, commands, and hooks are automatically loaded.
 
-Edit `.claude/agent-registry.json`:
+### Optional: Customize Hook Behavior
 
-```json
-{
-  "discovery": {
-    "protocol": "semantic",
-    "fallback": "keyword",
-    "confidence_threshold": 0.7,
-    "max_agents_per_task": 2
-  }
-}
-```
-
-### Hook Behavior
-
-Edit `.claude/settings.json`:
+If you want to customize hook behavior in your workspace, create `.claude/settings.json`:
 
 ```json
 {
@@ -603,8 +590,9 @@ Edit `.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/user-prompt-submit.sh",
-            "statusMessage": "Checking for transformation commands..."
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.sh",
+            "statusMessage": "Checking for transformation commands...",
+            "timeout": 10
           }
         ]
       }
@@ -613,39 +601,35 @@ Edit `.claude/settings.json`:
 }
 ```
 
-### Quality Gates
+**Note**: This is optional. The plugin already registers hooks via `hooks/hooks.json` in the plugin folder.
 
-Edit `.claude/agent-registry.json`:
+### Customizing Skills
 
-```json
-{
-  "quality_gates": {
-    "transformation": {
-      "min_parameters": 2,
-      "require_function_name": true,
-      "semantic_preservation": true
-    },
-    "validation": {
-      "max_critical_issues": 0,
-      "security_check": true,
-      "completeness_threshold": 0.8
-    },
-    "compression": {
-      "min_compression_ratio": 0.6,
-      "max_information_loss": 0.1
-    }
-  }
-}
-```
+Skills are automatically discovered from the plugin's `skills/` folder. Each skill has:
+
+- `capabilities.json` - Discovery triggers and metadata
+- `SKILL.md` - Main skill content
+- `references/` - Domain-specific patterns (optional)
+- `templates/` - Code generation templates (optional)
+
+To add custom domain patterns, you can extend skills by adding files to your workspace `.claude/skills/` folder (separate from the plugin).
 
 ## Advanced Usage
 
-### Custom Validation Checklists
+### Extending Skills with Custom Patterns
 
-Create domain-specific validation checklists in `.claude/skills/requirement-validator/references/`:
+The plugin's skills are in the plugin folder and automatically loaded. To add custom domain-specific patterns:
+
+1. **Option A**: Contribute to the plugin by adding patterns to the skill's `references/` folder
+2. **Option B**: Create workspace-specific extensions (advanced users only)
+
+#### Example: Custom Validation Checklist
+
+If you want to extend the `requirement-validator` skill with ML-specific patterns, you could:
 
 ```markdown
-# custom-domain-checklist.md
+# Your custom checklist (for plugin contribution)
+# Location: skills/requirement-validator/references/ml-validation-checklist.md
 
 ## Machine Learning Feature Validation
 
@@ -667,29 +651,7 @@ Create domain-specific validation checklists in `.claude/skills/requirement-vali
 - [ ] Experiment tracking platform
 ```
 
-### Custom Optimization Patterns
-
-Add domain-specific optimization patterns in `.claude/skills/prompt-optimizer/references/`:
-
-```markdown
-# ml-optimization-patterns.md
-
-## ML Pipeline Optimization
-
-### Add Data Validation
-Before: train_model(data_path)
-After: train_model(
-  data_path,
-  data_validation={"schema_check": true, "quality_check": true}
-)
-
-### Add Experiment Tracking
-Before: train_model(model_config)
-After: train_model(
-  model_config,
-  experiment_tracking={"platform": "mlflow", "log_params": true}
-)
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding new skills and patterns.
 
 ## Performance Metrics
 
@@ -853,17 +815,27 @@ cat ~/.claude/plugins/pseudo-code-prompting/skills/prompt-structurer/capabilitie
 **Issue:** Too many warnings/errors flagged
 
 **Solution:**
-Edit `.claude/agent-registry.json`:
-```json
-{
-  "quality_gates": {
-    "validation": {
-      "max_critical_issues": 2,    // Was: 0
-      "completeness_threshold": 0.6  // Was: 0.8
-    }
-  }
-}
-```
+
+The validation skill follows security best practices. If you need to adjust validation behavior:
+
+1. **Review the validation checklists** in the skill:
+   - [skills/requirement-validator/references/validation-checklists.md](skills/requirement-validator/references/validation-checklists.md)
+
+2. **Provide context** when using validation:
+   ```
+   /validate-requirements [your-pseudo-code]
+
+   Context: This is a prototype/internal tool/low-risk feature
+   ```
+
+3. **Skip certain checks** explicitly:
+   ```
+   /validate-requirements [your-pseudo-code]
+
+   Skip: Rate limiting (internal API), CORS (same-origin only)
+   ```
+
+The validation is intentionally comprehensive to catch security issues early.
 
 ## Contributing
 

@@ -31,39 +31,52 @@ Welcome to the Pseudo-Code Prompting Plugin for Claude Code! We're excited that 
 
 ## Plugin Structure
 
+This plugin follows Claude Code's official auto-discovery structure:
+
 ```
 pseudo-code-prompting-plugin/
-├── .claude/
-│   ├── agent-registry.json      # Agent coordination and workflows
-│   ├── settings.json            # Hook configuration
-│   ├── agents/                  # Agent definitions
-│   │   ├── prompt-analyzer.md
-│   │   ├── prompt-transformer.md
-│   │   ├── requirement-validator.md
-│   │   ├── prompt-optimizer.md
-│   │   └── context-compressor.md
-│   ├── commands/                # User-invocable commands
-│   │   ├── transform-query.md
-│   │   ├── validate-requirements.md
-│   │   ├── optimize-prompt.md
-│   │   └── compress-context.md
-│   ├── hooks/                   # Lifecycle hooks
-│   │   ├── user-prompt-submit.sh
-│   │   ├── post-transform-validation.sh
-│   │   └── context-compression-helper.sh
-│   └── skills/                  # Skill definitions
-│       ├── prompt-structurer/
-│       ├── prompt-analyzer/
-│       ├── prompt-optimizer/
-│       ├── context-compressor/
-│       └── requirement-validator/
-├── .claude-plugin/             # Legacy plugin structure
-├── plugin.json                 # Plugin metadata and configuration
-├── README.md                   # Main documentation
-├── SKILL.md                    # Quick reference guide
-├── CHANGELOG.md                # Version history
-└── CONTRIBUTING.md             # This file
+├── .claude-plugin/              # Marketplace configuration
+│   ├── marketplace.json         # Marketplace metadata
+│   └── README.md               # Installation guide
+├── plugin.json                  # Plugin manifest (minimal)
+├── skills/                      # 6 skills with progressive loading
+│   ├── context-compressor/
+│   │   ├── capabilities.json    # Tier 1: Discovery
+│   │   ├── SKILL.md            # Tier 2: Overview
+│   │   └── references/          # Tier 3: Specific patterns
+│   ├── feature-dev-enhancement/
+│   ├── prompt-analyzer/
+│   ├── prompt-optimizer/
+│   ├── prompt-structurer/
+│   └── requirement-validator/
+├── agents/                      # 5 agent definitions
+│   ├── context-compressor.md
+│   ├── prompt-analyzer.md
+│   ├── prompt-optimizer.md
+│   ├── prompt-transformer.md
+│   └── requirement-validator.md
+├── commands/                    # 4 slash commands
+│   ├── compress-context.md
+│   ├── optimize-prompt.md
+│   ├── transform-query.md
+│   └── validate-requirements.md
+├── hooks/                       # 3 hooks + registration
+│   ├── hooks.json              # Hook registration
+│   ├── user-prompt-submit.sh
+│   ├── post-transform-validation.sh
+│   └── context-compression-helper.sh
+├── README.md                    # Main documentation
+├── CHANGELOG.md                 # Version history
+├── CONTRIBUTING.md              # This file
+└── LICENSE                      # MIT License
 ```
+
+**Key Principles:**
+
+- **Auto-Discovery**: Claude Code automatically finds skills/, agents/, commands/, hooks/
+- **No .claude/ folder**: That's for user workspace configuration, not plugin distribution
+- **Progressive Loading**: Skills use 4-tier architecture for token efficiency
+- **hooks.json**: Required file to register hook scripts properly
 
 ## Adding New Skills
 
@@ -72,8 +85,9 @@ Skills provide specialized knowledge and patterns for transformation, validation
 ### Skill Structure
 
 Each skill should have:
+
 ```
-.claude/skills/your-skill-name/
+skills/your-skill-name/
 ├── capabilities.json           # Tier 1: Discovery (100 tokens)
 ├── SKILL.md                    # Tier 2: Overview (300-800 tokens)
 ├── references/                 # Tier 3: Specific patterns
@@ -85,8 +99,9 @@ Each skill should have:
 ### Creating a New Skill
 
 1. **Create the skill directory**:
+
    ```bash
-   mkdir -p .claude/skills/your-skill-name/{references,templates}
+   mkdir -p skills/your-skill-name/{references,templates}
    ```
 
 2. **Create `capabilities.json`** (Tier 1 - Discovery):
@@ -155,20 +170,12 @@ Each skill should have:
    - Optional: Add code generation templates
    - Keep templates focused and reusable
 
-6. **Update `plugin.json`**:
-   ```json
-   {
-     "skills": [
-       {
-         "id": "your-skill-name",
-         "name": "Your Skill Name",
-         "path": "./.claude/skills/your-skill-name",
-         "description": "Brief description",
-         "tags": ["category", "type"]
-       }
-     ]
-   }
-   ```
+6. **No plugin.json updates needed!**
+
+   Claude Code auto-discovers skills from the `skills/` folder. Just make sure your skill has:
+   - `capabilities.json` for discovery triggers
+   - `SKILL.md` for the main skill content
+   - Optional `references/` and `templates/` subdirectories
 
 ### Skill Best Practices
 
@@ -184,15 +191,15 @@ Agents are specialized sub-processes that execute specific tasks within the plug
 
 ### Agent Structure
 
-Create agent definition in `.claude/agents/your-agent-name.md`:
+Create agent definition in `agents/your-agent-name.md`:
 
 ```markdown
 ---
 name: your-agent-name
 description: What this agent does and when to use it
-tools: Read, Write, Grep
+tools: ["Read", "Write", "Grep"]
 model: sonnet
-permissionMode: plan
+color: blue
 ---
 
 # Your Agent Name
@@ -216,61 +223,17 @@ Expected output format...
 Concrete examples...
 ```
 
-### Registering the Agent
+### Agent Auto-Discovery
 
-Add to `.claude/agent-registry.json`:
+**No registration needed!** Claude Code automatically discovers agents from the `agents/` folder.
 
-```json
-{
-  "agents": {
-    "your-agent-name": {
-      "display_name": "Your Agent Name",
-      "color": "blue",
-      "model_preference": {
-        "default": "sonnet"
-      },
-      "capabilities": [
-        "capability-1",
-        "capability-2"
-      ],
-      "can_solve_examples": [
-        "Example task 1",
-        "Example task 2"
-      ],
-      "skills_used": ["skill-id-1", "skill-id-2"],
-      "tools": ["Read", "Write"],
-      "boundaries": {
-        "allowed": [".claude/skills/**"],
-        "forbidden": ["src/**"]
-      },
-      "handoff_to": ["other-agent-name"],
-      "pipeline_position": 1
-    }
-  }
-}
-```
+Key requirements:
 
-And update `plugin.json`:
+- Agent file must be in `agents/*.md`
+- Must have YAML frontmatter with `name`, `description`, `tools`
+- Optional fields: `model`, `color`
 
-```json
-{
-  "agents": [
-    {
-      "id": "your-agent-name",
-      "name": "Your Agent Name",
-      "display_name": "Your Agent Name",
-      "path": "./.claude/agents/your-agent-name.md",
-      "color": "blue",
-      "triggers": {
-        "keywords": ["keyword1", "keyword2"],
-        "patterns": ["pattern.*"]
-      },
-      "capabilities": ["capability-1", "capability-2"],
-      "skills_used": ["skill-id"]
-    }
-  ]
-}
-```
+**That's it!** The agent will be automatically available.
 
 ## Adding New Commands
 
@@ -278,12 +241,13 @@ Commands are user-invocable shortcuts for common operations.
 
 ### Command Structure
 
-Create command file in `.claude/commands/your-command.md`:
+Create command file in `commands/your-command.md`:
 
 ```markdown
 ---
 description: Brief description of what this command does
 argument-hint: [expected-arguments]
+allowed-tools: ["Read", "Write", "Skill", "Task"]
 ---
 
 # Your Command Name
@@ -299,22 +263,11 @@ Command execution instructions...
 Example invocations and expected results...
 ```
 
-### Registering the Command
+### Command Auto-Discovery
 
-Update `plugin.json`:
+**No registration needed!** Commands are automatically discovered from the `commands/` folder.
 
-```json
-{
-  "commands": [
-    {
-      "id": "your-command",
-      "name": "Your Command",
-      "file": "./.claude/commands/your-command.md",
-      "description": "Brief description"
-    }
-  ]
-}
-```
+The command will be available as `/your-command` in Claude Code.
 
 ## Adding New Hooks
 
@@ -322,21 +275,26 @@ Hooks execute at specific lifecycle events to automate workflows or enforce poli
 
 ### Hook Structure
 
-Create hook script in `.claude/hooks/your-hook.sh`:
+Create hook script in `hooks/your-hook.sh`:
 
 ```bash
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Read hook input from stdin (JSON format)
 INPUT=$(cat)
 
-# Extract relevant data
-PROMPT=$(echo "$INPUT" | jq -r '.prompt // empty')
+# Extract relevant data using bash regex (no jq dependency)
+if [[ "$INPUT" =~ \"prompt\":[[:space:]]*\"([^\"]*)\" ]]; then
+  PROMPT="${BASH_REMATCH[1]}"
+else
+  exit 0
+fi
 
 # Your hook logic here
 if [[ condition ]]; then
   cat <<EOF
+
 [Your context injection or message]
 EOF
   exit 0
@@ -347,24 +305,27 @@ exit 0
 ```
 
 Make it executable:
+
 ```bash
-chmod +x .claude/hooks/your-hook.sh
+chmod +x hooks/your-hook.sh
 ```
 
 ### Registering the Hook
 
-Update `.claude/settings.json`:
+Update `hooks/hooks.json`:
 
 ```json
 {
+  "description": "Your plugin hooks",
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/your-hook.sh",
-            "statusMessage": "Running your hook..."
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/your-hook.sh",
+            "statusMessage": "Running your hook...",
+            "timeout": 10
           }
         ]
       }
@@ -373,48 +334,52 @@ Update `.claude/settings.json`:
 }
 ```
 
-And update `plugin.json`:
+**Important:**
 
-```json
-{
-  "hooks": [
-    {
-      "id": "your-hook",
-      "type": "user-prompt-submit",
-      "file": "./.claude/hooks/your-hook.sh",
-      "description": "What this hook does",
-      "security_risk": "LOW"
-    }
-  ]
-}
-```
+- Use `${CLAUDE_PLUGIN_ROOT}` for portable paths (not hardcoded)
+- Always use `set -euo pipefail` for proper error handling
+- Exit 0 for normal pass-through
+- Exit 2 with JSON output for interactive approval (`permissionDecision: "ask"`)
 
 ## Testing Your Changes
 
 1. **Install the plugin locally**:
+
    ```bash
    # Symlink to Claude Code plugins directory
    ln -s $(pwd) ~/.claude/plugins/pseudo-code-prompting
    ```
 
 2. **Test with Claude Code**:
+
    ```bash
    # Start a new session
-   claude-code
+   cc
+
+   # Verify plugin is loaded
+   /plugin list
 
    # Try your new feature
    /your-command test input
    ```
 
 3. **Verify progressive loading**:
-   - Check that skills load incrementally
-   - Monitor token usage in Claude Code logs
-   - Ensure discovery phase works correctly
 
-4. **Test agent coordination**:
-   - Verify agents are triggered correctly
-   - Check handoff between agents works
-   - Validate output format
+   - Check that skills load incrementally (view Claude logs)
+   - Monitor token usage
+   - Ensure `capabilities.json` discovery works
+
+4. **Test hooks**:
+
+   - Trigger UserPromptSubmit hooks (type any message)
+   - Trigger PostToolUse hooks (make a file edit)
+   - Verify hook scripts execute and output correctly
+
+5. **Test commands**:
+
+   - Invoke your new command with `/command-name`
+   - Verify command appears in `/help` output
+   - Test with various argument patterns
 
 ## Code Quality Guidelines
 

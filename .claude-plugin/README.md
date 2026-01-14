@@ -24,11 +24,13 @@ All features (6 skills, 5 agents, 4 commands, 3 hooks) are automatically availab
 git clone https://github.com/EladAriel/pseudo-code-prompting-plugin ~/.claude/plugins/pseudo-code-prompting
 ```
 
-### Project-Scoped Installation
+### Local Development
 
 ```bash
-# Copy to your project directory
-cp -r pseudo-code-prompting-plugin/.claude your-project/.claude
+# Clone and symlink for development
+git clone https://github.com/EladAriel/pseudo-code-prompting-plugin
+cd ~/.claude/plugins
+ln -s /path/to/pseudo-code-prompting-plugin pseudo-code-prompting
 ```
 
 ## Features
@@ -112,6 +114,17 @@ create_endpoint(
 )
 ```
 
+## Plugin Structure
+
+This plugin follows Claude Code's official auto-discovery pattern:
+
+- **Skills**: `skills/*/SKILL.md` with progressive loading (capabilities.json → SKILL.md → references → templates)
+- **Agents**: `agents/*.md` with YAML frontmatter
+- **Commands**: `commands/*.md` slash commands
+- **Hooks**: `hooks/hooks.json` + bash scripts for event automation
+
+No manual configuration needed - everything is auto-discovered!
+
 ## More Information
 
 See the main [README.md](../README.md) for full documentation, examples, and advanced usage.
@@ -119,4 +132,4 @@ See the main [README.md](../README.md) for full documentation, examples, and adv
 ## Version
 
 **Current Version:** 1.1.0
-**Last Updated:** 2026-01-13
+**Last Updated:** 2026-01-14

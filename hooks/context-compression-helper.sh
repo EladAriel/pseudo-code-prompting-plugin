@@ -9,7 +9,7 @@
 # 2. Suggests using context-compressor skill for better efficiency
 # 3. Helps maintain token efficiency in conversations
 
-set -e
+set -euo pipefail
 
 # Read hook input from stdin (JSON format)
 INPUT=$(cat)

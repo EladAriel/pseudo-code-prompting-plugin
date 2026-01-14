@@ -10,7 +10,7 @@
 # 3. Provides feedback on missing parameters or ambiguities
 # 4. Suggests improvements before implementation
 
-set -e
+set -euo pipefail
 
 # Read hook input from stdin (JSON format)
 INPUT=$(cat)

@@ -71,14 +71,18 @@ create_endpoint(
 | **prompt-optimizer** | Security, validation, completeness enhancement | Enhancement (Tier 3) |
 | **requirement-validator** | Gap identification, security audit, edge cases | Quality (Tier 3) |
 
-### 🎮 4 User Commands
+### 🎮 6 Skills (Auto-Invoked)
 
-```bash
-/transform-query <natural language>     # Transform to pseudo-code
-/validate-requirements <pseudo-code>   # Validate completeness
-/optimize-prompt <pseudo-code>         # Enhance implementation-readiness
-/compress-context <verbose spec>       # Compress 60-95%
-```
+Skills are automatically invoked by Claude when relevant keywords/patterns are detected:
+
+| Skill | Triggers | Purpose |
+|-------|----------|---------|
+| **prompt-structurer** | "transform", "structure", "pseudo-code" | Transform natural language to pseudo-code |
+| **prompt-analyzer** | "analyze", "complexity", "ambiguity" | Analyze prompts for clarity |
+| **requirement-validator** | "validate", "verify", "check" | Validate completeness & security |
+| **prompt-optimizer** | "optimize", "enhance", "improve" | Add missing parameters |
+| **context-compressor** | "compress", "reduce", "simplify" | Compress verbose requirements |
+| **feature-dev-enhancement** | "feature-dev", "workflow" | Integrate with feature-dev |
 
 ### ⚡ 3 Automated Hooks
 
@@ -120,29 +124,32 @@ cp -r pseudo-code-prompting-plugin/.claude your-project/.claude
 
 ### Verify Installation
 
-After installation, skills and commands are auto-discovered. Verify by checking available commands:
+After installation, verify the plugin is loaded:
 
 ```bash
-/help
-
-# You should see:
-✓ /transform-query
-✓ /validate-requirements
-✓ /optimize-prompt
-✓ /compress-context
+/plugin list
 ```
+
+You should see `pseudo-code-prompting` in the installed plugins list.
+
+**Note:** This plugin uses **auto-invoked skills**, not slash commands. Skills are automatically triggered by Claude when you use relevant keywords in your requests.
 
 ## Quick Start Guide
 
+### How It Works
+
+**Skills are automatically invoked by Claude** when you use relevant keywords. You don't call them directly - just describe what you need naturally.
+
 ### 1. Transform Natural Language
 
-```bash
-/transform-query Add OAuth authentication with Google and GitHub providers
+**You say:**
+```
+Transform this to pseudo-code: Add OAuth authentication with Google and GitHub providers
 ```
 
-**Output:**
+**Claude automatically invokes the `prompt-structurer` skill and responds:**
 ```javascript
-Transformed: implement_authentication(
+implement_authentication(
   type="oauth",
   providers=["google", "github"],
   scope="user_auth",
@@ -153,9 +160,12 @@ Transformed: implement_authentication(
 
 ### 2. Validate Requirements
 
-```bash
-/validate-requirements create_endpoint(path="/api/users", method="POST")
+**You say:**
 ```
+Validate this requirement: create_endpoint(path="/api/users", method="POST")
+```
+
+**Claude automatically invokes the `requirement-validator` skill and responds:**
 
 **Output:**
 ```
@@ -708,34 +718,131 @@ After: train_model(
 | Completeness | 20 checks | 90% of common parameters |
 | Edge Cases | 12 patterns | 85% of typical scenarios |
 
-## Troubleshooting
+## Plugin Architecture
 
-### Hook Not Triggering
+### Directory Structure
 
-**Issue:** Commands like `/transform-query` not working
+This plugin follows Claude Code's official plugin structure with auto-discovery:
 
-**Solution:**
-```bash
-# Check hook permissions
-chmod +x .claude/hooks/*.sh
-
-# Verify settings.json
-cat .claude/settings.json
-
-# Restart Claude Code
+```
+pseudo-code-prompting-plugin/
+├── plugin.json                 # Plugin manifest (minimal)
+├── skills/                     # 6 skills with progressive loading
+│   ├── context-compressor/
+│   │   ├── capabilities.json   # Tier 1: Discovery (90-110 tokens)
+│   │   ├── SKILL.md           # Tier 2: Overview (300-800 tokens)
+│   │   └── references/         # Tier 3: Specific patterns (90-300 tokens)
+│   ├── prompt-structurer/
+│   ├── prompt-analyzer/
+│   ├── prompt-optimizer/
+│   ├── requirement-validator/
+│   └── feature-dev-enhancement/
+├── agents/                     # 5 agent definitions
+│   ├── prompt-analyzer.md
+│   ├── context-compressor.md
+│   ├── prompt-transformer.md
+│   ├── prompt-optimizer.md
+│   └── requirement-validator.md
+├── commands/                   # 4 command definitions
+│   ├── transform-query.md
+│   ├── validate-requirements.md
+│   ├── optimize-prompt.md
+│   └── compress-context.md
+└── hooks/                      # 3 event hooks
+    ├── hooks.json             # Hook registration
+    ├── user-prompt-submit.sh
+    ├── context-compression-helper.sh
+    └── post-transform-validation.sh
 ```
 
-### Agent Not Found
+### Progressive Loading System
 
-**Issue:** "Agent 'requirement-validator' not found"
+Skills use a 4-tier progressive loading architecture for token efficiency:
+
+**Tier 1: Discovery** (`capabilities.json`) - 90-110 tokens
+- Quick relevance check
+- Trigger patterns and keywords
+- Loaded for every skill search
+
+**Tier 2: Overview** (`SKILL.md`) - 300-800 tokens
+- Methodology and process steps
+- Loaded when skill is confirmed relevant
+
+**Tier 3: Specific** (`references/*.md`) - 90-300 tokens each
+- Domain-specific patterns and checklists
+- Loaded on-demand when needed
+
+**Tier 4: Generation** (`templates/*.md`) - 150-400 tokens each
+- Boilerplate and format examples
+- Loaded when generating structured output
+
+**Token Efficiency**: 788 tokens (progressive) vs 5,000+ tokens (full load) = 84% savings
+
+### Hook System
+
+Hooks are event-driven automation scripts registered in `hooks/hooks.json`:
+
+**UserPromptSubmit Hooks** (run when user submits input):
+- `user-prompt-submit.sh` - Detects transformation keywords, injects context
+- `context-compression-helper.sh` - Suggests compression for verbose input (>100 words)
+
+**PostToolUse Hooks** (run after Write/Edit tools):
+- `post-transform-validation.sh` - Auto-validates transformed pseudo-code
+
+All hooks use:
+- Interactive approval mode (`permissionDecision: "ask"`)
+- `${CLAUDE_PLUGIN_ROOT}` for portable paths
+- Proper error handling (`set -euo pipefail`)
+
+## Troubleshooting
+
+### Commands Not Working
+
+**Issue:** Commands like `/transform-query` not found
 
 **Solution:**
 ```bash
 # Verify plugin installation
-ls ~/.claude/plugins/pseudo-code-prompting
+/plugin list
 
-# Check plugin.json agents section
-cat plugin.json | jq '.agents'
+# Check if pseudo-code-prompting is loaded
+# Reinstall if needed:
+/plugin install pseudo-code-prompting
+```
+
+### Hook Not Triggering
+
+**Issue:** Hooks not executing on user input or file edits
+
+**Solution:**
+```bash
+# Check hook scripts are executable
+ls -la ~/.claude/plugins/pseudo-code-prompting/hooks/*.sh
+
+# Should show -rwxr-xr-x permissions
+# If not, make executable:
+cd ~/.claude/plugins/pseudo-code-prompting/hooks
+chmod +x *.sh
+
+# Verify hooks.json exists
+cat hooks/hooks.json
+```
+
+### Skills Not Auto-Invoked
+
+**Issue:** Skills not triggering on keywords like "transform" or "validate"
+
+**Solution:**
+Skills are auto-discovered from the `skills/` folder. Each skill has a `capabilities.json` with trigger patterns.
+
+```bash
+# Verify skills exist
+ls ~/.claude/plugins/pseudo-code-prompting/skills/
+
+# Check a skill's triggers
+cat ~/.claude/plugins/pseudo-code-prompting/skills/prompt-structurer/capabilities.json
+
+# Use explicit keywords: "transform to pseudo-code", "validate requirements"
 
 # Reload plugin
 /plugin reload pseudo-code-prompting

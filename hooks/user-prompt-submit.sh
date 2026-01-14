@@ -10,7 +10,7 @@
 # 3. Injecting context that activates the prompt-structurer Skill
 # 4. Allowing Claude to apply transformation rules automatically
 
-set -e
+set -euo pipefail
 
 # Read hook input from stdin (JSON format)
 # Schema: { session_id, transcript_path, cwd, permission_mode, hook_event_name, prompt }

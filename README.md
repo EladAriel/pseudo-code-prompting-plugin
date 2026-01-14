@@ -837,6 +837,17 @@ The validation skill follows security best practices. If you need to adjust vali
 
 The validation is intentionally comprehensive to catch security issues early.
 
+## Examples
+
+Real-world usage examples are available in the [examples/](examples/) folder:
+
+- **[create-auth-api-example](examples/create-auth-api-example/)** - Authentication API endpoint design
+  - Demonstrates natural language → pseudo-code transformation
+  - Shows validation and optimization in action
+  - Complete API specification with security requirements
+
+See [examples/README.md](examples/README.md) for more details and how to add your own examples.
+
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
@@ -856,9 +867,10 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## Documentation
 
-- **[SKILL.md](SKILL.md)** - Quick reference guide and overview
+- **[README.md](README.md)** - This file - Complete plugin documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and updates
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Detailed contribution guidelines
+- **[examples/](examples/)** - Real-world usage examples
 - **[LICENSE](LICENSE)** - MIT License details
 
 ## License

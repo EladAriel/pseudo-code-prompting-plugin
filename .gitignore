@@ -39,3 +39,7 @@ node_modules/
 # Build outputs
 dist/
 build/
+
+# Example projects - committed but ignored by Claude Code plugin loader
+# Claude Code only loads: skills/, agents/, commands/, hooks/, plugin.json
+# examples/ folder is safe for demo projects

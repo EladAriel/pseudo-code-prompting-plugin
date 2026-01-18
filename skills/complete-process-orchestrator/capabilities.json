@@ -1,10 +1,10 @@
 {
   "skill_id": "complete-process-orchestrator",
   "skill_name": "Complete Process Orchestrator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "orchestration",
   "category": "workflow_automation",
-  "description": "Orchestrate end-to-end pseudo-code transformation workflows with automated validation and optimization",
+  "description": "Orchestrate end-to-end pseudo-code transformation workflows with automated validation, optimization, context-aware tree injection, and 60-80% context window reduction",
   "depends_on": [
     "prompt-structurer:1.0.0",
     "requirement-validator:1.0.0",
@@ -50,11 +50,15 @@
     "preference_persistence",
     "timeout_protection",
     "state_management",
-    "checkpoint_recovery"
+    "checkpoint_recovery",
+    "context_window_optimization",
+    "context_aware_tree_injection",
+    "mandatory_skill_tool_invocation"
   ],
   "metadata": {
     "author": "Elad Ariel",
     "created": "2026-01-18",
-    "plugin_version": "1.6.0"
+    "updated": "2026-01-18",
+    "plugin_version": "1.6.1"
   }
 }

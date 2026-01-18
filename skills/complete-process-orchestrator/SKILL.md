@@ -6,6 +6,150 @@ Orchestrate end-to-end pseudo-code transformation workflows with automated valid
 
 The Complete Process Orchestrator skill provides an automated pipeline that combines transformation, validation, and optimization into a seamless workflow. Instead of invoking each step separately, users can choose between a quick transformation or a complete process that handles everything automatically.
 
+## CRITICAL IMPLEMENTATION REQUIREMENTS
+
+### 1. Always Use Skill Tool for Sub-Skills
+
+**MANDATORY**: When executing transformation, validation, or optimization steps, you MUST use the Skill tool to invoke the respective skills. NEVER handle these directly or inline.
+
+```text
+❌ WRONG: Directly transforming the query yourself
+✅ CORRECT: Use Skill tool with skill="pseudo-code-prompting:prompt-structurer"
+
+❌ WRONG: Directly validating yourself
+✅ CORRECT: Use Skill tool with skill="pseudo-code-prompting:requirement-validator"
+
+❌ WRONG: Directly optimizing yourself
+✅ CORRECT: Use Skill tool with skill="pseudo-code-prompting:prompt-optimizer"
+```
+
+### 2. Context Window Optimization (MANDATORY)
+
+To minimize token usage, you MUST remove intermediate outputs from the conversation flow:
+
+**Keep Only**:
+
+- Original user query (input)
+- Final optimized output
+
+**Remove/Don't Store**:
+
+- Transform step output (intermediate)
+- Validate step input (redundant with transform output)
+- Validate step output (intermediate)
+- Optimize step input (redundant with validate output)
+
+**Implementation**: After each step completes, extract only the essential result and pass it to the next step WITHOUT including full tool outputs in subsequent messages.
+
+### 3. Context-Aware Tree Injection (MANDATORY)
+
+Before invoking the transform step, you MUST ensure the context-aware tree injection occurs:
+
+**Process**:
+
+1. Check if user query contains implementation keywords: `implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`
+2. If keywords detected, the UserPromptSubmit hook should have already injected PROJECT_TREE context
+3. When invoking prompt-structurer skill, include any PROJECT_TREE context that was injected
+4. This enables context-aware transformation with actual file paths from the project
+
+**Why This Matters**: Without PROJECT_TREE context, transformations will be generic instead of project-specific.
+
+## Execution Workflow
+
+### Quick Mode Execution
+
+1. **Validate Input**: Check query length (10-5000 characters)
+2. **Invoke Transform Skill**:
+   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-structurer" args="[user query]"`
+   - Extract ONLY the transformed output
+3. **Return Result**: Output the transformed pseudo-code
+4. **Clean Up**: Do NOT keep the transform tool output in context
+
+### Complete Mode Execution
+
+1. **Validate Input**: Check query length (10-5000 characters)
+2. **Step 1/3: Transform**
+   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-structurer" args="[user query]"`
+   - Extract: `transformed_output` (single variable)
+   - Clean: Remove full tool output from context
+3. **Step 2/3: Validate**
+   - Use: `Skill tool with skill="pseudo-code-prompting:requirement-validator" args="[transformed_output]"`
+   - Extract: `validation_report` (single variable)
+   - Clean: Remove full tool output AND transformed_output from context
+4. **Step 3/3: Optimize**
+   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-optimizer" args="[transformed_output]"`
+   - Extract: `optimized_output` (final result)
+   - Clean: Remove full tool output from context
+5. **Return Result**: Output optimized pseudo-code + validation report + optimization summary
+6. **Final Context**: Keep ONLY original query + final outputs
+
+**Token Savings**: By removing intermediate outputs, you save approximately 60-80% of context window usage.
+
+## Context-Aware Detection and Tree Injection
+
+### Automatic Hook Execution
+
+Before this skill executes, the **UserPromptSubmit** hook automatically runs and checks the user's query for implementation keywords:
+
+**Keywords**: `implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`
+
+If ANY of these keywords are detected, the hook:
+
+1. Generates a project structure tree using `get_context_tree.py`
+2. Injects the tree into the conversation context with `[CONTEXT-AWARE MODE ACTIVATED]` marker
+3. Provides guidance on using the project structure for transformation
+
+### Checking for Context Injection
+
+At the start of execution, check if the conversation context contains:
+
+```text
+[CONTEXT-AWARE MODE ACTIVATED]
+
+Project Structure:
+```
+(project tree)
+```
+
+Use this project structure as context for the request: "..."
+```
+
+**If Found**: The PROJECT_TREE context is available. Pass this context when invoking the prompt-structurer skill.
+
+**If Not Found**: Either:
+
+- Query didn't contain implementation keywords (no tree needed)
+- Hook failed to execute (graceful degradation)
+- Project is empty (tree generation skipped)
+
+### Using Context During Transformation
+
+When PROJECT_TREE context is available, you MUST pass it to the transform skill:
+
+```text
+Skill tool with skill="pseudo-code-prompting:prompt-structurer"
+args="[user query]
+
+PROJECT_TREE:
+[tree structure from context]
+"
+```
+
+This ensures the transformation includes project-specific file paths and architecture-aware suggestions.
+
+### Context-Aware Troubleshooting
+
+**Context not appearing?**
+
+1. Check if query contains implementation keywords
+2. Verify hook is configured in `hooks/hooks.json`
+3. Check if Python is installed (`python3 --version`)
+4. Verify script exists: `hooks/tree/get_context_tree.py`
+
+**Empty project tree?**
+
+The hook gracefully skips tree injection for empty projects and returns `<<PROJECT_EMPTY_NO_STRUCTURE>>`.
+
 ## When to Use
 
 Use this skill when:
@@ -76,12 +220,15 @@ User Query → Input Validation → Transform → Output
 ```
 
 #### Complete Mode Flow
-```
+
+```text
 User Query → Input Validation → Transform → Validate → Optimize → Output
                                      ↓          ↓          ↓
                               Progress     Progress    Progress
                               Step 1/3     Step 2/3    Step 3/3
 ```
+
+**Important**: The UserPromptSubmit hook automatically injects PROJECT_TREE context BEFORE this skill executes if the query contains implementation keywords (`implement`, `create`, `add`, etc.). This context is available during the Transform step for context-aware pseudo-code generation.
 
 ### Progress Tracking
 

@@ -2,6 +2,97 @@
 
 The Pseudo-Code Prompting plugin includes an intelligent semantic caching system that dramatically reduces API costs and response times by reusing previously generated patterns.
 
+## What's New in v1.6.1
+
+Version 1.6.1 introduces major enhancements to the caching system:
+
+### 1. User Confirmation Before Cache Usage
+
+You now have full control over cache operations with an interactive confirmation prompt:
+
+```text
+╔════════════════════════════════════════════════════════════════╗
+║                    Cached Pattern Found                        ║
+╚════════════════════════════════════════════════════════════════╝
+
+Tag ID:           auth_jwt
+Type:             optimized
+Description:      JWT authentication with refresh tokens
+Similarity:       87%
+Usage Count:      12
+Last Used:        2026-01-18
+File Size:        3.2KB
+
+Preview:
+────────────────────────────────────────────────────────────────
+implement_jwt_authentication(
+  token_type="jwt",
+  ...
+────────────────────────────────────────────────────────────────
+
+💡 Tip: Cache hits save ~90% cost and 5-15x faster than generation
+
+Would you like to use this cached pattern? [Y]es / [N]o / [V]iew full / [C]ancel:
+```
+
+**Features**:
+
+- **Y**es - Use the cached pattern
+- **N**o - Skip cache and generate fresh
+- **V**iew - See full pattern before deciding
+- **C**ancel - Abort the operation
+- Auto-timeout (30s) defaults to "yes"
+- CI/CD mode auto-confirms
+- Environment override: `export CACHE_AUTO_CONFIRM=yes`
+
+### 2. Context-Aware Path Injection
+
+Cached patterns now adapt to your current project automatically:
+
+**Problem**: Cached patterns with hardcoded paths don't work across different projects.
+
+**Solution**: Path-agnostic caching with intelligent context injection.
+
+**How It Works**:
+
+1. **Semantic Matching**: Router matches on intent, NOT file paths
+   - ✅ Matches: action verbs, technology stack, domain concepts
+   - ❌ Ignores: specific paths, line numbers, timestamps
+
+2. **Context Detection**: Automatically scans your project
+   - Detects technology stack (Node.js, Python, Go, Rust, Java)
+   - Analyzes current directory structure (3 levels)
+   - Identifies project patterns
+
+3. **Path Adaptation**: Injects project context
+   - Adds header with current project structure
+   - Preserves relative directory relationships
+   - Claude adapts cached paths to your project
+
+**Example**:
+
+Cached pattern from a Next.js project can be reused in an Express project, a FastAPI project, or even a Go project - the pattern adapts to your current structure.
+
+### 3. Enhanced Workflow
+
+The complete caching flow now includes user control and context awareness:
+
+```text
+Your Query
+    ↓
+Semantic Router (intent-based matching)
+    ↓
+Cache Hit Found
+    ↓
+User Confirmation Prompt ← NEW in v1.6.1
+    ↓ (user confirms)
+Load Cached Pattern
+    ↓
+Inject Current Project Context ← NEW in v1.6.1
+    ↓
+Return Adapted Pattern
+```
+
 ## Overview
 
 ### What is Semantic Caching?

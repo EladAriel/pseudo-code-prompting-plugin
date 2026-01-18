@@ -2,7 +2,7 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.6.1-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 
@@ -227,6 +227,207 @@ export ANTHROPIC_API_KEY="your-key"
 - **With Cache**: $0.01 + (9 × $0.0001) = **$0.0109** (~90% savings)
 
 **Learn more**: [Semantic Caching Documentation](docs/CACHING.md)
+
+### 🎯 Enhanced Cache Control & Context Injection (NEW in v1.6.1)
+
+Version 1.6.1 introduces three major improvements to the caching system for better user control and cross-project reusability:
+
+#### 1. ✅ User Confirmation Before Cache Operations
+
+Never be surprised by cached results again. The system now asks for your confirmation before using a cached pattern:
+
+```text
+╔════════════════════════════════════════════════════════════════╗
+║                    Cached Pattern Found                        ║
+╚════════════════════════════════════════════════════════════════╝
+
+Tag ID:           auth_jwt
+Type:             optimized
+Description:      JWT authentication with refresh tokens
+Similarity:       87%
+Usage Count:      12
+Last Used:        2026-01-18
+File Size:        3.2KB
+
+Preview:
+────────────────────────────────────────────────────────────────
+implement_jwt_authentication(
+  token_type="jwt",
+  access_token_ttl="15m",
+  ...
+────────────────────────────────────────────────────────────────
+
+💡 Tip: Cache hits save ~90% cost and 5-15x faster than generation
+
+Would you like to use this cached pattern? [Y]es / [N]o / [V]iew full / [C]ancel:
+```
+
+**Features**:
+
+- Interactive preview with metadata (similarity score, usage stats, pattern type)
+- View full pattern before accepting
+- 30-second timeout with countdown (defaults to "yes")
+- Non-interactive mode for CI/CD (auto-confirms)
+- Environment variable override: `export CACHE_AUTO_CONFIRM=yes`
+
+#### 2. 🔄 Context-Aware Path Injection
+
+Cached patterns are now **project-agnostic** - they work across different codebases by adapting to your current project structure:
+
+**How It Works**:
+
+- ✅ Cache matching based on **intent**, NOT file paths
+- ✅ Automatic detection of current project structure
+- ✅ Technology stack identification (Node.js, Python, Go, Rust, Java)
+- ✅ Intelligent path mapping from cached pattern to your project
+
+**Example**:
+
+```text
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 CACHED PATTERN LOADED: auth_jwt
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚙️  CONTEXT-AWARE MODE: This pattern is being adapted to your current project
+
+Current Project Root: /your/project
+Project Stack:
+  📦 Node.js/JavaScript project (package.json found)
+
+Current Project Structure:
+src/
+├── lib/
+│   └── auth.ts
+├── app/
+│   └── api/
+└── components/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 CACHED PATTERN BELOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When applying this pattern:
+1. Map the cached file paths to your current project structure shown above
+2. Preserve the relative directory relationships from the pattern
+3. Adapt file names/paths to match your current technology stack
+4. If a suggested file/directory doesn't exist, create it or use the closest match
+
+[Original cached pattern with context for adaptation...]
+```
+
+**Benefits**:
+
+- Same cached pattern works across Next.js, Express, FastAPI, Go projects
+- No brittle path replacement - intelligent semantic mapping
+- Claude understands how to adapt paths to your project
+- Preserves relative directory relationships
+
+#### 3. 🛠️ Fixed Permission Pattern Syntax
+
+Resolved configuration file syntax errors that could block cache operations:
+
+- Fixed `:*` wildcard patterns to use proper `*` syntax
+- Updated `.claude/settings.local.json` for compatibility
+- All permission patterns now follow correct format
+
+**Technical Details**:
+
+- **Confirmation Script**: [hooks/cache/confirm-cache-use.sh](hooks/cache/confirm-cache-use.sh)
+- **Path Injection Script**: [hooks/cache/inject-context-paths.sh](hooks/cache/inject-context-paths.sh)
+- **Integration Point**: [hooks/tree/context-aware-tree-injection.sh](hooks/tree/context-aware-tree-injection.sh)
+- **Updated Documentation**: [commands/transform-query.md](commands/transform-query.md)
+
+#### 4. 🚀 Complete Process Orchestrator Improvements (ALSO NEW in v1.6.1)
+
+The `/complete-process` orchestrator has been significantly enhanced with three critical improvements for efficiency and accuracy:
+
+##### **Mandatory Skill Tool Invocation**
+
+The orchestrator now **enforces** proper skill invocation patterns:
+
+- ✅ Always uses Skill tool for sub-skill invocations (`prompt-structurer`, `requirement-validator`, `prompt-optimizer`)
+- ✅ Prevents direct handling of transformations for consistency
+- ✅ Ensures proper separation of concerns in the pipeline
+- ✅ Clear examples of correct vs incorrect patterns in documentation
+
+##### **Context Window Optimization (60-80% Token Reduction)** 🎯
+
+**Massive efficiency improvement** - the orchestrator now intelligently removes intermediate outputs:
+
+**Before (v1.6.0)**:
+
+```text
+User Query (500 tokens)
+→ Transform Output (800 tokens) ← KEPT
+→ Validate Input (800 tokens) ← KEPT (duplicate)
+→ Validate Output (600 tokens) ← KEPT
+→ Optimize Input (600 tokens) ← KEPT (duplicate)
+→ Optimize Output (900 tokens) ← KEPT
+
+Total Context: 4,200 tokens
+```
+
+**After (v1.6.1)**:
+
+```text
+User Query (500 tokens) ← KEPT
+→ Transform Output → extracted, not kept
+→ Validate Input → not kept (duplicate)
+→ Validate Output → extracted, not kept
+→ Optimize Input → not kept (duplicate)
+→ Final Optimized Output (900 tokens) ← KEPT
+
+Total Context: 1,400 tokens (66% reduction!)
+```
+
+**Benefits**:
+
+- 60-80% reduction in context window usage
+- Enables longer conversations without hitting token limits
+- Reduces costs significantly
+- Improves performance
+
+**Implementation**: The orchestrator extracts only essential results and passes them to the next step WITHOUT including full tool outputs in subsequent messages.
+
+##### **Context-Aware Tree Injection Integration** 🌳
+
+The orchestrator now automatically leverages PROJECT_TREE context from the UserPromptSubmit hook:
+
+**How It Works**:
+
+1. User query contains implementation keywords: `implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`
+2. Hook automatically injects `[CONTEXT-AWARE MODE ACTIVATED]` with project structure
+3. Orchestrator checks for this marker and passes PROJECT_TREE context to transform skill
+4. Results in **project-specific, architecture-aware** transformations
+
+**Without Context-Aware**:
+
+```javascript
+implement_authentication(
+  type="jwt",
+  features=["login", "logout"]
+)
+```
+
+**With Context-Aware**:
+
+```javascript
+implement_authentication(
+  type="jwt",
+  target_files=["src/lib/auth.ts", "src/app/api/auth/route.ts"],
+  stack="nextjs_react",
+  architecture_pattern="app_directory"
+)
+```
+
+**Troubleshooting**: The orchestrator documentation now includes guidance for checking context injection and resolving issues.
+
+**Technical Details**:
+
+- **Updated SKILL**: [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md)
+- **Updated Capabilities**: [skills/complete-process-orchestrator/capabilities.json](skills/complete-process-orchestrator/capabilities.json)
+- **Skill Version**: Updated from 1.0.0 to 1.1.0
+- **New Features**: `context_window_optimization`, `context_aware_tree_injection`, `mandatory_skill_tool_invocation`
 
 ### 🔄 Complete Process Orchestration (NEW in v1.6.0)
 

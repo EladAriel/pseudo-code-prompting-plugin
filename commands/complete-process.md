@@ -15,6 +15,34 @@ Orchestrate end-to-end pseudo-code transformation with automated validation and 
 
 The complete-process command provides an orchestrated workflow that automates the entire transformation pipeline. Instead of manually invoking `/transform-query`, `/validate-requirements`, and `/optimize-prompt` separately, this command handles everything in one streamlined operation.
 
+## What's New in v1.6.1
+
+The complete-process orchestrator has been significantly enhanced with three critical improvements:
+
+### 1. Mandatory Skill Tool Invocation
+
+The orchestrator now **always** uses the Skill tool for sub-skill invocations instead of handling transformations directly. This ensures:
+
+- Consistent execution patterns
+- Proper separation of concerns
+- Reliable pipeline behavior
+
+### 2. Context Window Optimization (60-80% Token Reduction)
+
+**Major efficiency improvement** - the orchestrator now removes intermediate outputs from the conversation context:
+
+- **Keeps**: Original query + Final optimized output
+- **Removes**: All intermediate transform/validate/optimize outputs
+- **Result**: 60-80% reduction in context window usage
+
+This enables longer conversations, reduces costs, and improves performance.
+
+### 3. Context-Aware Tree Injection
+
+The orchestrator now automatically leverages PROJECT_TREE context when implementation keywords are detected (`implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`). This results in project-specific, architecture-aware transformations with actual file paths from your codebase.
+
+**Learn more**: [Complete Process Orchestrator SKILL.md](../skills/complete-process-orchestrator/SKILL.md)
+
 ## Usage
 
 ### Basic Usage

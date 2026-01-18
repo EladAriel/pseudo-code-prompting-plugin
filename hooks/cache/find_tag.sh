@@ -52,7 +52,7 @@ update_usage_stats() {
 
     local temp_file="${REGISTRY_FILE}.tmp.$$"
 
-    jq \
+    if jq \
         --arg tag "$tag_id" \
         --arg time "$timestamp" \
         '.patterns |= map(
@@ -63,9 +63,7 @@ update_usage_stats() {
                 .
             end
         ) | .metadata.last_modified = $time' \
-        "$REGISTRY_FILE" > "$temp_file" 2>/dev/null
-
-    if [ $? -eq 0 ]; then
+        "$REGISTRY_FILE" > "$temp_file" 2>/dev/null; then
         mv "$temp_file" "$REGISTRY_FILE"
         log "INFO" "Updated usage stats for: $tag_id"
     else

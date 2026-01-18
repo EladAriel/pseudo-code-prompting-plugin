@@ -248,12 +248,12 @@ main() {
     fi
 
     local content_length=${#content}
-    if [ $content_length -lt 50 ]; then
+    if [ "$content_length" -lt 50 ]; then
         echo "✗ Error: Content too short (minimum 50 characters)" >&2
         exit 1
     fi
 
-    if [ $content_length -gt 5000000 ]; then
+    if [ "$content_length" -gt 5000000 ]; then
         echo "✗ Error: Content too large (maximum 5MB)" >&2
         exit 1
     fi
@@ -328,7 +328,8 @@ main() {
         case "$choice" in
             1)
                 # Backup existing file
-                local backup_file="$BACKUPS_DIR/${tag_id}_$(date +%Y%m%d_%H%M%S).md"
+                local backup_file
+                backup_file="$BACKUPS_DIR/${tag_id}_$(date +%Y%m%d_%H%M%S).md"
                 cp "$pattern_file" "$backup_file"
                 echo "✓ Backup created: $backup_file"
                 is_update="true"

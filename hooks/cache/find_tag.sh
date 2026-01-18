@@ -139,8 +139,25 @@ main() {
         # Update usage stats (non-blocking)
         update_usage_stats "$result" &
 
-        echo "$result"
-        exit 0
+        # Check if path injection script is available
+        PATH_INJECTOR="$SCRIPT_DIR/inject-context-paths.sh"
+        if [ -x "$PATH_INJECTOR" ]; then
+            # Inject current project context into cached pattern
+            PROJECT_ROOT="${PWD:-$(pwd)}"
+            if "$PATH_INJECTOR" "$result" "$PROJECT_ROOT" 2>>"$LOG_FILE"; then
+                log "INFO" "Context-aware cache hit with path injection: $result"
+                exit 0
+            else
+                log "WARNING" "Path injection failed, returning tag_id only: $result"
+                echo "$result"
+                exit 0
+            fi
+        else
+            # Fallback: Return tag_id without path injection (backward compatibility)
+            log "INFO" "Path injection script not available, returning tag_id: $result"
+            echo "$result"
+            exit 0
+        fi
     else
         local exit_code=$?
         if [ $exit_code -eq 124 ]; then

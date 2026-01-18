@@ -61,23 +61,19 @@ jobs:
       - name: Check bash syntax for hooks
         run: |
           echo "Checking bash scripts..."
-          for file in hooks/*.sh; do
-            if [ -f "$file" ]; then
-              echo "Checking $file"
-              bash -n "$file" || exit 1
-              echo "✅ $file syntax OK"
-            fi
+          find hooks -name "*.sh" -type f | while read -r file; do
+            echo "Checking $file"
+            bash -n "$file" || exit 1
+            echo "✅ $file syntax OK"
           done
 
       - name: Run shellcheck on hooks
         run: |
           echo "Running shellcheck..."
-          for file in hooks/*.sh; do
-            if [ -f "$file" ]; then
-              echo "Shellcheck: $file"
-              shellcheck -x "$file" || exit 1
-              echo "✅ $file passed shellcheck"
-            fi
+          find hooks -name "*.sh" -type f | while read -r file; do
+            echo "Shellcheck: $file"
+            shellcheck -x "$file" || exit 1
+            echo "✅ $file passed shellcheck"
           done
 
   validate-python:
@@ -94,22 +90,20 @@ jobs:
       - name: Check Python syntax
         run: |
           echo "Checking Python scripts..."
-          for file in hooks/*.py; do
-            if [ -f "$file" ]; then
-              echo "Checking $file"
-              python -m py_compile "$file" || exit 1
-              echo "✅ $file syntax OK"
-            fi
+          find hooks -name "*.py" -type f | while read -r file; do
+            echo "Checking $file"
+            python -m py_compile "$file" || exit 1
+            echo "✅ $file syntax OK"
           done
 
       - name: Test get_context_tree.py execution
         run: |
           echo "Testing get_context_tree.py..."
-          python hooks/get_context_tree.py --help || exit 1
+          python hooks/tree/get_context_tree.py --help || exit 1
           echo "✅ get_context_tree.py help works"
 
           # Test on current directory
-          python hooks/get_context_tree.py . --max-depth 2 --max-files 50
+          python hooks/tree/get_context_tree.py . --max-depth 2 --max-files 50
           echo "✅ get_context_tree.py execution successful"
 
   validate-markdown:
@@ -180,7 +174,7 @@ jobs:
           echo "Testing context-aware-tree-injection hook..."
 
           # Simulate hook input
-          echo '{"prompt":"implement user authentication","cwd":"'$(pwd)'"}' | bash hooks/context-aware-tree-injection.sh
+          echo '{"prompt":"implement user authentication","cwd":"'$(pwd)'"}' | bash hooks/tree/context-aware-tree-injection.sh
 
           echo "✅ Hook execution test passed"
 
@@ -188,7 +182,7 @@ jobs:
         run: |
           echo "Testing empty directory detection..."
           mkdir -p /tmp/empty-test
-          output=$(python hooks/get_context_tree.py /tmp/empty-test)
+          output=$(python hooks/tree/get_context_tree.py /tmp/empty-test)
           if [[ "$output" != *"<<PROJECT_EMPTY_NO_STRUCTURE>>"* ]]; then
             echo "❌ Empty detection failed"
             exit 1
@@ -196,7 +190,7 @@ jobs:
           echo "✅ Empty detection works"
 
           echo "Testing tree generation..."
-          python hooks/get_context_tree.py . --max-depth 3 --max-files 100
+          python hooks/tree/get_context_tree.py . --max-depth 3 --max-files 100
           echo "✅ Tree generation works"
 
       - name: Verify plugin structure
@@ -208,8 +202,11 @@ jobs:
             "plugin.json"
             ".claude-plugin/marketplace.json"
             "hooks/hooks.json"
-            "hooks/get_context_tree.py"
-            "hooks/context-aware-tree-injection.sh"
+            "hooks/tree/get_context_tree.py"
+            "hooks/tree/context-aware-tree-injection.sh"
+            "hooks/cache/find_tag.py"
+            "hooks/cache/find_tag.sh"
+            "hooks/core/user-prompt-submit.sh"
             "README.md"
             "CHANGELOG.md"
             "LICENSE"

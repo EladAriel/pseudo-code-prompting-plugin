@@ -2,7 +2,7 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 
@@ -143,6 +143,88 @@ implement_authentication(
 - ✅ Works with **empty projects** too (generates recommended structure)
 
 **Learn more**: [Context-Aware Transform-Query Guide](docs/CONTEXT-AWARE-MODE.md) | [Technical Details](docs/TREE-INJECTION-GUIDE.md)
+
+### 💾 Semantic Caching System (v1.4.0) + Optimized Query Scoring (v1.5.0)
+
+Dramatically reduce API costs and response times by intelligently reusing previously-generated patterns through AI-powered semantic matching.
+
+**The Problem**: Generating pseudo-code patterns requires expensive API calls and takes 10-30 seconds each time.
+
+**The Solution**: Semantic caching understands the **meaning** of your query and matches it to similar patterns, even with different wording.
+
+**Example**:
+
+```bash
+# First time (generates pattern)
+/transform-query implement Google OAuth authentication
+# → Takes 15 seconds, costs $0.01
+
+# Later (semantically similar query)
+/transform-query add Google login with OAuth 2.0
+# 📦 Loaded cached pattern: auth_google_oauth
+# → Takes 2 seconds, costs $0.0001 (100x cheaper!)
+```
+
+**Key Benefits**:
+
+- **10x Cost Reduction**: Cache hits use Claude Haiku (~$0.0001) vs full generation (~$0.01+)
+- **5-15x Faster**: Load from disk (2s) vs full generation (10-30s)
+- **Intelligent Matching**: Semantic understanding, not exact text matching
+- **Team Sharing**: Commit cached patterns to share with your team
+- **Auto-Optimized**: Most-used patterns prioritized for faster lookups
+
+**How It Works**:
+
+```text
+Your Query
+    ↓
+Semantic Router (Claude Haiku) ← Lightweight, fast
+    ↓
+  Match?
+    ↓
+Yes → Load from Cache → Done! (2 seconds)
+No  → Generate Pattern → Optionally Save (10-30 seconds)
+```
+
+**Quick Start**:
+
+```bash
+# 1. Install Python package
+pip install anthropic
+
+# 2. Set API key
+export ANTHROPIC_API_KEY="your-key"
+
+# 3. Generate a pattern
+/transform-query implement JWT authentication
+
+# 4. Save it for reuse
+./hooks/cache/cache-success.sh
+# Tag: auth_jwt
+# Description: JWT authentication with access tokens
+
+# 5. Later, benefit from semantic matching
+/transform-query add JWT-based user login
+# 📦 Loaded cached pattern: auth_jwt ← Instant!
+```
+
+**Cache Management Commands**:
+
+```bash
+./hooks/cache/list-cache.sh          # List all cached patterns
+./hooks/cache/search-cache.sh oauth  # Search by keyword
+./hooks/cache/cache-stats.sh         # View statistics
+./hooks/cache/validate-cache.sh      # Check integrity
+./hooks/cache/delete-cache.sh <tag>  # Remove pattern
+./hooks/cache/update-cache.sh <tag>  # Update pattern
+```
+
+**Cost Example** (10 authentication requests):
+
+- **Without Cache**: 10 × $0.01 = **$0.10**
+- **With Cache**: $0.01 + (9 × $0.0001) = **$0.0109** (~90% savings)
+
+**Learn more**: [Semantic Caching Documentation](docs/CACHING.md)
 
 ## Installation
 
@@ -329,6 +411,6 @@ Copyright (c) 2026 Pseudo-Code Prompting Contributors
 
 ## Version
 
-**Current Version:** 2.1.0
-**Last Updated:** 2026-01-13
+**Current Version:** 1.5.0
+**Last Updated:** 2026-01-18
 **Minimum Claude Code Version:** 1.0.0

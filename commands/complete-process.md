@@ -1,3 +1,8 @@
+---
+description: Orchestrate end-to-end pseudo-code transformation with automated validation and optimization
+argument-hint: [query]
+---
+
 # Complete Process Command
 
 Orchestrate end-to-end pseudo-code transformation with automated validation and optimization.

@@ -2,7 +2,7 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.5.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 
@@ -50,7 +50,7 @@ create_endpoint(
 
 ## Key Features
 
-### 🎯 6 Specialized Skills
+### 🎯 7 Specialized Skills
 
 | Skill | Purpose | Token Efficiency |
 |-------|---------|------------------|
@@ -60,6 +60,7 @@ create_endpoint(
 | **prompt-optimizer** | Add missing parameters, enhance security | 400-700 tokens |
 | **requirement-validator** | Validate completeness, security, edge cases | 500-800 tokens |
 | **feature-dev-enhancement** | Integrate with feature-dev workflow | 200-400 tokens |
+| **complete-process-orchestrator** | End-to-end workflow automation (transform → validate → optimize) | 1000-2000 tokens |
 
 ### 🤖 5 Intelligent Agents
 
@@ -71,7 +72,7 @@ create_endpoint(
 | **prompt-optimizer** | Security, validation, completeness enhancement | Enhancement (Tier 3) |
 | **requirement-validator** | Gap identification, security audit, edge cases | Quality (Tier 3) |
 
-### 🎮 6 Skills (Auto-Invoked)
+### 🎮 7 Skills (Auto-Invoked)
 
 Skills are automatically invoked by Claude when relevant keywords/patterns are detected:
 
@@ -83,6 +84,7 @@ Skills are automatically invoked by Claude when relevant keywords/patterns are d
 | **prompt-optimizer** | "optimize", "enhance", "improve" | Add missing parameters |
 | **context-compressor** | "compress", "reduce", "simplify" | Compress verbose requirements |
 | **feature-dev-enhancement** | "feature-dev", "workflow" | Integrate with feature-dev |
+| **complete-process-orchestrator** | "/complete-process", "/complete", "full workflow" | Orchestrate complete transformation pipeline |
 
 ### ⚡ 4 Automated Hooks
 
@@ -225,6 +227,70 @@ export ANTHROPIC_API_KEY="your-key"
 - **With Cache**: $0.01 + (9 × $0.0001) = **$0.0109** (~90% savings)
 
 **Learn more**: [Semantic Caching Documentation](docs/CACHING.md)
+
+### 🔄 Complete Process Orchestration (NEW in v1.6.0)
+
+Automate the entire transformation pipeline with a single command. Instead of manually running transform → validate → optimize, the Complete Process Orchestrator handles everything automatically with intelligent error recovery and progress tracking.
+
+**The Problem**: Running `/transform-query`, `/validate-requirements`, and `/optimize-prompt` separately is tedious and error-prone.
+
+**The Solution**: One command that orchestrates the entire workflow with two modes:
+
+**Quick Mode** (5-15s):
+
+- Transform only
+- Best for simple queries and rapid iteration
+- Perfect for prototyping
+
+**Complete Mode** (30-90s):
+
+- Transform → Validate → Optimize
+- Production-ready output with full validation
+- Includes error handling, security, and edge cases
+
+**Example**:
+
+```bash
+# Invoke the orchestrator
+/complete-process Implement JWT authentication with refresh tokens
+
+# Choose your workflow mode:
+○ Quick Transform Only (5-15s)
+● Complete Process (Recommended) (30-90s)
+
+# Complete mode shows progress:
+Step 1/3: 🔄 Transforming query to pseudo-code... ✓ (12s)
+Step 2/3: ✓ Validating requirements... ✓ (8s)
+Step 3/3: ⚡ Optimizing for implementation... ✓ (22s)
+
+✓ Pipeline complete! Review output below.
+```
+
+**Key Features**:
+
+- **Mode Selection**: Choose quick or complete based on your needs
+- **Progress Tracking**: Real-time visibility into pipeline execution
+- **Error Recovery**: Automatic rollback and checkpoint recovery
+- **Preference Persistence**: Remembers your mode choice for next time
+- **Timeout Protection**: Graceful handling with partial results
+- **State Management**: Preserves work on failures for easy retry
+
+**Benefits**:
+
+- ✅ **Streamlined Workflow**: One command instead of three
+- ✅ **Intelligent Automation**: Full validation and optimization automatically
+- ✅ **Error Resilience**: Recovers from failures gracefully
+- ✅ **Time Savings**: 50% faster than manual steps
+- ✅ **Quality Assurance**: Complete mode ensures production-ready output
+
+**Available Commands**:
+
+- `/complete-process` (primary)
+- `/complete` (alias)
+- `/full-transform` (alias)
+- `/orchestrate` (alias)
+
+**Learn more**: [Complete Process Documentation](skills/complete-process-orchestrator/SKILL.md)
 
 ## Installation
 
@@ -411,6 +477,6 @@ Copyright (c) 2026 Pseudo-Code Prompting Contributors
 
 ## Version
 
-**Current Version:** 1.5.0
+**Current Version:** 1.6.0
 **Last Updated:** 2026-01-18
-**Minimum Claude Code Version:** 1.0.0
+**Minimum Claude Code Version:** 2.1.0

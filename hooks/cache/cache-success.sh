@@ -263,7 +263,7 @@ main() {
     echo
 
     # Prompt for tag name
-    read -p "Enter tag name (e.g., 'auth_google_oauth'): " tag_input
+    read -rp "Enter tag name (e.g., 'auth_google_oauth'): " tag_input
 
     if [ -z "$tag_input" ]; then
         echo "✗ Error: Tag name required" >&2
@@ -282,7 +282,7 @@ main() {
     echo
 
     # Prompt for description
-    read -p "Enter description (for semantic matching): " description
+    read -rp "Enter description (for semantic matching): " description
 
     if [ -z "$description" ]; then
         echo "✗ Error: Description required" >&2
@@ -300,7 +300,7 @@ main() {
     echo "  Regular   - Standard pattern (70% match threshold)"
     echo "  Optimized - Enhanced/validated pattern (65% threshold, 1.5x priority)"
     echo
-    read -p "Tag this as optimized query? [y/N]: " query_type_input
+    read -rp "Tag this as optimized query? [y/N]: " query_type_input
 
     local query_type="regular"
     if [[ "$query_type_input" =~ ^[Yy]$ ]]; then
@@ -323,7 +323,7 @@ main() {
         echo "  1) Overwrite (backup will be created)"
         echo "  2) Cancel"
         echo
-        read -p "Choose [1-2]: " choice
+        read -rp "Choose [1-2]: " choice
 
         case "$choice" in
             1)

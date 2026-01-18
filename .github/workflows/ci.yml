@@ -61,20 +61,30 @@ jobs:
       - name: Check bash syntax for hooks
         run: |
           echo "Checking bash scripts..."
-          find hooks -name "*.sh" -type f | while read -r file; do
+          EXIT_CODE=0
+          while IFS= read -r file; do
             echo "Checking $file"
-            bash -n "$file" || exit 1
-            echo "✅ $file syntax OK"
-          done
+            if ! bash -n "$file"; then
+              EXIT_CODE=1
+            else
+              echo "✅ $file syntax OK"
+            fi
+          done < <(find hooks -name "*.sh" -type f)
+          exit $EXIT_CODE
 
       - name: Run shellcheck on hooks
         run: |
           echo "Running shellcheck..."
-          find hooks -name "*.sh" -type f | while read -r file; do
+          EXIT_CODE=0
+          while IFS= read -r file; do
             echo "Shellcheck: $file"
-            shellcheck -x "$file" || exit 1
-            echo "✅ $file passed shellcheck"
-          done
+            if ! shellcheck -x "$file"; then
+              EXIT_CODE=1
+            else
+              echo "✅ $file passed shellcheck"
+            fi
+          done < <(find hooks -name "*.sh" -type f)
+          exit $EXIT_CODE
 
   validate-python:
     name: Validate Python Scripts

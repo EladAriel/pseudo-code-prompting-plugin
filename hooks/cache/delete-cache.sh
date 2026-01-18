@@ -40,7 +40,7 @@ echo "  Tag:         $tag_id"
 echo "  Description: $description"
 echo
 
-read -p "Are you sure you want to delete this pattern? [y/N]: " confirm
+read -rp "Are you sure you want to delete this pattern? [y/N]: " confirm
 
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     echo "Cancelled."

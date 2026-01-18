@@ -76,10 +76,10 @@ echo "Content captured: ${#new_content} characters"
 echo
 
 # Optionally update description
-read -p "Update description? [y/N]: " update_desc
+read -rp "Update description? [y/N]: " update_desc
 
 if [[ "$update_desc" =~ ^[Yy]$ ]]; then
-    read -p "Enter new description: " description
+    read -rp "Enter new description: " description
 fi
 
 # Acquire lock

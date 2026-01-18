@@ -149,6 +149,10 @@ jobs:
                 if [[ "$link" =~ ^# ]]; then
                   continue
                 fi
+                # Skip directory links (ending with /)
+                if [[ "$link" =~ /$ ]]; then
+                  continue
+                fi
                 # Check if file exists (relative to file location)
                 dir=$(dirname "$file")
                 if [ ! -f "$dir/$link" ] && [ ! -f "$link" ]; then

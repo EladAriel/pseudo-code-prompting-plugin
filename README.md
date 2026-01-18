@@ -93,41 +93,56 @@ Skills are automatically invoked by Claude when relevant keywords/patterns are d
 | **context-compression-helper** | Verbose input (>100 words) | Suggest compression |
 | **context-aware-tree-injection** | Implementation keywords | Analyze project structure for architecture-aware suggestions |
 
-### 🌳 Context-Aware Mode (NEW in v1.3.0)
+### 🌳 Context-Aware `/transform-query` (NEW in v1.3.0)
 
-Automatically analyzes your project structure and provides architecture-aligned implementation suggestions.
+The `/transform-query` command now automatically includes **actual file paths** from your project when transforming natural language to pseudo-code.
 
 **How it works**:
-1. Detects implementation keywords (`implement`, `create`, `add`, `refactor`, `build`)
-2. Scans your project directory structure
-3. Generates ASCII tree representation
-4. Provides specific file paths and architecture-aligned suggestions
 
-**Two Modes**:
-- **Rule A (Map Mode)**: Existing project → Suggests changes that match your current architecture
-- **Rule B (Skeleton Mode)**: Empty project → Generates complete recommended structure
+1. You use implementation keywords: `implement`, `create`, `add`, `refactor`, `build`
+2. Hook automatically scans your project structure
+3. `/transform-query` outputs pseudo-code **with actual file paths** from your codebase
 
-**Supported Stacks**: Next.js, Express, FastAPI, Go, Generic
+**Without Context-Aware** (Generic):
 
-**Example**:
-```bash
-# In Next.js project with existing structure
-Your prompt: "implement user authentication"
+```javascript
+/transform-query "add user authentication"
 
-Claude's response:
-[CONTEXT-AWARE ANALYSIS]
-Detected Stack: Next.js 13+ (React)
-
-Implementation Plan:
-1. Create src/lib/auth.ts (follows existing lib/ pattern)
-2. Create src/app/api/auth/route.ts (Next.js 13 API route)
-3. Add auth context in src/app/providers/AuthProvider.tsx
-...
+Output:
+implement_authentication(
+  type="jwt",
+  features=["login", "logout", "session"],
+  security=["bcrypt", "token"]
+)
 ```
 
-**Commands**: `/context-aware-transform [request]`
+**With Context-Aware** (Actual Paths):
 
-**Learn more**: [Context-Aware Mode Guide](docs/CONTEXT-AWARE-MODE.md) | [Technical Guide](docs/TREE-INJECTION-GUIDE.md)
+```javascript
+/transform-query "implement user authentication"
+
+Output:
+implement_authentication(
+  type="jwt",
+  target_files=[
+    "src/lib/auth.ts",              // ← Actual file from YOUR project
+    "src/app/api/auth/route.ts"     // ← Follows YOUR architecture
+  ],
+  modifications=["src/app/layout.tsx"],
+  create_files=["src/components/auth/LoginForm.tsx"],
+  stack="nextjs_react",             // ← Detected from YOUR package.json
+  architecture_pattern="app_directory"
+)
+```
+
+**Key Benefits**:
+
+- ✅ Outputs include **specific file paths** from your project
+- ✅ Follows **your existing architecture** patterns
+- ✅ Detects **your stack** automatically (Next.js, Express, FastAPI, Go)
+- ✅ Works with **empty projects** too (generates recommended structure)
+
+**Learn more**: [Context-Aware Transform-Query Guide](docs/CONTEXT-AWARE-MODE.md) | [Technical Details](docs/TREE-INJECTION-GUIDE.md)
 
 ## Installation
 

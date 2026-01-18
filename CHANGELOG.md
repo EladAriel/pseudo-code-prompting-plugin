@@ -39,10 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Complete directory structure with purpose annotations
     - Stack-specific initialization steps
 
-- **Comprehensive documentation**
-  - `docs/CONTEXT-AWARE-MODE.md` - User-facing guide with examples and troubleshooting
+- **Comprehensive documentation** (focused on `/transform-query` with actual file paths)
+  - `docs/CONTEXT-AWARE-MODE.md` - Complete guide for context-aware `/transform-query` with path injection examples
   - `docs/TREE-INJECTION-GUIDE.md` - Technical implementation details and architecture
-  - Updated README.md with Context-Aware Mode section
+  - Updated README.md with side-by-side comparison of generic vs context-aware transform-query output
 
 - **Multi-stack template system**
   - **nextjs_react**: Next.js 13+ with app directory, components, lib, hooks
@@ -52,11 +52,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **default**: Generic structure for unknown stacks
 
 - **GitHub Actions CI/CD workflows**
-  - `ci.yml` - Comprehensive CI with JSON, bash, Python, and markdown validation (with anchor link support)
+  - `ci.yml` - Comprehensive CI with JSON, bash, Python, and markdown validation
+    - Skips anchor links (starting with `#`)
+    - Skips directory links (ending with `/`)
+    - Validates file links exist
   - `plugin-validation.yml` - Plugin-specific validation (manifest, hooks, commands, documentation)
   - `release.yml` - Automated versioning and release with release-please (requires PR creation permission)
   - `version-check.yml` - PR validation for version bumps and CHANGELOG updates
-  - `.github/workflows/README.md` - Complete setup instructions and troubleshooting guide
+  - `.github/workflows/README.md` - Complete setup instructions, branch protection guide, and troubleshooting
 
 ### Changed
 

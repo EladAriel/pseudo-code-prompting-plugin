@@ -1,46 +1,99 @@
-# Context-Aware Mode
+# Context-Aware Transform-Query
 
 ## Overview
 
-Context-Aware Mode is an intelligent feature that automatically analyzes your project structure and provides architecture-aligned implementation suggestions. Instead of generic advice, Claude understands your codebase organization and recommends changes that fit your existing patterns.
+The `/transform-query` command automatically includes **actual file paths from your project** when transforming natural language to pseudo-code. This happens transparently when you use implementation keywords.
+
+**Core Benefit**: Transform queries output **specific file paths** from YOUR codebase, not generic suggestions.
 
 ## How It Works
 
 ### Automatic Activation
 
-Context-Aware Mode activates automatically when you use implementation keywords in your prompts:
+When you use these keywords in your query:
 
 - `implement` - "implement user authentication"
-- `create` - "create a new API endpoint"
+- `create` - "create API endpoints"
 - `add` - "add payment processing"
-- `refactor` - "refactor the auth module"
-- `build` - "build a dashboard component"
-- `generate` - "generate CRUD operations"
-- `setup` - "setup database migrations"
-- `initialize` - "initialize the project structure"
+- `refactor` - "refactor auth module"
+- `build` - "build dashboard"
+- `generate` - "generate CRUD"
+- `setup` - "setup database"
+- `initialize` - "initialize project"
 
-When triggered, the plugin:
-1. Scans your project directory structure
-2. Generates an ASCII tree representation
-3. Injects this context into Claude's understanding
-4. Applies intelligent transformation rules
+The system automatically:
 
-### Two Operating Modes
+1. **Scans** your project directory structure
+2. **Detects** your technology stack (Next.js, Express, FastAPI, Go, etc.)
+3. **Analyzes** your architecture patterns (MVC, feature-based, etc.)
+4. **Injects** this context into `/transform-query`
 
-#### Rule A: Map to Existing Structure
+### Result: Pseudo-Code with Actual Paths
 
-**When**: Your project has existing files and directories
+Instead of generic pseudo-code, you get output with **your actual file paths**.
 
-**What happens**: Claude analyzes your structure and:
-- Detects your technology stack (Next.js, Express, FastAPI, Go, etc.)
-- Identifies architectural patterns (MVC, feature-based, etc.)
-- References specific existing files
-- Suggests file placements that match your conventions
-- Follows your naming patterns
+## Examples
 
-**Example**:
+### Example 1: Existing Next.js Project
+
+**Your Project Structure:**
+
+```text
+my-app/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   └── Header.tsx
+│   └── lib/
+│       └── utils.ts
+└── package.json
 ```
-Your project:
+
+**Your Query:**
+
+```bash
+/transform-query "implement user authentication with JWT"
+```
+
+**Output (WITH Context-Aware):**
+
+```javascript
+Transformed: implement_authentication(
+  type="jwt",
+  target_files=[
+    "src/lib/auth.ts",                    // ← Actual path from YOUR project
+    "src/app/api/auth/[...nextauth]/route.ts",
+    "src/app/providers/AuthProvider.tsx",
+    "src/components/auth/LoginForm.tsx"
+  ],
+  modifications=[
+    "src/app/layout.tsx"                  // ← File that exists in YOUR project
+  ],
+  stack="nextjs_react",                   // ← Detected from YOUR package.json
+  architecture_pattern="app_directory",   // ← Detected from YOUR structure
+  follows_existing_pattern="src/lib/utils.ts",
+  integration_points=["Header.tsx:add_logout_button"],
+  security=["bcrypt_hash", "jwt_token", "secure_cookies"]
+)
+```
+
+**Key Features:**
+
+- ✅ `target_files` = specific paths in YOUR project
+- ✅ `modifications` = files that exist in YOUR codebase
+- ✅ `stack` = detected from YOUR package.json
+- ✅ `architecture_pattern` = detected from YOUR directory structure
+- ✅ `follows_existing_pattern` = references YOUR existing files
+
+---
+
+### Example 2: Existing Express API
+
+**Your Project Structure:**
+
+```text
 api/
 ├── src/
 │   ├── controllers/
@@ -49,192 +102,232 @@ api/
 │   │   └── users.js
 │   └── models/
 │       └── User.js
-
-Your prompt: "implement order management"
-
-Claude's response:
-[CONTEXT-AWARE ANALYSIS]
-Detected Stack: Node.js with Express
-Project Pattern: MVC architecture
-
-Implementation Plan:
-1. Create Order model in src/models/Order.js
-   - Follows existing User.js pattern
-2. Create order controller in src/controllers/orderController.js
-   - Mirrors userController.js structure
-3. Create order routes in src/routes/orders.js
-   - Follows users.js routing pattern
-...
+└── server.js
 ```
 
-#### Rule B: Generate Virtual Skeleton
+**Your Query:**
 
-**When**: Your project is empty or has no clear structure
-
-**What happens**: Claude infers your intended stack and:
-- Detects technology from keywords (FastAPI, React, Go, etc.)
-- Generates a complete recommended directory structure
-- Provides stack-specific best practices
-- Creates a foundation to build on
-
-**Example**:
-```
-Empty project directory
-
-Your prompt: "create a FastAPI REST API for user management"
-
-Claude's response:
-[VIRTUAL SKELETON GENERATION]
-Inferred Stack: python_fastapi
-Detection Reason: "FastAPI" keyword
-
-Recommended Structure:
-app/
-├── api/
-│   └── endpoints/
-│       └── users.py
-├── core/
-│   ├── config.py
-│   └── security.py
-├── models/
-│   └── user.py
-...
-
-Implementation Plan:
-1. Install dependencies: pip install fastapi uvicorn sqlalchemy
-2. Create directory structure
-3. Implement user endpoints...
+```bash
+/transform-query "add order management endpoints"
 ```
 
-## Supported Stacks
+**Output (WITH Context-Aware):**
 
-### Next.js / React
-**Indicators**: `package.json`, `.next/`, `next.config.js`, keywords: "React", "Next.js"
+```javascript
+Transformed: implement_order_management(
+  target_files=[
+    "src/models/Order.js",
+    "src/controllers/orderController.js",
+    "src/routes/orders.js"
+  ],
+  modifications=["server.js"],
+  follows_pattern="src/controllers/userController.js",  // ← YOUR existing pattern
+  stack="node_express",
+  architecture="mvc",
+  endpoints=["POST /orders", "GET /orders", "GET /orders/:id", "PATCH /orders/:id/status"],
+  integrations=["User.js:foreign_key_userId"]
+)
+```
 
-**Template Structure**:
+---
+
+### Example 3: Empty Project (Virtual Skeleton)
+
+**Your Project Structure:**
+
+```text
+empty-project/
+(no files)
+```
+
+**Your Query:**
+
+```bash
+/transform-query "create FastAPI REST API for user management"
+```
+
+**Output (WITH Empty Project Detection):**
+
+```javascript
+Transformed: create_api(
+  framework="fastapi",
+  domain="user_management",
+  recommended_structure={
+    "stack": "python_fastapi",
+    "files": [
+      "app/api/endpoints/users.py",
+      "app/core/config.py",
+      "app/core/security.py",
+      "app/models/user.py",
+      "app/schemas/user.py",
+      "app/services/user_service.py",
+      "main.py",
+      "requirements.txt"
+    ]
+  },
+  endpoints=["POST /users", "GET /users", "GET /users/{id}", "PUT /users/{id}", "DELETE /users/{id}"],
+  features=["crud", "validation", "authentication"],
+  database="sqlalchemy"
+)
+```
+
+**Note**: For empty projects, the system generates a **recommended structure** based on the detected stack.
+
+---
+
+### Example 4: Without Context-Aware (Generic Mode)
+
+If you use a query WITHOUT implementation keywords:
+
+**Your Query:**
+
+```bash
+/transform-query "add user authentication"  # ← No "implement", "create", etc.
+```
+
+**Output (Standard Mode):**
+
+```javascript
+Transformed: add_authentication(
+  type="user_authentication",
+  features=["login", "logout", "session"],
+  security=["password_hash", "token"]
+)
+```
+
+**Note**: Generic pseudo-code without specific file paths.
+
+---
+
+## Comparison: With vs. Without Context-Aware
+
+| Feature | **Without Context** | **With Context** |
+|---------|---------------------|------------------|
+| File paths | ❌ Generic names | ✅ Actual paths from YOUR project |
+| Stack detection | ❌ Not included | ✅ Auto-detected (Next.js, Express, etc.) |
+| Architecture | ❌ Not analyzed | ✅ Pattern identified (MVC, app directory, etc.) |
+| Existing patterns | ❌ Not referenced | ✅ References YOUR existing files |
+| Integration points | ❌ Not identified | ✅ Shows how to connect to YOUR code |
+| Empty projects | ❌ Generic output | ✅ Stack-specific recommended structure |
+
+---
+
+## Supported Technology Stacks
+
+The system automatically detects these stacks from your project files:
+
+### 1. Next.js / React
+
+**Detection Indicators**: `package.json` with `next`, `.next/`, `next.config.js`
+
+**Recommended Structure**:
+
 - `src/app/` - Next.js 13+ app directory
 - `src/components/` - React components
 - `src/lib/` - Utilities
 - `src/hooks/` - Custom hooks
 
-### Node.js / Express
-**Indicators**: `package.json` with Express, keywords: "Express", "Node"
+### 2. Node.js / Express
 
-**Template Structure**:
+**Detection Indicators**: `package.json` with `express`, `server.js`, `app.js`
+
+**Recommended Structure**:
+
 - `src/controllers/` - Route controllers
 - `src/routes/` - Route definitions
 - `src/models/` - Data models
 - `src/middleware/` - Custom middleware
 
-### Python / FastAPI
-**Indicators**: `requirements.txt`, `pyproject.toml`, keywords: "FastAPI", "Python API"
+### 3. Python / FastAPI
 
-**Template Structure**:
+**Detection Indicators**: `requirements.txt`, `pyproject.toml` with `fastapi`, `main.py`
+
+**Recommended Structure**:
+
 - `app/api/endpoints/` - API routes
 - `app/core/` - Config and security
 - `app/models/` - SQLAlchemy models
 - `app/schemas/` - Pydantic schemas
 
-### Go
-**Indicators**: `go.mod`, `go.sum`, keywords: "Go", "Golang"
+### 4. Go
 
-**Template Structure**:
+**Detection Indicators**: `go.mod`, `go.sum`
+
+**Recommended Structure**:
+
 - `cmd/` - Application entry points
 - `internal/` - Private application code
 - `pkg/` - Public libraries
-- `tests/` - Test files
+- `api/` - API definitions
 
-### Generic / Default
-**When**: No clear stack indicators
+### 5. Generic
 
-**Template Structure**:
+**When**: No clear stack indicators detected
+
+**Recommended Structure**:
+
 - `src/` - Source code
 - `tests/` - Test files
 - `docs/` - Documentation
 
-## Usage Examples
+---
 
-### Example 1: Existing Next.js App
+## Usage Patterns
 
-**Scenario**: You have a Next.js project with some components
-
-```bash
-Your prompt: "implement user authentication with JWT"
-```
-
-**What happens**:
-1. Hook detects "implement" keyword
-2. Scans your project directory
-3. Finds `src/app/`, `package.json`, `next.config.js`
-4. Identifies: Next.js 13+ with TypeScript
-5. Analyzes: App directory structure, existing component patterns
-6. Suggests: Specific files (`src/lib/auth.ts`, `src/app/api/auth/route.ts`) that match your conventions
-
-### Example 2: Empty Python Project
-
-**Scenario**: You just created an empty directory
+### Pattern 1: Standard Workflow
 
 ```bash
-Your prompt: "create a FastAPI microservice for order processing"
+# Step 1: Transform with context
+/transform-query "implement user authentication"
+
+# Step 2: Review the pseudo-code with actual paths
+# Output includes: target_files, modifications, stack, architecture_pattern
+
+# Step 3: Use the pseudo-code to guide implementation
+# You now have specific file paths to work with
 ```
 
-**What happens**:
-1. Hook detects "create" keyword
-2. Scans directory (finds it empty)
-3. Returns `<<PROJECT_EMPTY_NO_STRUCTURE>>` flag
-4. Analyzes keywords: "FastAPI", "microservice"
-5. Infers: python_fastapi template
-6. Generates: Complete directory structure with FastAPI best practices
-
-### Example 3: Manual Command Usage
-
-You can explicitly trigger context-aware mode:
+### Pattern 2: Exploring New Features
 
 ```bash
-/context-aware-transform add real-time notifications with WebSockets
+# See what files would be created for a feature
+/transform-query "add payment processing with Stripe"
+
+# Output shows:
+# - target_files: Where to create new code
+# - modifications: Existing files to update
+# - integrations: How to connect to existing code
 ```
 
-This bypasses automatic keyword detection and forces the analysis.
+### Pattern 3: Empty Project Initialization
 
-## Benefits
+```bash
+# Start a new project
+/transform-query "create React dashboard with authentication"
 
-### 1. Architecture Consistency
-- New code matches existing patterns
-- No mixing of conventions (e.g., consistent file extensions)
-- Proper module organization
+# Output shows:
+# - recommended_structure: Complete directory layout
+# - stack-specific best practices
+# - initialization commands
+```
 
-### 2. Faster Onboarding
-- Works with unfamiliar codebases
-- Understands structure without extensive explanation
-- Identifies patterns automatically
-
-### 3. Better File Placement
-- Suggests exact paths based on existing structure
-- Groups related functionality correctly
-- Follows your project's organizational logic
-
-### 4. Stack-Appropriate Suggestions
-- Recommendations fit your technology stack
-- Uses framework-specific best practices
-- Considers tooling conventions (TypeScript vs JavaScript, etc.)
-
-### 5. Reduced Ambiguity
-- Concrete file paths instead of vague suggestions
-- References existing files as patterns
-- Clear integration points
+---
 
 ## Limitations
 
 ### Performance Constraints
+
 - **Timeout**: 15 seconds maximum for tree generation
 - **File Limit**: 1000 files scanned (configurable)
 - **Output Size**: 50KB maximum tree size
 - **Depth Limit**: 10 directory levels deep
 
-Large monorepos may hit these limits, resulting in partial trees or graceful degradation.
+**Impact**: Large monorepos may hit these limits, resulting in partial trees or fallback to generic mode.
 
 ### Automatic Filtering
+
 The tree generator excludes common directories:
+
 - `.git`, `.svn` - Version control
 - `node_modules`, `vendor` - Dependencies
 - `dist`, `build`, `out`, `target` - Build output
@@ -242,71 +335,103 @@ The tree generator excludes common directories:
 - `.venv`, `venv` - Virtual environments
 - `.idea`, `.vscode` - IDE files
 
-If your project uses non-standard directory names, they might be excluded. Use `.gitignore` to customize filtering.
+**Impact**: If your project uses non-standard directory names, they might be excluded. Customize via `.gitignore`.
 
-### Inference Accuracy
-Stack detection relies on:
-1. File indicators (package.json, requirements.txt, etc.)
+### Stack Detection Accuracy
+
+Detection relies on:
+
+1. File indicators (package.json, requirements.txt, go.mod)
 2. Directory names (app/, src/, cmd/)
-3. Request keywords ("FastAPI", "React")
+3. Query keywords ("FastAPI", "React", "Express")
 
-Ambiguous projects may need clarification.
+**Impact**: Ambiguous projects (e.g., both package.json and requirements.txt) may need clarification in the query.
+
+---
 
 ## Troubleshooting
 
-### Hook Not Triggering
+### Issue: No Actual Paths in Output
 
-**Symptom**: No context-aware analysis appears
+**Symptom**: Transform-query returns generic pseudo-code without file paths
 
-**Causes**:
-1. Keywords not detected - Use: implement, create, add, refactor, build, generate, setup, initialize
-2. Python not installed - Install Python 3.6+
-3. Script execution error - Check console for errors
+**Causes:**
 
-**Solution**: Try explicit invocation with `/context-aware-transform [request]`
+1. **No implementation keyword** - Use: `implement`, `create`, `add`, `refactor`, `build`
+2. **Hook not triggering** - Check that Python 3.6+ is installed
+3. **Project scan failed** - Check console for errors
 
-### Empty Tree (PROJECT_EMPTY_NO_STRUCTURE)
+**Solution:**
 
-**Symptom**: Claude generates skeleton despite having files
+```bash
+# Ensure you use an implementation keyword
+/transform-query "implement user auth"  # ✅ Good
+/transform-query "add user auth"        # ✅ Good
+/transform-query "user auth"            # ❌ Won't trigger context-aware
+```
 
-**Causes**:
+---
+
+### Issue: Empty Project Structure Detected
+
+**Symptom**: Output shows `recommended_structure` instead of `target_files`
+
+**Causes:**
+
 1. All files filtered (hidden, node_modules, etc.)
 2. Permission errors preventing directory access
-3. Directory depth exceeds limit (10 levels)
+3. Directory depth exceeds 10 levels
 
-**Solution**: Check for hidden files, ensure read permissions, reduce project depth
+**Solution:**
 
-### Wrong Stack Detected
+- Check for hidden files (files starting with `.`)
+- Ensure read permissions on project directory
+- Reduce project depth (move files closer to root)
 
-**Symptom**: Claude uses incorrect template
+---
 
-**Causes**:
+### Issue: Wrong Stack Detected
+
+**Symptom**: Output has incorrect `stack` parameter
+
+**Causes:**
+
 1. Ambiguous indicators (both package.json and requirements.txt)
 2. Generic directory names
-3. Keyword confusion
+3. Keyword confusion in query
 
-**Solution**: Be explicit in your prompt: "using FastAPI" or "in this Next.js project"
+**Solution:**
 
-### Partial Tree / Truncation
+Be explicit in your query:
 
-**Symptom**: Tree shows "[TRUNCATED]" message
+```bash
+# ❌ Ambiguous
+/transform-query "create API endpoints"
 
-**Causes**:
-1. More than 1000 files
-2. Output exceeds 50KB
+# ✅ Explicit
+/transform-query "create FastAPI endpoints"
+/transform-query "create Express endpoints"
+```
 
-**Solution**: This is expected for large projects. The partial tree still provides useful context.
+---
 
-### Timeout
+### Issue: Missing Files in Output
 
-**Symptom**: No tree appears, graceful fallback to normal mode
+**Symptom**: Expected files not included in `target_files`
 
-**Causes**:
-1. Very large directory (>10,000 files)
-2. Slow file system
-3. Network-mounted directories
+**Causes:**
 
-**Solution**: Increase timeout in `get_context_tree.py` or use manual command
+1. File limit reached (1000 files max)
+2. Files filtered by .gitignore patterns
+3. Files at depth > 10
+
+**Solution:**
+
+- Check if files are in excluded directories
+- Verify `.gitignore` patterns
+- Reduce project complexity
+
+---
 
 ## Configuration
 
@@ -323,7 +448,7 @@ MAX_OUTPUT_BYTES = 50 * 1024  # 50KB output limit
 
 ### Custom Exclusions
 
-Add patterns to `DEFAULT_EXCLUDE_DIRS` or `DEFAULT_EXCLUDE_PATTERNS`:
+Add patterns to `DEFAULT_EXCLUDE_DIRS`:
 
 ```python
 DEFAULT_EXCLUDE_DIRS = {
@@ -334,7 +459,7 @@ DEFAULT_EXCLUDE_DIRS = {
 
 ### Disabling Context-Aware Mode
 
-Remove or comment out the hook entry in `hooks/hooks.json`:
+Remove the hook entry in `hooks/hooks.json`:
 
 ```json
 {
@@ -342,8 +467,7 @@ Remove or comment out the hook entry in `hooks/hooks.json`:
     "UserPromptSubmit": [
       {
         "hooks": [
-          // ... other hooks ...
-          // Comment out or remove this block:
+          // Remove or comment out this block:
           // {
           //   "type": "command",
           //   "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/context-aware-tree-injection.sh",
@@ -356,49 +480,77 @@ Remove or comment out the hook entry in `hooks/hooks.json`:
 }
 ```
 
+---
+
 ## Best Practices
 
-### 1. Use Clear Keywords
-Instead of: "I need authentication"
-Use: "implement user authentication"
+### 1. Use Clear Implementation Keywords
 
-### 2. Be Specific About Stack
-If ambiguous: "create a FastAPI REST API" not just "create an API"
+```bash
+# ✅ Good - triggers context-aware
+/transform-query "implement user authentication"
+/transform-query "create dashboard components"
+/transform-query "add payment processing"
 
-### 3. Reference Existing Patterns
-"Add orders like the existing products module"
+# ❌ Won't trigger context-aware
+/transform-query "user authentication"
+/transform-query "dashboard components"
+```
 
-### 4. Review Suggested Paths
-Always verify Claude's file paths match your intentions
+### 2. Be Specific About Stack (If Ambiguous)
 
-### 5. Iterate If Needed
-If the first suggestion doesn't fit, clarify: "actually, place it in lib/ not utils/"
+```bash
+# ✅ Explicit stack
+/transform-query "create FastAPI REST API"
+/transform-query "add Next.js authentication"
 
-## Integration with Other Features
+# ⚠️  May guess wrong stack
+/transform-query "create API"
+/transform-query "add authentication"
+```
 
-Context-Aware Mode works alongside:
-- **/transform-query** - Convert requests to pseudo-code before analysis
-- **/compress-context** - Compress verbose requirements before implementation
-- **/validate-requirements** - Validate pseudo-code completeness
+### 3. Review Output Paths
 
-**Workflow Example**:
-1. `/transform-query create user authentication` → Get pseudo-code
-2. `implement [pseudo-code]` → Triggers context-aware mode
-3. Claude provides architecture-aligned implementation
+Always verify the suggested file paths match your intentions:
+
+```javascript
+target_files=[
+  "src/lib/auth.ts",  // ← Check: Does this location make sense?
+  "src/app/api/..."   // ← Check: Follows your conventions?
+]
+```
+
+### 4. Use for Both New and Existing Projects
+
+- **Existing**: Get specific paths that match your architecture
+- **Empty**: Get recommended structure for your stack
+
+---
 
 ## Technical Details
 
-For technical implementation details, see [TREE-INJECTION-GUIDE.md](TREE-INJECTION-GUIDE.md).
+For implementation details, architecture, and cross-platform considerations, see:
 
-## Feedback and Issues
+- [Tree Injection Technical Guide](TREE-INJECTION-GUIDE.md) - Complete technical implementation
+- [Plugin Architecture](ARCHITECTURE.md) - Overall plugin design
+- [Troubleshooting](TROUBLESHOOTING.md) - Common issues and solutions
 
-If you encounter issues or have suggestions:
-1. Check [Troubleshooting](#troubleshooting) section
-2. Review logs in `hooks/context_tree.log` (if logging enabled)
-3. Report issues with example prompts and project structure
+---
 
-## Related Documentation
+## Summary
 
-- [Tree Injection Technical Guide](TREE-INJECTION-GUIDE.md) - Implementation details
-- [QUICK_START.md](QUICK_START.md) - Getting started with the plugin
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Plugin architecture overview
+**Context-Aware `/transform-query`** automatically includes actual file paths from your project in pseudo-code output:
+
+✅ **Detects** your stack (Next.js, Express, FastAPI, Go)
+
+✅ **Analyzes** your architecture (MVC, app directory, feature-based)
+
+✅ **Outputs** pseudo-code with **your actual file paths**
+
+✅ **References** your existing files as patterns
+
+✅ **Works** with both existing and empty projects
+
+**Triggers automatically** when you use: `implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`
+
+**No manual configuration needed** - just use implementation keywords in your queries!

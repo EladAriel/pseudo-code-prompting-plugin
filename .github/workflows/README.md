@@ -81,16 +81,93 @@ If you prefer not to grant PR creation permission:
     # ... rest of config
 ```
 
-### 3. Branch Protection (Optional but Recommended)
+### 3. Branch Protection (Highly Recommended)
 
-Configure branch protection rules for `main` branch:
+Protect your `main` branch from accidental force pushes, deletions, and require CI checks before merging.
 
-1. Go to Settings → Branches → Add rule
-2. Branch name pattern: `main`
-3. Enable:
-   - ✅ Require status checks to pass before merging
-   - Select checks: `CI Summary`, `Validation Summary`
-   - ✅ Require branches to be up to date before merging
+#### Step-by-Step Setup
+
+1. **Go to Repository Settings**
+   - Navigate to your repository on GitHub
+   - Click **Settings** (requires admin permissions)
+
+2. **Access Branch Protection Rules**
+   - In the left sidebar, click **Branches**
+   - Under "Branch protection rules", click **Add rule**
+
+3. **Configure Branch Name Pattern**
+   - Branch name pattern: `main` (or `master` if that's your default branch)
+
+4. **Enable Protection Rules**
+
+   **Required Status Checks** (Recommended):
+   - ✅ **Require status checks to pass before merging**
+   - ✅ **Require branches to be up to date before merging**
+   - Select these status checks:
+     - `CI Summary` (from ci.yml)
+     - `Validation Summary` (from plugin-validation.yml)
+     - `PR Check Summary` (from version-check.yml, for PRs only)
+
+   **Protect Against Force Push** (Highly Recommended):
+   - ✅ **Do not allow bypassing the above settings**
+   - ✅ **Do not allow force pushes**
+   - ✅ **Do not allow deletions**
+
+   **Additional Options** (Optional but useful):
+   - ✅ **Require a pull request before merging**
+     - Require approvals: `1` (for team projects)
+     - ✅ Dismiss stale pull request approvals when new commits are pushed
+   - ✅ **Require conversation resolution before merging**
+   - ✅ **Require linear history** (prevents merge commits, forces rebase/squash)
+
+5. **Save Changes**
+   - Scroll down and click **Create** or **Save changes**
+
+#### What This Protects Against
+
+| Protection | What It Prevents | Why It Matters |
+|-----------|------------------|----------------|
+| **Require status checks** | Merging code that fails tests | Catches bugs before they reach main |
+| **No force pushes** | Rewriting history on main | Prevents breaking others' local repos |
+| **No deletions** | Accidentally deleting main | Protects against catastrophic mistakes |
+| **Require PR** | Direct pushes to main | Enables code review process |
+| **Conversation resolution** | Unresolved review comments | Ensures all feedback is addressed |
+
+#### Viewing Protection Status
+
+After setup, you'll see:
+- A shield icon next to the `main` branch
+- "Protected" label in branch list
+- Warning messages when trying to force push
+
+#### Testing Protection Rules
+
+Try these to verify protection is working:
+
+```bash
+# This should be blocked (force push)
+git push --force origin main
+# Expected: ! [remote rejected] main -> main (protected branch hook declined)
+
+# This should be blocked (delete branch)
+git push origin :main
+# Expected: ! [remote rejected] main (deletion of the current branch prohibited)
+
+# This should require PR + passing checks
+git push origin feature-branch
+# Create PR → CI runs → Can only merge after CI passes
+```
+
+#### Bypassing Protection (Admins Only)
+
+If you're an admin and need to bypass protection:
+
+1. Go to Settings → Branches → Edit rule
+2. Enable "Allow force pushes" for administrators
+3. Make your change
+4. **Immediately re-enable protection**
+
+**Warning**: Only do this in emergencies. It defeats the purpose of branch protection.
 
 ## Workflow Triggers
 

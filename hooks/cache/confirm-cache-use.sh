@@ -151,7 +151,7 @@ EOF
             ;;
         *)
             # Invalid input - ask again (max 2 more times)
-            for attempt in 1 2; do
+            for _attempt in 1 2; do
                 echo -n "Invalid option. Please enter Y/N/V/C: " >&2
                 if read -t 10 -r RETRY_RESPONSE; then
                     RETRY_RESPONSE=$(echo "$RETRY_RESPONSE" | tr '[:upper:]' '[:lower:]' | xargs)

@@ -145,6 +145,10 @@ jobs:
                 if [[ "$link" =~ ^https?:// ]]; then
                   continue
                 fi
+                # Skip anchor links (internal page links starting with #)
+                if [[ "$link" =~ ^# ]]; then
+                  continue
+                fi
                 # Check if file exists (relative to file location)
                 dir=$(dirname "$file")
                 if [ ! -f "$dir/$link" ] && [ ! -f "$link" ]; then

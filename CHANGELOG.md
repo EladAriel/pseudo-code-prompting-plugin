@@ -52,10 +52,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **default**: Generic structure for unknown stacks
 
 - **GitHub Actions CI/CD workflows**
-  - `ci.yml` - Comprehensive CI with JSON, bash, Python, and markdown validation
+  - `ci.yml` - Comprehensive CI with JSON, bash, Python, and markdown validation (with anchor link support)
   - `plugin-validation.yml` - Plugin-specific validation (manifest, hooks, commands, documentation)
-  - `release.yml` - Automated versioning and release with release-please
+  - `release.yml` - Automated versioning and release with release-please (requires PR creation permission)
   - `version-check.yml` - PR validation for version bumps and CHANGELOG updates
+  - `.github/workflows/README.md` - Complete setup instructions and troubleshooting guide
 
 ### Changed
 

@@ -15,6 +15,12 @@
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/context-compression-helper.sh",
             "statusMessage": "Analyzing context compression opportunities...",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/context-aware-tree-injection.sh",
+            "statusMessage": "Analyzing project structure for context-aware suggestions...",
+            "timeout": 15
           }
         ]
       }

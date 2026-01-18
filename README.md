@@ -84,13 +84,50 @@ Skills are automatically invoked by Claude when relevant keywords/patterns are d
 | **context-compressor** | "compress", "reduce", "simplify" | Compress verbose requirements |
 | **feature-dev-enhancement** | "feature-dev", "workflow" | Integrate with feature-dev |
 
-### ⚡ 3 Automated Hooks
+### ⚡ 4 Automated Hooks
 
 | Hook | Trigger | Purpose |
 |------|---------|---------|
 | **user-prompt-submit** | User input | Detect /feature-dev commands, inject transformation |
 | **post-transform-validation** | After transformation | Auto-validate output |
 | **context-compression-helper** | Verbose input (>100 words) | Suggest compression |
+| **context-aware-tree-injection** | Implementation keywords | Analyze project structure for architecture-aware suggestions |
+
+### 🌳 Context-Aware Mode (NEW in v1.3.0)
+
+Automatically analyzes your project structure and provides architecture-aligned implementation suggestions.
+
+**How it works**:
+1. Detects implementation keywords (`implement`, `create`, `add`, `refactor`, `build`)
+2. Scans your project directory structure
+3. Generates ASCII tree representation
+4. Provides specific file paths and architecture-aligned suggestions
+
+**Two Modes**:
+- **Rule A (Map Mode)**: Existing project → Suggests changes that match your current architecture
+- **Rule B (Skeleton Mode)**: Empty project → Generates complete recommended structure
+
+**Supported Stacks**: Next.js, Express, FastAPI, Go, Generic
+
+**Example**:
+```bash
+# In Next.js project with existing structure
+Your prompt: "implement user authentication"
+
+Claude's response:
+[CONTEXT-AWARE ANALYSIS]
+Detected Stack: Next.js 13+ (React)
+
+Implementation Plan:
+1. Create src/lib/auth.ts (follows existing lib/ pattern)
+2. Create src/app/api/auth/route.ts (Next.js 13 API route)
+3. Add auth context in src/app/providers/AuthProvider.tsx
+...
+```
+
+**Commands**: `/context-aware-transform [request]`
+
+**Learn more**: [Context-Aware Mode Guide](docs/CONTEXT-AWARE-MODE.md) | [Technical Guide](docs/TREE-INJECTION-GUIDE.md)
 
 ## Installation
 

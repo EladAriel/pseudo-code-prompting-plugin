@@ -5,6 +5,80 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-01-18
+
+### Added
+
+#### Context-Aware Tree Injection Module
+
+- **Python tree generator** (`hooks/get_context_tree.py`) - Intelligent project structure scanning
+  - Recursive directory scanning with configurable depth (default: 10 levels) and file limits (default: 1000 files)
+  - Smart filtering with .gitignore support and default exclusions (node_modules, .git, dist, build, __pycache__, venv, etc.)
+  - Cross-platform timeout handling (Windows: threading.Timer, Unix: signal.alarm)
+  - Graceful error handling for permissions, symlinks, encoding issues
+  - Output truncation at 50KB with informative statistics
+  - Empty project detection with `<<PROJECT_EMPTY_NO_STRUCTURE>>` flag
+  - ASCII tree formatting with file and directory counts
+
+- **Bash hook orchestrator** (`hooks/context-aware-tree-injection.sh`) - Automatic context injection
+  - Keyword detection for implementation tasks: implement, create, add, refactor, build, generate, setup, initialize
+  - Python executable detection (python3 → python → graceful skip)
+  - 15-second timeout with graceful degradation on failure
+  - Context injection with formatted project structure
+  - Integration with Claude Code hook system via hooks.json
+
+- **Context-aware transform command** (`/context-aware-transform`)
+  - **Rule A (Map Mode)**: Analyzes existing project structure and suggests architecture-aligned changes
+    - Stack detection from file indicators (package.json, requirements.txt, go.mod, etc.)
+    - Architecture pattern identification (MVC, feature-based, layered)
+    - Specific file path recommendations based on existing conventions
+    - Integration point identification
+  - **Rule B (Skeleton Mode)**: Generates virtual project structure for empty projects
+    - Technology stack inference from keywords
+    - Five predefined templates: Next.js/React, Node/Express, Python/FastAPI, Go, Generic
+    - Complete directory structure with purpose annotations
+    - Stack-specific initialization steps
+
+- **Comprehensive documentation**
+  - `docs/CONTEXT-AWARE-MODE.md` - User-facing guide with examples and troubleshooting
+  - `docs/TREE-INJECTION-GUIDE.md` - Technical implementation details and architecture
+  - Updated README.md with Context-Aware Mode section
+
+- **Multi-stack template system**
+  - **nextjs_react**: Next.js 13+ with app directory, components, lib, hooks
+  - **node_express**: Express with controllers, routes, models, middleware
+  - **python_fastapi**: FastAPI with api/endpoints, core, models, schemas
+  - **golang**: Go standard layout with cmd, internal, pkg
+  - **default**: Generic structure for unknown stacks
+
+- **GitHub Actions CI/CD workflows**
+  - `ci.yml` - Comprehensive CI with JSON, bash, Python, and markdown validation
+  - `plugin-validation.yml` - Plugin-specific validation (manifest, hooks, commands, documentation)
+  - `release.yml` - Automated versioning and release with release-please
+  - `version-check.yml` - PR validation for version bumps and CHANGELOG updates
+
+### Changed
+
+- **Enhanced `/transform-query` command** - Now integrates with context-aware tree injection
+  - Automatically includes actual file paths from PROJECT_TREE when available
+  - Applies Rule A (map to existing) or Rule B (generate skeleton) based on project state
+  - Three modes: Context-Aware (with paths), Empty Project (with recommendations), Standard (generic)
+  - Output includes `target_files`, `create_files`, `modifications`, `stack`, `architecture_pattern` parameters
+- Updated plugin version from 1.2.0 to 1.3.0
+- Updated hook count from 3 to 4 in documentation
+- Updated command count from 4 to 5 in documentation
+- Enhanced plugin description to mention context-aware capabilities
+- Updated README.md with new Context-Aware Mode feature section
+- Renamed documentation files to uppercase convention (CONTEXT-AWARE-MODE.md, TREE-INJECTION-GUIDE.md)
+
+### Technical Details
+
+- **Performance**: Tree generation completes in <2s for most projects, with hard timeout at 15s
+- **Limits**: max_depth=10, max_files=1000, max_output=50KB (all configurable)
+- **Dependencies**: Python 3.6+ stdlib only (no external dependencies)
+- **Cross-platform**: Tested on Windows and Unix-like systems
+- **Error handling**: Graceful degradation on all failures (Python missing, timeout, permissions, etc.)
+
 ## [1.2.0] - 2026-01-14
 
 ### Changed

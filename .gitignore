@@ -40,6 +40,18 @@ node_modules/
 dist/
 build/
 
+# Python
+*.pyc
+*.pyo
+__pycache__/
+.venv/
+*.egg-info/
+
+# GitHub Actions artifacts
+release_notes.md
+*.md.tmp
+.github/workflows/*.log
+
 # Example projects - committed but ignored by Claude Code plugin loader
 # Claude Code only loads: skills/, agents/, commands/, hooks/, plugin.json
 # examples/ folder is safe for demo projects

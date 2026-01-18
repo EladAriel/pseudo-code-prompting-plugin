@@ -1,16 +1,16 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pseudo-code-prompting",
-  "version": "1.1.0",
-  "description": "Transform natural language into structured, validated pseudo-code - 6 skills, 5 agents, 4 commands, 3 hooks",
+  "version": "1.3.0",
+  "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis - 6 skills, 5 agents, 5 commands, 4 hooks",
   "owner": {
     "name": "Elad Ariel"
   },
   "plugins": [
     {
       "name": "pseudo-code-prompting",
-      "description": "Transform natural language requirements into structured, validated pseudo-code with 6 skills, 5 agents, 4 commands, and 3 hooks for optimal implementation clarity.",
-      "version": "1.1.0",
+      "description": "Transform natural language requirements into structured, validated pseudo-code with context-aware architecture analysis. Includes 6 skills, 5 agents, 5 commands, and 4 hooks for optimal implementation clarity.",
+      "version": "1.3.0",
       "author": {
         "name": "Elad Ariel"
       },

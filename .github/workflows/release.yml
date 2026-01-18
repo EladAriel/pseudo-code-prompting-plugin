@@ -1,0 +1,264 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+    steps:
+      - name: Run Release Please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: simple
+          package-name: pseudo-code-prompting
+          changelog-types: '[
+            {"type":"feat","section":"Features","hidden":false},
+            {"type":"fix","section":"Bug Fixes","hidden":false},
+            {"type":"docs","section":"Documentation","hidden":false},
+            {"type":"refactor","section":"Code Refactoring","hidden":false},
+            {"type":"perf","section":"Performance Improvements","hidden":false},
+            {"type":"test","section":"Tests","hidden":false},
+            {"type":"chore","section":"Miscellaneous","hidden":true}
+          ]'
+
+  update-plugin-version:
+    name: Update Plugin Version Files
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Update plugin.json version
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          echo "Updating plugin.json to version $VERSION"
+
+          jq --arg version "$VERSION" '.version = $version' plugin.json > plugin.json.tmp
+          mv plugin.json.tmp plugin.json
+
+          echo "✅ Updated plugin.json to $VERSION"
+
+      - name: Update marketplace.json version
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          echo "Updating marketplace.json to version $VERSION"
+
+          jq --arg version "$VERSION" '.version = $version' .claude-plugin/marketplace.json > marketplace.json.tmp
+          mv marketplace.json.tmp .claude-plugin/marketplace.json
+
+          # Also update version in plugins array if it exists
+          jq --arg version "$VERSION" '
+            if .plugins then
+              .plugins[0].version = $version
+            else . end
+          ' .claude-plugin/marketplace.json > marketplace.json.tmp
+          mv marketplace.json.tmp .claude-plugin/marketplace.json
+
+          echo "✅ Updated marketplace.json to $VERSION"
+
+      - name: Commit version updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add plugin.json .claude-plugin/marketplace.json
+          git commit -m "chore: update plugin version files to ${{ needs.release-please.outputs.version }}"
+          git push
+
+          echo "✅ Version files committed and pushed"
+
+  validate-release:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    needs: [release-please, update-plugin-version]
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Validate release artifacts
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          echo "Validating release version: $VERSION"
+
+          # Verify version consistency
+          PLUGIN_VERSION=$(jq -r '.version' plugin.json)
+          MARKETPLACE_VERSION=$(jq -r '.version' .claude-plugin/marketplace.json)
+
+          if [ "$PLUGIN_VERSION" != "$VERSION" ]; then
+            echo "❌ plugin.json version mismatch: expected $VERSION, got $PLUGIN_VERSION"
+            exit 1
+          fi
+
+          if [ "$MARKETPLACE_VERSION" != "$VERSION" ]; then
+            echo "❌ marketplace.json version mismatch: expected $VERSION, got $MARKETPLACE_VERSION"
+            exit 1
+          fi
+
+          echo "✅ Version consistency validated"
+
+      - name: Run plugin validation
+        run: |
+          echo "Running validation checks..."
+
+          # JSON validation
+          jq empty plugin.json
+          jq empty .claude-plugin/marketplace.json
+          jq empty hooks/hooks.json
+
+          # Bash syntax
+          for file in hooks/*.sh; do
+            if [ -f "$file" ]; then
+              bash -n "$file"
+            fi
+          done
+
+          # Python syntax
+          for file in hooks/*.py; do
+            if [ -f "$file" ]; then
+              python -m py_compile "$file"
+            fi
+          done
+
+          echo "✅ All validation checks passed"
+
+      - name: Test plugin functionality
+        run: |
+          echo "Testing plugin functionality..."
+
+          # Test tree generation
+          python hooks/get_context_tree.py . --max-depth 3 --max-files 50
+
+          # Test hook execution
+          echo '{"prompt":"implement test","cwd":"'$(pwd)'"}' | bash hooks/context-aware-tree-injection.sh
+
+          echo "✅ Plugin functionality verified"
+
+  create-release-notes:
+    name: Create Enhanced Release Notes
+    runs-on: ubuntu-latest
+    needs: [release-please, validate-release]
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Extract release notes from CHANGELOG
+        id: changelog
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          echo "Extracting release notes for version $VERSION"
+
+          # Extract the section for this version from CHANGELOG.md
+          awk "/## \[$VERSION\]/,/## \[/{if (/## \[/ && !/$VERSION/) exit; print}" CHANGELOG.md > release_notes.md
+
+          echo "✅ Release notes extracted"
+
+      - name: Count plugin components
+        id: counts
+        run: |
+          SKILLS=$(find skills -name "*.md" -type f 2>/dev/null | wc -l || echo "0")
+          AGENTS=$(find agents -name "*.md" -type f | wc -l)
+          COMMANDS=$(find commands -name "*.md" -type f | wc -l)
+          HOOKS=$(jq '.hooks | to_entries | length' hooks/hooks.json)
+
+          echo "skills=$SKILLS" >> $GITHUB_OUTPUT
+          echo "agents=$AGENTS" >> $GITHUB_OUTPUT
+          echo "commands=$COMMANDS" >> $GITHUB_OUTPUT
+          echo "hooks=$HOOKS" >> $GITHUB_OUTPUT
+
+      - name: Update release with enhanced notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.release-please.outputs.version }}"
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+
+          # Add component counts to release notes
+          cat >> release_notes.md << EOF
+
+          ---
+
+          ## Plugin Statistics
+
+          - **Skills**: ${{ steps.counts.outputs.skills }}
+          - **Agents**: ${{ steps.counts.outputs.agents }}
+          - **Commands**: ${{ steps.counts.outputs.commands }}
+          - **Hooks**: ${{ steps.counts.outputs.hooks }}
+
+          ## Installation
+
+          \`\`\`bash
+          # Clone or download this repository
+          git clone https://github.com/EladAriel/pseudo-code-prompting-plugin.git
+
+          # The plugin will be auto-discovered by Claude Code
+          \`\`\`
+
+          ## Quick Start
+
+          \`\`\`bash
+          # Transform natural language to pseudo-code
+          /transform-query "implement user authentication"
+
+          # Context-aware transformation
+          /context-aware-transform "add API endpoints"
+
+          # Compress verbose requirements
+          /compress-context [verbose-requirements]
+
+          # Validate pseudo-code
+          /validate-requirements [pseudo-code]
+
+          # Optimize pseudo-code
+          /optimize-prompt [pseudo-code]
+          \`\`\`
+
+          ## Documentation
+
+          - [Quick Start Guide](docs/QUICK_START.md)
+          - [Context-Aware Mode](docs/CONTEXT-AWARE-MODE.md)
+          - [Architecture](docs/ARCHITECTURE.md)
+          - [Full Documentation](README.md)
+          EOF
+
+          # Update the release
+          gh release edit "$TAG" --notes-file release_notes.md
+
+          echo "✅ Release notes updated"
+
+  notify-completion:
+    name: Notify Release Completion
+    runs-on: ubuntu-latest
+    needs: [release-please, create-release-notes]
+    if: needs.release-please.outputs.release_created == 'true'
+    steps:
+      - name: Summary
+        run: |
+          echo "✅ Release ${{ needs.release-please.outputs.version }} completed successfully!"
+          echo "📦 Tag: ${{ needs.release-please.outputs.tag_name }}"
+          echo "🔗 Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release-please.outputs.tag_name }}"

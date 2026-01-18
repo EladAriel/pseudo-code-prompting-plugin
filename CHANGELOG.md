@@ -5,6 +5,19 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 (2026-01-18)
+
+
+### Features
+
+* Add context aware tree injection and GitHub Actions CI/CD workflows ([df9274b](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/df9274b2c10ac3cc0f73b91f7b59239512cedb27))
+
+
+### Bug Fixes
+
+* **ci:** skip anchor links in markdown validation and add workflow setup guide ([de46bfc](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/de46bfc3a054f3e2fc7f8676230a0a951f6467b1))
+* **ci:** skip directory links in markdown validation and add branch protection guide ([c0b7eef](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/c0b7eef6bb7884f615eb6f682b2f96733927762f))
+
 ## [1.3.0] - 2026-01-18
 
 ### Added

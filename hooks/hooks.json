@@ -6,19 +6,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.sh",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh",
             "statusMessage": "Checking for pseudo-code transformation commands...",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/context-compression-helper.sh",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.sh",
             "statusMessage": "Analyzing context compression opportunities...",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/context-aware-tree-injection.sh",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.sh",
             "statusMessage": "Analyzing project structure for context-aware suggestions...",
             "timeout": 15
           }
@@ -31,7 +31,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/post-transform-validation.sh",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/validation/post-transform-validation.sh",
             "statusMessage": "Validating transformed output...",
             "timeout": 10
           }

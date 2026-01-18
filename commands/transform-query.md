@@ -11,6 +11,32 @@ Transform the provided natural language query into concise, function-like pseudo
 
 User query: `$ARGUMENTS`
 
+### Step 0: Semantic Cache Lookup
+
+**BEFORE generating transformation, check the semantic cache**:
+
+1. **Call semantic router**: Run `hooks/cache/find_tag.sh "$ARGUMENTS"`
+2. **Evaluate result**:
+   - If result is NOT "None" → **CACHE HIT**:
+     - Load pattern from `.claude/prompt_cache/patterns/{tag_id}.md`
+     - Display: `📦 Loaded cached pattern: {tag_id}`
+     - **SKIP Steps 1-2 below** (do not generate transformation)
+     - Return the cached pattern content directly
+   - If result is "None" → **CACHE MISS**:
+     - Log cache miss
+     - Proceed with Steps 1-2 below (generate transformation)
+     - Display tip: `💡 Tip: Use 'hooks/cache/cache-success.sh' to save this transformation for reuse`
+
+**Cache hit workflow**:
+```
+Query → Semantic Router → Match found → Load from disk → Return cached pattern → Done
+```
+
+**Cache miss workflow**:
+```
+Query → Semantic Router → No match → Generate new transformation → Return result → (User can optionally cache)
+```
+
 ### Step 1: Check for Context-Aware Mode
 
 If `[CONTEXT-AWARE MODE ACTIVATED]` and `PROJECT_TREE` are present in the conversation context:

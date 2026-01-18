@@ -82,15 +82,13 @@ jobs:
       - name: Verify hook scripts are executable
         run: |
           echo "Checking hook script permissions..."
-          for file in hooks/*.sh; do
-            if [ -f "$file" ]; then
-              # Check if file has execute permission or can be executed with bash
-              if bash -n "$file" 2>/dev/null; then
-                echo "✅ $file can be executed"
-              else
-                echo "❌ $file has syntax errors"
-                exit 1
-              fi
+          find hooks -name "*.sh" -type f | while read -r file; do
+            # Check if file has execute permission or can be executed with bash
+            if bash -n "$file" 2>/dev/null; then
+              echo "✅ $file can be executed"
+            else
+              echo "❌ $file has syntax errors"
+              exit 1
             fi
           done
 
@@ -246,12 +244,12 @@ jobs:
 
           # Test 1: Tree generation
           echo "Test 1: Tree generation"
-          python hooks/get_context_tree.py . --max-depth 2 --max-files 50
+          python hooks/tree/get_context_tree.py . --max-depth 2 --max-files 50
           echo "✅ Tree generation works"
 
           # Test 2: Hook with keyword trigger
           echo "Test 2: Hook trigger test"
-          echo '{"prompt":"implement feature","cwd":"'$(pwd)'"}' | bash hooks/context-aware-tree-injection.sh > /tmp/hook-output.txt
+          echo '{"prompt":"implement feature","cwd":"'$(pwd)'"}' | bash hooks/tree/context-aware-tree-injection.sh > /tmp/hook-output.txt
           if grep -q "CONTEXT-AWARE MODE" /tmp/hook-output.txt; then
             echo "✅ Hook triggered and injected context"
           else
@@ -260,7 +258,7 @@ jobs:
 
           # Test 3: Hook with non-keyword (should pass through)
           echo "Test 3: Hook pass-through test"
-          echo '{"prompt":"hello world","cwd":"'$(pwd)'"}' | bash hooks/context-aware-tree-injection.sh > /tmp/passthrough.txt
+          echo '{"prompt":"hello world","cwd":"'$(pwd)'"}' | bash hooks/tree/context-aware-tree-injection.sh > /tmp/passthrough.txt
           if [ ! -s /tmp/passthrough.txt ]; then
             echo "✅ Hook correctly passed through non-keyword prompt"
           else

@@ -46,7 +46,24 @@ if [[ "$PROMPT" =~ (implement|create|add|refactor|build|generate|setup|initializ
     SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
     PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
   fi
-  PYTHON_SCRIPT="${PLUGIN_ROOT}/hooks/get_context_tree.py"
+
+  # ═══════════════════════════════════════════════════════════
+  # CACHE CHECK - Skip expensive tree generation if cache hit
+  # ═══════════════════════════════════════════════════════════
+  CACHE_ROUTER="${PLUGIN_ROOT}/hooks/cache/find_tag.sh"
+  if [[ -x "$CACHE_ROUTER" ]] && command -v python3 &> /dev/null; then
+    # Try semantic cache lookup first (fast path)
+    CACHE_RESULT=$(bash "$CACHE_ROUTER" "$PROMPT" 2>/dev/null || echo "None")
+
+    if [[ "$CACHE_RESULT" != "None" ]] && [[ -n "$CACHE_RESULT" ]] && [[ ! "$CACHE_RESULT" =~ ERROR ]]; then
+      # Cache hit - no need for tree generation
+      # The transform-query command will handle loading the cached pattern
+      exit 0
+    fi
+  fi
+  # Cache miss or cache unavailable - proceed with tree generation
+
+  PYTHON_SCRIPT="${PLUGIN_ROOT}/hooks/tree/get_context_tree.py"
 
   # Check if Python script exists
   if [[ ! -f "$PYTHON_SCRIPT" ]]; then

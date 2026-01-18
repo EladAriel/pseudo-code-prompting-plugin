@@ -1,0 +1,60 @@
+{
+  "skill_id": "complete-process-orchestrator",
+  "skill_name": "Complete Process Orchestrator",
+  "version": "1.0.0",
+  "type": "orchestration",
+  "category": "workflow_automation",
+  "description": "Orchestrate end-to-end pseudo-code transformation workflows with automated validation and optimization",
+  "depends_on": [
+    "prompt-structurer:1.0.0",
+    "requirement-validator:1.0.0",
+    "prompt-optimizer:1.0.0"
+  ],
+  "provides": [
+    "end_to_end_transformation",
+    "automated_validation",
+    "workflow_orchestration",
+    "pipeline_automation"
+  ],
+  "user_invocable": true,
+  "commands": [
+    "complete-process"
+  ],
+  "aliases": [
+    "/complete",
+    "/full-transform",
+    "/orchestrate"
+  ],
+  "requires_user_input": true,
+  "supports_background_execution": false,
+  "execution_modes": [
+    {
+      "mode": "quick",
+      "description": "Transform only - fast execution (5-15s)",
+      "steps": ["transform"],
+      "estimated_duration": "5-15s"
+    },
+    {
+      "mode": "complete",
+      "description": "Full pipeline - transform, validate, optimize (30-90s)",
+      "steps": ["transform", "validate", "optimize"],
+      "estimated_duration": "30-90s",
+      "recommended": true
+    }
+  ],
+  "features": [
+    "input_validation",
+    "progress_tracking",
+    "error_recovery",
+    "rollback_support",
+    "preference_persistence",
+    "timeout_protection",
+    "state_management",
+    "checkpoint_recovery"
+  ],
+  "metadata": {
+    "author": "Elad Ariel",
+    "created": "2026-01-18",
+    "plugin_version": "1.6.0"
+  }
+}

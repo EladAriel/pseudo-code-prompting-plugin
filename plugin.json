@@ -1,7 +1,7 @@
 {
   "name": "pseudo-code-prompting",
-  "version": "1.5.0",
-  "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis - 6 skills, 5 agents, 5 commands, and 4 hooks for optimal implementation clarity",
+  "version": "1.6.0",
+  "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis and orchestrated workflows - 7 skills, 5 agents, 6 commands, and 4 hooks for optimal implementation clarity",
   "author": {
     "name": "Elad Ariel",
     "url": "https://github.com/EladAriel/pseudo-code-prompting-plugin"
@@ -15,6 +15,8 @@
     "feature-development",
     "automation",
     "workflow-optimization",
+    "workflow-orchestration",
+    "pipeline-automation",
     "progressive-loading",
     "requirement-engineering",
     "validation",

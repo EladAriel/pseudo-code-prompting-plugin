@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pseudo-code-prompting",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis, semantic caching, Ralph Loop integration, and intelligent path injection - 8 skills, 5 agents, 7 commands, 4 hooks",
   "owner": {
     "name": "Elad Ariel"
@@ -10,7 +10,7 @@
     {
       "name": "pseudo-code-prompting",
       "description": "Transform natural language requirements into structured, validated pseudo-code with context-aware architecture analysis, semantic caching, and Ralph Loop integration for automated iterative development. Includes 8 skills, 5 agents, 7 commands, and 4 hooks for optimal implementation clarity. Integrates with the official ralph-loop plugin for end-to-end workflow automation.",
-      "version": "1.0.8",
+      "version": "1.0.9",
       "author": {
         "name": "Elad Ariel"
       },

@@ -25,5 +25,28 @@
     "complexity-estimation",
     "orchestration",
     "workflow"
+  ],
+  "triggers": {
+    "keywords": [
+      "use pseudo-code prompting with ralph",
+      "use pseudocode prompting with ralph",
+      "invoke ralph-process",
+      "run ralph-process",
+      "ralph loop integration",
+      "automated implementation"
+    ],
+    "patterns": [
+      "use.*pseudo.*code.*prompting.*with.*ralph",
+      "use.*pseudocode.*prompting.*ralph",
+      "invoke.*ralph.*process"
+    ],
+    "contexts": [
+      "user explicitly requested ralph loop integration",
+      "automated iterative implementation needed",
+      "complexity-based planning required"
+    ]
+  },
+  "auto_invoke_on": [
+    "explicit_plugin_request_with_ralph"
   ]
 }

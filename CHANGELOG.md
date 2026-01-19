@@ -5,6 +5,66 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-01-19
+
+### Added
+
+- **Enhanced Natural Language Plugin Invocation**: Added hook support for explicit plugin invocation via natural language
+  - Now recognizes "Use pseudo-code prompting plugin" patterns
+  - Automatically routes to appropriate skill (complete-process or ralph-process)
+  - Prevents manual implementation bypass when plugin is explicitly requested
+
+- **UserPromptSubmit Hook Enhancement**: Updated [hooks/core/user-prompt-submit.sh](hooks/core/user-prompt-submit.sh)
+  - New pattern matching for explicit plugin requests
+  - Injects `<plugin-invocation-detected>` context to enforce skill usage
+  - Catches variations: "Use pseudo-code prompting plugin", "Use pseudocode prompting with ralph", "Invoke pseudo-code plugin"
+  - Provides clear routing instructions based on Ralph Loop mention
+
+- **Skill Trigger Improvements**:
+  - Added `triggers` section to [ralph-process-integration/capabilities.json](skills/ralph-process-integration/capabilities.json)
+  - Added `triggers` section to [complete-process-orchestrator/capabilities.json](skills/complete-process-orchestrator/capabilities.json)
+  - Defined keywords, patterns, and contexts for better auto-invocation
+  - Added `auto_invoke_on` field to specify explicit invocation scenarios
+
+- **Documentation Enhancements**:
+  - Added Table of Contents to [README.md](README.md) for easier navigation
+  - Moved Installation and Quick Start sections after Overview for better flow
+  - Added "💡 Don't Like Commands? Just Talk to Claude!" section with natural language usage instructions
+  - Clear guidance: "Use pseudo-code prompting plugin" or "Use pseudo-code prompting plugin with Ralph"
+
+### Changed
+
+- **Hook Priority**: Explicit plugin invocation check now runs before transformation keyword detection
+- **User Experience**: Claude now reliably invokes skills when explicitly requested by name
+- **Metadata**: Updated `complete-process-orchestrator/capabilities.json` updated date to 2026-01-19
+
+### Fixed
+
+- **Critical Bug**: Fixed issue where Claude would bypass plugin skills when user explicitly requested plugin usage
+- **Pattern Matching**: Hook now correctly identifies natural language plugin invocation requests
+- **Skill Routing**: Ensures proper skill selection based on user intent (with/without Ralph)
+
+### Technical Details
+
+**New Hook Pattern:**
+```bash
+if [[ "$PROMPT" =~ [Uu]se.*(pseudo.*code.*prompting|pseudocode.*prompting).*(plugin|with.*ralph|with.*Ralph) ]] || \
+   [[ "$PROMPT" =~ [Ii]nvoke.*(pseudo|pseudocode).*(plugin|workflow) ]]; then
+```
+
+**Injected Context:**
+- `<plugin-invocation-detected>` tag with CRITICAL priority
+- Explicit Skill tool invocation instructions
+- DO NOT bypass rules to prevent manual implementation
+- Clear routing logic based on Ralph Loop mention
+
+**Pattern Coverage:**
+- "Use pseudo-code prompting plugin" → complete-process
+- "Use pseudo-code prompting plugin with Ralph" → ralph-process
+- "Use pseudocode prompting with ralph" → ralph-process
+- "Invoke pseudo-code plugin" → complete-process
+- "Invoke pseudocode workflow" → complete-process
+
 ## [1.0.8] - 2026-01-19
 
 ### Added

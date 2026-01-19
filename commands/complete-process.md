@@ -410,13 +410,6 @@ You have:
 
 ### With Hooks
 
-**Semantic Cache Integration:**
-The command automatically leverages semantic cache:
-```
-Query → Check Cache → Hit: Return cached result (< 1s)
-                    → Miss: Execute pipeline → Cache result
-```
-
 **Context-Aware Transformation:**
 The command automatically uses project context when available:
 ```
@@ -446,9 +439,9 @@ Query → Detect project → Inject structure → Transform with context
    - Use `/compress-context` first
    - Reduces processing time by 30-50%
 
-3. **Leverage Cache**
-   - Repeated queries return instantly
-   - Similar queries may hit semantic cache
+3. **Prefer Quick Mode for Simple Queries**
+   - Faster results for well-defined requirements
+   - Perfect for rapid prototyping
 
 4. **Be Specific**
    - Clear queries process faster

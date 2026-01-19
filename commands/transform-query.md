@@ -11,46 +11,6 @@ Transform the provided natural language query into concise, function-like pseudo
 
 User query: `$ARGUMENTS`
 
-### Step 0: Semantic Cache Lookup with Context-Aware Path Injection
-
-**BEFORE generating transformation, check the semantic cache**:
-
-1. **Call semantic router**: Run `hooks/cache/find_tag.sh "$ARGUMENTS"`
-   - The semantic router matches queries based on **intent**, NOT file paths or names
-   - Matching factors: action verbs, technology stack, domain concepts
-   - Excluded factors: specific file paths, line numbers, timestamps
-
-2. **Evaluate result**:
-   - If result is NOT "None" → **CACHE HIT**:
-     - The `find_tag.sh` script automatically calls `inject-context-paths.sh`
-     - **Context injection** adds current project structure header to cached pattern
-     - Display: `📦 CACHED PATTERN LOADED: {tag_id}` with current project context
-     - Pattern is adapted to your current project structure
-     - **SKIP Steps 1-2 below** (do not generate transformation)
-     - Return the context-injected cached pattern content directly
-   - If result is "None" → **CACHE MISS**:
-     - Log cache miss
-     - Proceed with Steps 1-2 below (generate transformation)
-     - Display tip: `💡 Tip: Use 'hooks/cache/cache-success.sh' to save this transformation for reuse`
-
-**Cache hit workflow with context awareness**:
-```
-Query → Semantic Router (intent-based) → Match found → Load cached pattern →
-Inject current project context → Return adapted pattern → Done
-```
-
-**Key Features**:
-
-- ✅ **Path-agnostic matching**: Cache matches are based on semantic intent, not file paths
-- ✅ **Context injection**: Cached patterns are adapted with your current project structure
-- ✅ **Cross-project reusability**: Same pattern works across different project structures
-- ✅ **Technology stack aware**: Detects your project's tech stack and adapts accordingly
-
-**Cache miss workflow**:
-```
-Query → Semantic Router → No match → Generate new transformation → Return result → (User can optionally cache)
-```
-
 ### Step 1: Check for Context-Aware Mode
 
 If `[CONTEXT-AWARE MODE ACTIVATED]` and `PROJECT_TREE` are present in the conversation context:

@@ -528,11 +528,6 @@ Resume later with /resume-pipeline? (saved to .claude/pipeline_state.json)
 - **feature-dev-enhancement**: Use orchestrator output with /feature-dev
 - **context-aware-transform**: Orchestrator leverages project context automatically
 
-### Semantic Cache Integration
-The orchestrator integrates with the semantic cache system:
-- Quick mode checks cache before transformation
-- Complete mode caches final optimized output
-- Cache hits skip entire pipeline (< 1 second)
 
 ## Best Practices
 

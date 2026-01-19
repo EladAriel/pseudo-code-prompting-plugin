@@ -47,42 +47,6 @@ if [[ "$PROMPT" =~ (implement|create|add|refactor|build|generate|setup|initializ
     PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
   fi
 
-  # ═══════════════════════════════════════════════════════════
-  # CACHE CHECK - Skip expensive tree generation if cache hit
-  # ═══════════════════════════════════════════════════════════
-  CACHE_ROUTER="${PLUGIN_ROOT}/hooks/cache/find_tag.sh"
-  CACHE_CONFIRM="${PLUGIN_ROOT}/hooks/cache/confirm-cache-use.sh"
-
-  if [[ -x "$CACHE_ROUTER" ]] && command -v python3 &> /dev/null; then
-    # Try semantic cache lookup first (fast path)
-    CACHE_RESULT=$(bash "$CACHE_ROUTER" "$PROMPT" 2>/dev/null || echo "None")
-
-    if [[ "$CACHE_RESULT" != "None" ]] && [[ -n "$CACHE_RESULT" ]] && [[ ! "$CACHE_RESULT" =~ ERROR ]]; then
-      # Cache hit found - ask user for confirmation
-      if [[ -x "$CACHE_CONFIRM" ]]; then
-        USER_CHOICE=$(bash "$CACHE_CONFIRM" "$CACHE_RESULT" "unknown" || echo "no")
-
-        case "$USER_CHOICE" in
-          yes)
-            # User confirmed - skip tree generation, let transform-query load cache
-            exit 0
-            ;;
-          cancel)
-            # User cancelled - abort operation
-            echo "[CACHE_CANCELLED] User cancelled cache operation" >&2
-            exit 1
-            ;;
-          *)
-            # User declined (no) - proceed with normal flow (tree generation)
-            ;;
-        esac
-      else
-        # Confirmation script not available - proceed with cache (backward compatibility)
-        exit 0
-      fi
-    fi
-  fi
-  # Cache miss, user declined, or cache unavailable - proceed with tree generation
 
   PYTHON_SCRIPT="${PLUGIN_ROOT}/hooks/tree/get_context_tree.py"
 

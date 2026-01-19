@@ -276,14 +276,9 @@ Query → [Check Semantic Cache] → Cache Hit → Return Cached
 
 **Implementation**:
 ```bash
-# Check cache
-result=$(hooks/cache/find_tag.sh "$query")
-if [ "$result" != "None" ]; then
-  return_cached_result "$result"
-else
-  execute_pipeline
-  cache_result_if_success
-fi
+# Execute pipeline
+execute_pipeline
+return_result
 ```
 
 ## Performance Patterns

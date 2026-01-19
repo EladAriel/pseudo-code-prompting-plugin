@@ -2,9 +2,10 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.6.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
+[![Last Updated](https://img.shields.io/badge/updated-2026--01--19-brightgreen.svg)](CHANGELOG.md)
 
 ## Overview
 
@@ -50,7 +51,7 @@ create_endpoint(
 
 ## Key Features
 
-### 🎯 7 Specialized Skills
+### 🎯 8 Specialized Skills
 
 | Skill | Purpose | Token Efficiency |
 |-------|---------|------------------|
@@ -61,6 +62,7 @@ create_endpoint(
 | **requirement-validator** | Validate completeness, security, edge cases | 500-800 tokens |
 | **feature-dev-enhancement** | Integrate with feature-dev workflow | 200-400 tokens |
 | **complete-process-orchestrator** | End-to-end workflow automation (transform → validate → optimize) | 1000-2000 tokens |
+| **ralph-process-integration** | Automated iterative implementation with Ralph Loop (complexity estimation + promise generation) | 60-120s setup + Ralph iterations |
 
 ### 🤖 5 Intelligent Agents
 
@@ -72,7 +74,7 @@ create_endpoint(
 | **prompt-optimizer** | Security, validation, completeness enhancement | Enhancement (Tier 3) |
 | **requirement-validator** | Gap identification, security audit, edge cases | Quality (Tier 3) |
 
-### 🎮 7 Skills (Auto-Invoked)
+### 🎮 8 Skills (Auto-Invoked)
 
 Skills are automatically invoked by Claude when relevant keywords/patterns are detected:
 
@@ -85,6 +87,7 @@ Skills are automatically invoked by Claude when relevant keywords/patterns are d
 | **context-compressor** | "compress", "reduce", "simplify" | Compress verbose requirements |
 | **feature-dev-enhancement** | "feature-dev", "workflow" | Integrate with feature-dev |
 | **complete-process-orchestrator** | "/complete-process", "/complete", "full workflow" | Orchestrate complete transformation pipeline |
+| **ralph-process-integration** | "/ralph-process" | Integrate pseudo-code processing with Ralph Loop for automated implementation |
 
 ### ⚡ 4 Automated Hooks
 
@@ -95,213 +98,41 @@ Skills are automatically invoked by Claude when relevant keywords/patterns are d
 | **context-compression-helper** | Verbose input (>100 words) | Suggest compression |
 | **context-aware-tree-injection** | Implementation keywords | Analyze project structure for architecture-aware suggestions |
 
-### 🌳 Context-Aware `/transform-query` (NEW in v1.3.0)
+### 🌳 Context-Aware `/transform-query`
 
-The `/transform-query` command now automatically includes **actual file paths** from your project when transforming natural language to pseudo-code.
+The `/transform-query` command automatically includes **actual file paths** from your project when transforming natural language to pseudo-code. When you use implementation keywords (`implement`, `create`, `add`, `refactor`, `build`), the hook automatically scans your project structure and outputs pseudo-code with actual paths from your codebase.
 
-**How it works**:
-
-1. You use implementation keywords: `implement`, `create`, `add`, `refactor`, `build`
-2. Hook automatically scans your project structure
-3. `/transform-query` outputs pseudo-code **with actual file paths** from your codebase
-
-**Without Context-Aware** (Generic):
-
-```javascript
-/transform-query "add user authentication"
-
-Output:
-implement_authentication(
-  type="jwt",
-  features=["login", "logout", "session"],
-  security=["bcrypt", "token"]
-)
-```
-
-**With Context-Aware** (Actual Paths):
+**Example**:
 
 ```javascript
 /transform-query "implement user authentication"
-
-Output:
-implement_authentication(
-  type="jwt",
-  target_files=[
-    "src/lib/auth.ts",              // ← Actual file from YOUR project
-    "src/app/api/auth/route.ts"     // ← Follows YOUR architecture
-  ],
-  modifications=["src/app/layout.tsx"],
-  create_files=["src/components/auth/LoginForm.tsx"],
-  stack="nextjs_react",             // ← Detected from YOUR package.json
-  architecture_pattern="app_directory"
-)
+// Outputs: actual file paths, detected stack, architecture pattern
 ```
-
-**Key Benefits**:
-
-- ✅ Outputs include **specific file paths** from your project
-- ✅ Follows **your existing architecture** patterns
-- ✅ Detects **your stack** automatically (Next.js, Express, FastAPI, Go)
-- ✅ Works with **empty projects** too (generates recommended structure)
 
 **Learn more**: [Context-Aware Transform-Query Guide](docs/CONTEXT-AWARE-MODE.md) | [Technical Details](docs/TREE-INJECTION-GUIDE.md)
 
 
-#### 4. 🚀 Complete Process Orchestrator Improvements (ALSO NEW in v1.6.1)
+## Complete Process Orchestration
 
-The `/complete-process` orchestrator has been significantly enhanced with three critical improvements for efficiency and accuracy:
+See [docs/COMPLETE-PROCESS-ORCHESTRATION.md](docs/COMPLETE-PROCESS-ORCHESTRATION.md) for comprehensive guide on the complete-process orchestrator, including:
 
-##### **Mandatory Skill Tool Invocation**
+- Automated pipeline (transform → validate → optimize)
+- Workflow modes (Quick vs Complete)
+- Context window optimization (60-80% token reduction)
+- Context-aware tree injection
+- Progress tracking and error recovery
+- Mode selection and preference persistence
 
-The orchestrator now **enforces** proper skill invocation patterns:
+## Ralph Loop Integration
 
-- ✅ Always uses Skill tool for sub-skill invocations (`prompt-structurer`, `requirement-validator`, `prompt-optimizer`)
-- ✅ Prevents direct handling of transformations for consistency
-- ✅ Ensures proper separation of concerns in the pipeline
-- ✅ Clear examples of correct vs incorrect patterns in documentation
+See [docs/RALPH-LOOP-INTEGRATION.md](docs/RALPH-LOOP-INTEGRATION.md) for comprehensive guide on automated iterative implementatio, including:
 
-##### **Context Window Optimization (60-80% Token Reduction)** 🎯
-
-**Massive efficiency improvement** - the orchestrator now intelligently removes intermediate outputs:
-
-**Before (v1.6.0)**:
-
-```text
-User Query (500 tokens)
-→ Transform Output (800 tokens) ← KEPT
-→ Validate Input (800 tokens) ← KEPT (duplicate)
-→ Validate Output (600 tokens) ← KEPT
-→ Optimize Input (600 tokens) ← KEPT (duplicate)
-→ Optimize Output (900 tokens) ← KEPT
-
-Total Context: 4,200 tokens
-```
-
-**After (v1.6.1)**:
-
-```text
-User Query (500 tokens) ← KEPT
-→ Transform Output → extracted, not kept
-→ Validate Input → not kept (duplicate)
-→ Validate Output → extracted, not kept
-→ Optimize Input → not kept (duplicate)
-→ Final Optimized Output (900 tokens) ← KEPT
-
-Total Context: 1,400 tokens (66% reduction!)
-```
-
-**Benefits**:
-
-- 60-80% reduction in context window usage
-- Enables longer conversations without hitting token limits
-- Reduces costs significantly
-- Improves performance
-
-**Implementation**: The orchestrator extracts only essential results and passes them to the next step WITHOUT including full tool outputs in subsequent messages.
-
-##### **Context-Aware Tree Injection Integration** 🌳
-
-The orchestrator now automatically leverages PROJECT_TREE context from the UserPromptSubmit hook:
-
-**How It Works**:
-
-1. User query contains implementation keywords: `implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`
-2. Hook automatically injects `[CONTEXT-AWARE MODE ACTIVATED]` with project structure
-3. Orchestrator checks for this marker and passes PROJECT_TREE context to transform skill
-4. Results in **project-specific, architecture-aware** transformations
-
-**Without Context-Aware**:
-
-```javascript
-implement_authentication(
-  type="jwt",
-  features=["login", "logout"]
-)
-```
-
-**With Context-Aware**:
-
-```javascript
-implement_authentication(
-  type="jwt",
-  target_files=["src/lib/auth.ts", "src/app/api/auth/route.ts"],
-  stack="nextjs_react",
-  architecture_pattern="app_directory"
-)
-```
-
-**Troubleshooting**: The orchestrator documentation now includes guidance for checking context injection and resolving issues.
-
-**Technical Details**:
-
-- **Updated SKILL**: [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md)
-- **Updated Capabilities**: [skills/complete-process-orchestrator/capabilities.json](skills/complete-process-orchestrator/capabilities.json)
-- **Skill Version**: Updated from 1.0.0 to 1.1.0
-- **New Features**: `context_window_optimization`, `context_aware_tree_injection`, `mandatory_skill_tool_invocation`
-
-### 🔄 Complete Process Orchestration (NEW in v1.6.0)
-
-Automate the entire transformation pipeline with a single command. Instead of manually running transform → validate → optimize, the Complete Process Orchestrator handles everything automatically with intelligent error recovery and progress tracking.
-
-**The Problem**: Running `/transform-query`, `/validate-requirements`, and `/optimize-prompt` separately is tedious and error-prone.
-
-**The Solution**: One command that orchestrates the entire workflow with two modes:
-
-**Quick Mode** (5-15s):
-
-- Transform only
-- Best for simple queries and rapid iteration
-- Perfect for prototyping
-
-**Complete Mode** (30-90s):
-
-- Transform → Validate → Optimize
-- Production-ready output with full validation
-- Includes error handling, security, and edge cases
-
-**Example**:
-
-```bash
-# Invoke the orchestrator
-/complete-process Implement JWT authentication with refresh tokens
-
-# Choose your workflow mode:
-○ Quick Transform Only (5-15s)
-● Complete Process (Recommended) (30-90s)
-
-# Complete mode shows progress:
-Step 1/3: 🔄 Transforming query to pseudo-code... ✓ (12s)
-Step 2/3: ✓ Validating requirements... ✓ (8s)
-Step 3/3: ⚡ Optimizing for implementation... ✓ (22s)
-
-✓ Pipeline complete! Review output below.
-```
-
-**Key Features**:
-
-- **Mode Selection**: Choose quick or complete based on your needs
-- **Progress Tracking**: Real-time visibility into pipeline execution
-- **Error Recovery**: Automatic rollback and checkpoint recovery
-- **Preference Persistence**: Remembers your mode choice for next time
-- **Timeout Protection**: Graceful handling with partial results
-- **State Management**: Preserves work on failures for easy retry
-
-**Benefits**:
-
-- ✅ **Streamlined Workflow**: One command instead of three
-- ✅ **Intelligent Automation**: Full validation and optimization automatically
-- ✅ **Error Resilience**: Recovers from failures gracefully
-- ✅ **Time Savings**: 50% faster than manual steps
-- ✅ **Quality Assurance**: Complete mode ensures production-ready output
-
-**Available Commands**:
-
-- `/complete-process` (primary)
-- `/complete` (alias)
-- `/full-transform` (alias)
-- `/orchestrate` (alias)
-
-**Learn more**: [Complete Process Documentation](skills/complete-process-orchestrator/SKILL.md)
+- End-to-end workflow with Ralph Loop
+- Automatic complexity estimation
+- Promise generation from validation requirements
+- Iteration planning (Simple: 20, Medium: 40, Complex: 80)
+- Usage examples and best practices
+- Troubleshooting and advanced usage
 
 ## Installation
 
@@ -485,9 +316,3 @@ Copyright (c) 2026 Pseudo-Code Prompting Contributors
 ## Acknowledgments
 
 - Built for [Claude Code](https://claude.com/code)
-
-## Version
-
-**Current Version:** 1.6.0
-**Last Updated:** 2026-01-18
-**Minimum Claude Code Version:** 2.1.0

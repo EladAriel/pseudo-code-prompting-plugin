@@ -58,7 +58,29 @@
   "metadata": {
     "author": "Elad Ariel",
     "created": "2026-01-18",
-    "updated": "2026-01-18",
+    "updated": "2026-01-19",
     "plugin_version": "1.6.1"
-  }
+  },
+  "triggers": {
+    "keywords": [
+      "use pseudo-code prompting plugin",
+      "use pseudocode prompting plugin",
+      "invoke complete-process",
+      "run complete-process",
+      "full transformation workflow"
+    ],
+    "patterns": [
+      "use.*pseudo.*code.*prompting.*plugin",
+      "use.*pseudocode.*prompting.*plugin",
+      "invoke.*complete.*process"
+    ],
+    "contexts": [
+      "user explicitly requested plugin usage",
+      "full transformation pipeline needed",
+      "optimization and validation required"
+    ]
+  },
+  "auto_invoke_on": [
+    "explicit_plugin_request"
+  ]
 }

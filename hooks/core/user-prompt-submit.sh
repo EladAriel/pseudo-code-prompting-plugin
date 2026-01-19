@@ -30,6 +30,32 @@ if [[ -z "$PROMPT" ]]; then
   exit 0
 fi
 
+# Check for explicit plugin invocation
+# Match patterns: "Use pseudo-code prompting plugin", "Use pseudocode prompting with ralph", etc.
+if [[ "$PROMPT" =~ [Uu]se.*(pseudo.*code.*prompting|pseudocode.*prompting).*(plugin|with.*ralph|with.*Ralph) ]] || \
+   [[ "$PROMPT" =~ [Ii]nvoke.*(pseudo|pseudocode).*(plugin|workflow) ]]; then
+
+  # User explicitly asked to use the plugin - inject reminder to invoke the skill
+  cat <<EOF
+
+<plugin-invocation-detected>
+CRITICAL: The user explicitly requested to use the pseudo-code prompting plugin.
+
+You MUST invoke the appropriate skill immediately using the Skill tool as your FIRST action:
+
+- If user mentioned "with Ralph" or "with ralph": Use skill="pseudo-code-prompting:ralph-process"
+- Otherwise: Use skill="pseudo-code-prompting:complete-process"
+
+DO NOT proceed with manual implementation. DO NOT use other tools first.
+IMMEDIATELY invoke the Skill tool, then ask the user what they want to implement.
+
+User's original request: "$PROMPT"
+</plugin-invocation-detected>
+EOF
+
+  exit 0
+fi
+
 # Detect transformation trigger keywords
 # Match patterns: "transform", "convert to pseudo", "structure", etc.
 if [[ "$PROMPT" =~ (transform|convert).*(pseudo|pseudo-code|pseudocode) ]] || \

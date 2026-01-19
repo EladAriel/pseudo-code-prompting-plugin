@@ -2,16 +2,103 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.9-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 [![Last Updated](https://img.shields.io/badge/updated-2026--01--19-brightgreen.svg)](CHANGELOG.md)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Quick Start Guide](#quick-start-guide)
+- [Why Pseudo-Code Prompting?](#why-pseudo-code-prompting)
+- [Key Features](#key-features)
+- [Complete Process Orchestration](#complete-process-orchestration)
+- [Ralph Loop Integration](#ralph-loop-integration)
+- [PROMPTCONVERTER Methodology](#promptconverter-methodology)
+- [Workflows](#workflows)
+- [Validation Coverage](#validation-coverage)
+- [Real-World Examples](#real-world-examples)
+- [Integration](#integration)
+- [Configuration](#configuration)
+- [Performance Metrics](#performance-metrics)
+- [Plugin Architecture](#plugin-architecture)
+- [Troubleshooting](#troubleshooting)
+- [Q&A](#qa)
+- [Contributing](#contributing)
+- [Documentation](#documentation)
+- [License](#license)
+- [Support](#support)
+- [Acknowledgments](#acknowledgments)
 
 ## Overview
 
 The Pseudo-Code Prompting Plugin enhances Claude Code with automated conversion, validation, and optimization of natural language requirements into concise, function-like pseudo-code. This structured approach eliminates ambiguity, ensures completeness, and accelerates development.
 
 **Architecture:** Utilizes Claude Code's auto-discovery system - all skills, agents, and commands are automatically loaded based on your project context. No manual configuration required.
+
+## Installation
+
+### Requirements
+
+- Claude Code v2.1.0 or higher
+
+### From Marketplace
+
+```bash
+# Step 1: Add the marketplace
+/plugin marketplace add EladAriel/pseudo-code-prompting-plugin
+
+# Step 2: Install the plugin
+/plugin install pseudo-code-prompting
+```
+
+### From GitHub (Manual)
+
+```bash
+# Clone to your Claude plugins directory
+git clone https://github.com/EladAriel/pseudo-code-prompting-plugin ~/.claude/plugins/pseudo-code-prompting
+```
+
+### Project-Scoped Installation
+
+```bash
+# Copy plugin to your project
+cp -r pseudo-code-prompting-plugin/.claude your-project/.claude
+```
+
+### Verify Installation
+
+After installation, verify the plugin is loaded:
+
+```bash
+/plugin list
+```
+
+You should see `pseudo-code-prompting` in the installed plugins list.
+
+**Note:** This plugin uses **auto-invoked skills**, not slash commands. Skills are automatically triggered by Claude when you use relevant keywords in your requests.
+
+## Quick Start Guide
+
+### 💡 Don't Like Commands? Just Talk to Claude!
+
+If you prefer not to use slash commands, simply say:
+- **"Use pseudo-code prompting plugin"** - Claude will guide you through the transformation process
+- **"Use pseudo-code prompting plugin with Ralph"** - Claude will orchestrate the complete workflow with Ralph Loop for automated implementation
+
+Claude will understand your intent and invoke the appropriate skills automatically.
+
+---
+
+See [docs/QUICK_START.md](docs/QUICK_START.md) for a comprehensive guide on using the plugin, including:
+
+- How skills are automatically invoked
+- Transforming natural language to pseudo-code
+- Validating requirements
+- Optimizing pseudo-code
+- Compressing verbose requirements
 
 ## Why Pseudo-Code Prompting?
 
@@ -133,58 +220,6 @@ See [docs/RALPH-LOOP-INTEGRATION.md](docs/RALPH-LOOP-INTEGRATION.md) for compreh
 - Iteration planning (Simple: 20, Medium: 40, Complex: 80)
 - Usage examples and best practices
 - Troubleshooting and advanced usage
-
-## Installation
-
-### Requirements
-
-- Claude Code v2.1.0 or higher
-
-### From Marketplace
-
-```bash
-# Step 1: Add the marketplace
-/plugin marketplace add EladAriel/pseudo-code-prompting-plugin
-
-# Step 2: Install the plugin
-/plugin install pseudo-code-prompting
-```
-
-### From GitHub (Manual)
-
-```bash
-# Clone to your Claude plugins directory
-git clone https://github.com/EladAriel/pseudo-code-prompting-plugin ~/.claude/plugins/pseudo-code-prompting
-```
-
-### Project-Scoped Installation
-
-```bash
-# Copy plugin to your project
-cp -r pseudo-code-prompting-plugin/.claude your-project/.claude
-```
-
-### Verify Installation
-
-After installation, verify the plugin is loaded:
-
-```bash
-/plugin list
-```
-
-You should see `pseudo-code-prompting` in the installed plugins list.
-
-**Note:** This plugin uses **auto-invoked skills**, not slash commands. Skills are automatically triggered by Claude when you use relevant keywords in your requests.
-
-## Quick Start Guide
-
-See [docs/QUICK_START.md](docs/QUICK_START.md) for a comprehensive guide on using the plugin, including:
-
-- How skills are automatically invoked
-- Transforming natural language to pseudo-code
-- Validating requirements
-- Optimizing pseudo-code
-- Compressing verbose requirements
 
 ## PROMPTCONVERTER Methodology
 

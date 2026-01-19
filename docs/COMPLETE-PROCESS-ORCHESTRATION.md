@@ -252,5 +252,5 @@ The orchestrator can be invoked with multiple aliases:
 
 For issues or questions:
 - Check the [main plugin README](../README.md)
-- Review the [PROMPTCONVERTER documentation](../../PROMPTCONVERTER.md)
+- Review the [PROMPTCONVERTER methodology](METHODOLOGY.md)
 - See the [skill documentation](../skills/complete-process-orchestrator/SKILL.md)

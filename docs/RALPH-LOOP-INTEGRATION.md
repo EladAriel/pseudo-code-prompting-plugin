@@ -299,6 +299,6 @@ If you want to override the automatic settings:
 
 For issues or questions:
 - Check the [main plugin README](../README.md)
-- Review the [PROMPTCONVERTER documentation](../../PROMPTCONVERTER.md)
+- Review the [PROMPTCONVERTER methodology](METHODOLOGY.md)
 - See [complexity scoring details](../skills/ralph-process-integration/references/complexity-scoring.md)
 - See [promise generation details](../skills/ralph-process-integration/references/promise-generation.md)

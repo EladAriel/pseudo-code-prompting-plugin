@@ -214,8 +214,6 @@ jobs:
             "hooks/hooks.json"
             "hooks/tree/get_context_tree.py"
             "hooks/tree/context-aware-tree-injection.sh"
-            "hooks/cache/find_tag.py"
-            "hooks/cache/find_tag.sh"
             "hooks/core/user-prompt-submit.sh"
             "README.md"
             "CHANGELOG.md"

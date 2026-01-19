@@ -1,0 +1,29 @@
+{
+  "skill_id": "ralph-process-integration",
+  "skill_name": "Ralph Process Integration",
+  "version": "1.0.0",
+  "type": "orchestration",
+  "category": "workflow_automation",
+  "description": "Integrate pseudo-code processing with Ralph Loop for automated iterative implementation. Analyzes query complexity, generates completion criteria, and launches Ralph Loop with optimized parameters.",
+  "depends_on": [
+    "complete-process-orchestrator:1.1.0",
+    "ralph-loop:ralph-loop:*"
+  ],
+  "provides": [
+    "automated_iteration_planning",
+    "complexity_estimation",
+    "promise_generation",
+    "ralph_integration"
+  ],
+  "user_invocable": true,
+  "commands": ["ralph-process"],
+  "estimated_duration": "60-120s (before Ralph starts)",
+  "keywords": [
+    "ralph-loop",
+    "iteration",
+    "automation",
+    "complexity-estimation",
+    "orchestration",
+    "workflow"
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "pseudo-code-prompting",
-  "version": "1.6.1",
-  "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis, semantic caching with user confirmation, and intelligent path injection - 7 skills, 5 agents, 6 commands, and 4 hooks for optimal implementation clarity",
+  "version": "1.0.8",
+  "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis, semantic caching, Ralph Loop integration, and intelligent path injection - 8 skills, 5 agents, 7 commands, and 4 hooks for optimal implementation clarity and automated iterative development",
   "author": {
     "name": "Elad Ariel",
     "url": "https://github.com/EladAriel/pseudo-code-prompting-plugin"
@@ -22,6 +22,9 @@
     "validation",
     "optimization",
     "compression",
-    "security-validation"
+    "security-validation",
+    "ralph-loop",
+    "iterative-development",
+    "complexity-estimation"
   ]
 }

@@ -37,12 +37,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Hook Priority**: Explicit plugin invocation check now runs before transformation keyword detection
 - **User Experience**: Claude now reliably invokes skills when explicitly requested by name
 - **Metadata**: Updated `complete-process-orchestrator/capabilities.json` updated date to 2026-01-19
+- **Ralph Process Integration Workflow**: Expanded from 5 steps to 8 steps for proper file-based Ralph invocation
+  - Step 1-4: Unchanged (complete-process, parse, calculate complexity, generate promise)
+  - Step 5: NEW - Write files to `.claude/` directory
+  - Step 6: NEW - Extract promise keyword (strip `<>` tags)
+  - Step 7: NEW - Generate task summary with file references
+  - Step 8: Launch Ralph Loop (updated invocation format)
 
 ### Fixed
 
 - **Critical Bug**: Fixed issue where Claude would bypass plugin skills when user explicitly requested plugin usage
 - **Pattern Matching**: Hook now correctly identifies natural language plugin invocation requests
 - **Skill Routing**: Ensures proper skill selection based on user intent (with/without Ralph)
+- **Hook Compatibility**: Fixed hooks failing on Windows environments
+  - Changed all `bash` commands to `sh` for cross-platform compatibility (Windows, Linux, macOS)
+  - Fixed nested hooks structure in `UserPromptSubmit` causing triple execution
+  - Resolved "UserPromptSubmit hook error" appearing 3 times per message
+  - Fixed "Stop hook error: /bin/bash not found" on Windows Git Bash/MSYS
+  - Updated [hooks/hooks.json](hooks/hooks.json) with flattened hook array structure
+- **Ralph Loop Integration**: Fixed file-based invocation for Ralph Loop
+  - Added Step 5: Write Files to `.claude/` Directory (creates `ralph-prompt.local.md`, `optimized-pseudo-code.local.md`, `completion-promise.local.md`)
+  - Added Step 6: Extract Promise Keyword (removes `<>` characters to avoid security checks)
+  - Added Step 7: Generate Task Summary (creates concise description with file references)
+  - Updated Step 8: Launch Ralph Loop with file references instead of inline content
+  - Fixed "Command contains input redirection (<)" security check error
+  - Changed invocation from inline content to file references: `"[task] following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md --max-iterations N --completion-promise KEYWORD"`
+  - Updated [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md) workflow from 5 steps to 8 steps
 
 ### Technical Details
 
@@ -64,6 +84,38 @@ if [[ "$PROMPT" =~ [Uu]se.*(pseudo.*code.*prompting|pseudocode.*prompting).*(plu
 - "Use pseudocode prompting with ralph" → ralph-process
 - "Invoke pseudo-code plugin" → complete-process
 - "Invoke pseudocode workflow" → complete-process
+
+**Hook Structure Fix:**
+```json
+// Before (BROKEN)
+"UserPromptSubmit": [
+  {
+    "hooks": [  // ❌ Extra nesting causing triple execution
+      { "command": "bash ..." }  // ❌ bash not found on Windows
+    ]
+  }
+]
+
+// After (FIXED)
+"UserPromptSubmit": [
+  { "command": "sh ..." },  // ✅ Direct array, sh works everywhere
+  { "command": "sh ..." }
+]
+```
+
+**Ralph Invocation Fix:**
+```bash
+# Before (BROKEN - triggers security check)
+--max-iterations 50 --completion-promise '<promise>APP_COMPLETE</promise>' [entire prompt inline]
+
+# After (FIXED - uses file references)
+Implement user auth following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md --max-iterations 40 --completion-promise IMPLEMENTATION_COMPLETE
+```
+
+**Files Created by Ralph Process:**
+- `.claude/ralph-prompt.local.md` - Full implementation requirements and guidance
+- `.claude/optimized-pseudo-code.local.md` - Validated pseudo-code from complete-process
+- `.claude/completion-promise.local.md` - Promise keyword and completion criteria
 
 ## [1.0.8] - 2026-01-19
 

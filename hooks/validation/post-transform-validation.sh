@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Claude Code Hook: PostTransformValidation
 # Event: Triggered after prompt transformation

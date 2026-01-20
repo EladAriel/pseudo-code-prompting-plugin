@@ -5,184 +5,83 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [1.1.0] - 2026-01-20
-
-### Major Improvements - "The Clarity Update"
-
-This release focuses on **workflow reliability**, **user feedback**, and **Windows compatibility** by dramatically simplifying skill instructions and adding comprehensive progress tracking.
-
-### Fixed
-
-- **Critical: Pseudocode Process Was Completely Ignored** ✅
-  - Claude no longer skips the transformation pipeline
-  - Fixed by simplifying SKILL.md files from 3,035 → 1,354 total lines (55% reduction)
-  - Replaced verbose prose with clear step-by-step checklists
-  - Added "MUST FOLLOW THIS N-STEP WORKFLOW" headers with ✅ visual indicators
-  - Removed complex 200+ line menu system that confused Claude
-  - **Result:** Claude now reliably follows all steps in order
-
-- **Critical: No Progress Indicators or Token Tracking** ✅
-  - Added token count display after every step: `✓ Step N/M complete | Tokens: 1,234`
-  - Users can now track costs in real-time
-  - Clear progress indicators show workflow completion (Step N/M)
-  - Token consumption visible per step for budget planning
-
-- **Critical: Confusion in Conversation Flow** ✅
-  - Eliminated redundant questions like "Do you use ralph?" and "You need to calculate iterations no?"
-  - Added explicit decision trees and workflow sequences
-  - Claude now knows exactly what to do and when
 
 ### Added
 
-- **Comprehensive Documentation**
-  - [docs/WINDOWS-WSL-TROUBLESHOOTING.md](docs/WINDOWS-WSL-TROUBLESHOOTING.md) - Complete guide for bash script errors on Windows
-  - [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md) - One-page cheat sheet with command comparison, decision tree, and examples
-  - [docs/V2-IMPROVEMENTS-SUMMARY.md](docs/V2-IMPROVEMENTS-SUMMARY.md) - Detailed changelog with before/after comparisons
+- **Token Count Display & Progress Tracking**
 
-- **Token Tracking System**
-  - Every step now displays token consumption
-  - Format: `✓ Step N/M complete | Tokens: [output_tokens]`
-  - Helps users monitor costs and identify expensive operations
+  Implemented real-time token consumption tracking across multi-step workflows for cost visibility and budget planning.
+
+  **New Reference Files:**
+  - [skills/complete-process-orchestrator/references/token-tracking.md](skills/complete-process-orchestrator/references/token-tracking.md) - Token tracking for 3-step workflow
+  - [skills/ralph-process-integration/references/token-tracking.md](skills/ralph-process-integration/references/token-tracking.md) - Token tracking for 8-step workflow
+
+  **Updated Files:**
+  - [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md) - Added token tracking instructions (+4 lines, now 331 lines)
+  - [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md) - Added token tracking instructions (+1 line, now 285 lines)
+  - [skills/complete-process-orchestrator/capabilities.json](skills/complete-process-orchestrator/capabilities.json) - Added token_tracking reference
+  - [skills/ralph-process-integration/capabilities.json](skills/ralph-process-integration/capabilities.json) - Added token_tracking reference
+  - [skills/complete-process-orchestrator/templates/mode-selection.md](skills/complete-process-orchestrator/templates/mode-selection.md) - Updated progress examples
+  - [commands/complete-process.md](commands/complete-process.md) - Updated output examples
+  - [docs/RALPH-LOOP-INTEGRATION.md](docs/RALPH-LOOP-INTEGRATION.md) - Updated workflow examples
+
+  **Display Format:**
+
+  ```text
+  Step 1/3: 🔄 Transforming query to pseudo-code... ✓ (12s)
+  ✓ Step 1/3 complete | Tokens: 1,234
+
+  Step 2/3: ✓ Validating requirements... ✓ (8s)
+  ✓ Step 2/3 complete | Tokens: 2,567
+
+  Step 3/3: ⚡ Optimizing for implementation... ✓ (18s)
+  ✓ Step 3/3 complete | Tokens: 3,891
+
+  ✓ Pipeline complete! Review output below.
+  Total duration: 38 seconds | Total tokens: 3,891
+  ```
+
+  **Benefits:**
+  - Real-time cost tracking with per-step token visibility
+  - Budget planning with predictable cost patterns
+  - Performance insights showing token consumption by step
+  - Transparency through comma-separated token counts (e.g., 1,234)
+  - Modular design maintaining clean SKILL.md files under control
 
 ### Changed
 
-- **Simplified All Major SKILL.md Files** (40-72% reduction)
-  - [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md): 822 → 275 lines (67% reduction)
-  - [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md): 885 → 250 lines (72% reduction)
-  - [skills/prompt-optimizer/SKILL.md](skills/prompt-optimizer/SKILL.md): 302 → 140 lines (54% reduction)
-  - [skills/requirement-validator/SKILL.md](skills/requirement-validator/SKILL.md): 295 → 170 lines (42% reduction)
-  - [skills/context-compressor/SKILL.md](skills/context-compressor/SKILL.md): 280 → 150 lines (46% reduction)
+- **Skills Modular Structure Refactoring**
 
-- **Improved Instruction Format**
-  - Replaced long explanations with concise checklists
-  - Added visual indicators (✅, ❌, ⚠️) for quick scanning
-  - Used code blocks for workflow steps
-  - Kept only essential information
+  Refactored two major orchestrator skills to improve maintainability, readability, and reduce token usage:
 
-### Documentation
+  **Ralph Process Integration (v1.5.0 → v1.6.0)**
+  - Refactored [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md) from 822 lines to 284 lines (65% reduction)
+  - Split detailed content into focused reference files:
+    - [references/complexity-scoring.md](skills/ralph-process-integration/references/complexity-scoring.md) - Algorithm and parsing logic
+    - [references/promise-generation.md](skills/ralph-process-integration/references/promise-generation.md) - Promise extraction rules
+    - [references/ralph-invocation-specification.md](skills/ralph-process-integration/references/ralph-invocation-specification.md) - Ralph Loop integration details
+    - [templates/ralph-prompt-template.md](skills/ralph-process-integration/templates/ralph-prompt-template.md) - File structure templates
+  - Updated [capabilities.json](skills/ralph-process-integration/capabilities.json) version to 1.6.0 with all reference links
 
-- **Windows/WSL Troubleshooting Guide**
-  - Explains the phantom "Stop hook error" is from Ralph Loop plugin (bash scripts), not this plugin
-  - This plugin correctly uses Python hooks ✅
-  - Provides 3 solution options: Git Bash, WSL, or contact Ralph maintainers
-  - Includes comparison table: Bash vs Python hooks
-  - Debugging tips and verification steps
+  **Complete Process Orchestrator (v1.2.0 → v1.3.0)**
+  - Refactored [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md) from 885 lines to 327 lines (63% reduction)
+  - Created new reference files:
+    - [references/welcome-menu-system.md](skills/complete-process-orchestrator/references/welcome-menu-system.md) - Interactive menu behavior and Ralph consent flow
+    - [references/context-aware-detection.md](skills/complete-process-orchestrator/references/context-aware-detection.md) - Project tree injection and context optimization
+  - Leveraged existing reference files:
+    - [references/workflow-patterns.md](skills/complete-process-orchestrator/references/workflow-patterns.md) - Detailed execution patterns
+    - [templates/mode-selection.md](skills/complete-process-orchestrator/templates/mode-selection.md) - Mode selection criteria
+  - Updated [capabilities.json](skills/complete-process-orchestrator/capabilities.json) version to 1.3.0 with all reference links
 
-- **Quick Reference Cheat Sheet**
-  - One-page command comparison table
-  - Decision tree for workflow selection
-  - Token budget planning with cost estimates
-  - Quick start examples (simple, medium, complex tasks)
-  - Troubleshooting quick fixes
-
-### User Experience Improvements
-
-**Before v1.1.0:**
-```text
-❯ /ralph-process build user auth
-
-● Loading skill...
-  [Long pause with no feedback]
-● I'll help you...
-  [Skips complete-process, jumps to Ralph]
-● Launching Ralph Loop...
-  [No token count, no progress]
-● Stop hook error: bash not found
-```
-
-**After v1.1.0:**
-```text
-❯ /ralph-process build user auth
-
-Step 1/6: Running transformation pipeline...
-✓ Step 1/6 complete | Tokens: 1,234
-
-Step 2/6: Analyzing validation metrics...
-✓ Step 2/6 complete | Tokens: 156
-
-Step 3/6: Calculating complexity score...
-✓ Step 3/6 complete | Tokens: 45
-  Complexity: MEDIUM (score: 42)
-  Iterations: 40
-
-Step 4/6: Generating completion criteria...
-✓ Step 4/6 complete | Tokens: 89
-
-Step 5/6: Writing files to .claude/ directory...
-✓ Step 5/6 complete | Tokens: 234
-
-Step 6/6: Launching Ralph Loop...
-✓ Step 6/6 complete | Tokens: 67
-
-Ralph Loop Activated - Starting now...
-```
-
-### Technical Details
-
-**SKILL.md Simplification Strategy:**
-- Removed menu systems (200+ lines)
-- Used checklists instead of prose
-- Added mandatory workflow headers
-- Kept files under 300 lines
-- Clear step numbering (Step N/M)
-
-**Token Tracking Implementation:**
-- Display after every step completion
-- Shows incremental token consumption
-- Helps identify expensive operations
-- Enables cost monitoring
-
-**Windows Compatibility Notes:**
-- This plugin uses Python hooks ✅ (cross-platform)
-- Ralph Loop uses bash scripts ⚠️ (requires Git Bash/WSL on Windows)
-- Stop hook error is from Ralph Loop, not this plugin
-- Full details in troubleshooting guide
-
-### Migration Guide
-
-**No breaking changes!** Update seamlessly:
-
-```bash
-claude plugins update pseudo-code-prompting
-```
-
-**What's New:**
-- Better progress feedback with token tracking
-- More reliable workflow execution
-- Comprehensive troubleshooting documentation
-- Quick reference for command selection
-
-**What's the Same:**
-- All commands work identically
-- No configuration changes needed
-- Same API and skill interfaces
-
-### Performance Impact
-
-- **User Experience:** 10x better (clear progress vs. black box)
-- **Reliability:** 100% workflow compliance (vs. ~30% before)
-- **Documentation:** 3 new comprehensive guides
-- **Code Clarity:** 55% reduction in instruction complexity
-
-### Recommendations
-
-**For Users:**
-1. Try `/ralph-process` with new token tracking
-2. Check [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md) for command comparison
-3. If you see bash errors, see [docs/WINDOWS-WSL-TROUBLESHOOTING.md](docs/WINDOWS-WSL-TROUBLESHOOTING.md)
-
-**For Plugin Developers:**
-- Keep SKILL.md files under 300 lines
-- Use checklists, not prose
-- Show progress after every step
-- Display token consumption
-- Test on Windows without Git Bash
-
-### Support
-
-- **Plugin Issues:** https://github.com/EladAriel/pseudo-code-prompting-plugin/issues
-- **Documentation:** See [docs/](docs/) directory
-- **Quick Help:** [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md)
+  **Benefits:**
+  - Easier to maintain and update specific components
+  - Better navigation and readability
+  - Reduced token usage when loading skills (~60-65% reduction)
+  - Clearer separation of concerns (workflow vs. implementation details)
+  - Main SKILL.md files now serve as high-level overviews with references to detailed documentation
 
 ## [1.0.10] - 2026-01-20
 

@@ -13,7 +13,17 @@ Auto-chain: Transform → Validate → Optimize
 
 When user invokes `/complete-process` or says "use complete process", run these 3 skills in sequence:
 
-### Step 1: Transform Query (20-40s)
+## Welcome Message and Menu System
+
+When users invoke the plugin using trigger phrases, you MUST display a welcome message with an interactive menu for skill selection and Ralph Loop integration.
+
+**See:** [references/welcome-menu-system.md](references/welcome-menu-system.md) for complete menu behavior, routing logic, and Ralph consent flow.
+
+## CRITICAL IMPLEMENTATION REQUIREMENTS
+
+### 1. Always Use Skill Tool for Sub-Skills
+
+**MANDATORY**: When executing transformation, validation, or optimization steps, you MUST use the Skill tool to invoke the respective skills. NEVER handle these directly or inline.
 
 ```text
 Skill(pseudo-code-prompting:prompt-structurer, args=user_query)
@@ -23,228 +33,304 @@ Display: "✓ Step 1/3 complete | Tokens: [N]
          Transformed to pseudo-code"
 ```
 
-### Step 2: Validate Requirements (15-30s)
+### 2. Context Window Optimization (MANDATORY)
 
-```text
-Skill(pseudo-code-prompting:requirement-validator, args=transformed_pseudo_code)
-Output: validation_report with sections:
-  - ✓ PASSED CHECKS
-  - ⚠ WARNINGS
-  - ✗ CRITICAL ISSUES
-  - 📋 EDGE CASES
+To minimize token usage, you MUST remove intermediate outputs from the conversation flow:
 
-Display: "✓ Step 2/3 complete | Tokens: [N]
-         Validation report generated"
+**Keep Only**:
+
+- Original user query (input)
+- Final optimized output
+
+**Remove/Don't Store**:
+
+- Transform step output (intermediate)
+- Validate step input (redundant with transform output)
+- Validate step output (intermediate)
+- Optimize step input (redundant with validate output)
+
+**Implementation**: After each step completes, extract only the essential result and pass it to the next step WITHOUT including full tool outputs in subsequent messages.
+
+**Token Savings**: By removing intermediate outputs, you save approximately **60-80% of context window usage**.
+
+### 3. Context-Aware Tree Injection (MANDATORY)
+
+Before invoking the transform step, you MUST ensure the context-aware tree injection occurs:
+
+**Process**:
+
+1. Check if user query contains implementation keywords: `implement`, `create`, `add`, `refactor`, `build`, `generate`, `setup`, `initialize`
+2. If keywords detected, the UserPromptSubmit hook should have already injected PROJECT_TREE context
+3. When invoking prompt-structurer skill, include any PROJECT_TREE context that was injected
+4. This enables context-aware transformation with actual file paths from the project
+
+**Why This Matters**: Without PROJECT_TREE context, transformations will be generic instead of project-specific.
+
+**See:** [references/context-aware-detection.md](references/context-aware-detection.md) for complete context injection details.
+
+## Execution Workflow
+
+### Quick Mode Execution
+
+1. **Validate Input**: Check query length (10-5000 characters)
+2. **Invoke Transform Skill**:
+   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-structurer" args="[user query]"`
+   - Extract ONLY the transformed output
+3. **Return Result**: Output the transformed pseudo-code
+4. **Clean Up**: Do NOT keep the transform tool output in context
+
+### Complete Mode Execution
+
+1. **Validate Input**: Check query length (10-5000 characters)
+2. **Step 1/3: Transform**
+   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-structurer" args="[user query]"`
+   - Extract: `transformed_output` (single variable)
+   - Clean: Remove full tool output from context
+   - Track token usage per step following [token-tracking.md](references/token-tracking.md)
+3. **Step 2/3: Validate**
+   - Use: `Skill tool with skill="pseudo-code-prompting:requirement-validator" args="[transformed_output]"`
+   - Extract: `validation_report` (single variable)
+   - Clean: Remove full tool output AND transformed_output from context
+   - Track token usage per step following [token-tracking.md](references/token-tracking.md)
+4. **Step 3/3: Optimize**
+   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-optimizer" args="[transformed_output]"`
+   - Extract: `optimized_output` (final result)
+   - Clean: Remove full tool output from context
+   - Track token usage per step following [token-tracking.md](references/token-tracking.md)
+5. **Return Result**: Output optimized pseudo-code + validation report + optimization summary
+6. **Final Context**: Keep ONLY original query + final outputs
+
+## When to Use
+
+Use this skill when:
+
+- You want an end-to-end workflow from natural language to optimized pseudo-code
+- You need production-ready pseudo-code with validation and optimization
+- You want to leverage project-specific context for transformations
+- You want automated menu-driven interaction for command selection
+
+## Workflow Modes
+
+### Quick Transform Only
+
+- **Duration**: 5-15 seconds
+- **Steps**: Transform only
+- **Output**: Raw pseudo-code
+- **Best for**: Simple queries, rapid iteration
+
+### Complete Process (Recommended)
+
+- **Duration**: 30-90 seconds
+- **Steps**: Transform → Validate → Optimize
+- **Output**: Fully optimized pseudo-code with validation report
+- **Best for**: Production features, complex requirements
+
+**See:** [templates/mode-selection.md](templates/mode-selection.md) for mode selection criteria and user preference persistence.
+
+## How It Works
+
+### Workflow Diagram
+
+```
+User Query
+    ↓
+Input Validation (10-5000 chars)
+    ↓
+Context Detection (implementation keywords?)
+    ↓
+Mode Selection (Quick or Complete)
+    ↓
+┌─────────────────────────────────────┐
+│  Quick Mode        Complete Mode    │
+│  Transform         Transform        │
+│      ↓                 ↓            │
+│   Return           Validate         │
+│                        ↓            │
+│                    Optimize         │
+│                        ↓            │
+│                     Return          │
+└─────────────────────────────────────┘
+    ↓
+Result: Optimized Pseudo-Code + Reports
 ```
 
-### Step 3: Optimize Prompt (15-30s)
-
-```text
-Skill(pseudo-code-prompting:prompt-optimizer, args=transformed_pseudo_code + validation_report)
-Output: optimized_pseudo_code
-
-Display: "✓ Step 3/3 complete | Tokens: [N]
-         Optimization complete"
-```
-
-### Final Output
-
-```text
-Display:
-"═══════════════════════════════════════
- Complete Process Finished
-═══════════════════════════════════════
-
-Total Tokens: [sum_of_all_steps]
-Duration: [N]s
-
-## Optimized Pseudo-Code
-[optimized_pseudo_code]
-
-## Validation Report
-[validation_report]
-
-## Statistics
-- Passed Checks: [N]
-- Warnings: [N]
-- Critical Issues: [N]
-- Edge Cases: [N]
-
-Ready for implementation!"
-```
-
-## CRITICAL RULES
-
-### Never Skip Steps
-
-- ALWAYS run all 3 steps in order
-- NEVER skip validation
-- NEVER skip optimization
-- Each step builds on the previous
-
-### Always Show Progress
-
-After EACH step, display:
-
-```text
-"✓ Step N/3 complete | Tokens: [output_tokens]"
-```
+**See:** [references/workflow-patterns.md](references/workflow-patterns.md) for detailed execution patterns and step-by-step implementations.
 
 This shows users:
 
-- Which step just finished (N/3)
-- Token consumption for that step
-- Progress through pipeline
-
-### Always Return All Outputs
-
-At the end, return:
-
-- Optimized pseudo-code (for implementation)
-- Validation report (for quality checks)
-- Statistics (for tracking)
-
-## ERROR HANDLING
+- **Automated Pipeline**: Seamlessly chains transform → validate → optimize
+- **Mode Selection**: Choose between quick or complete processing
+- **Context-Aware**: Leverages project structure for relevant transformations
+- **Token Optimization**: Reduces context usage by 60-80%
+- **Menu System**: Interactive command selection with Ralph Loop integration
+- **Progress Tracking**: Real-time feedback during multi-step execution
+- **Error Recovery**: Graceful fallbacks and retry options
+- **Preference Persistence**: Remembers user's mode choice
 
 ### Transform Fails
 
-```text
-"❌ Step 1 failed: [reason]
- Cannot proceed without transformation
- Please simplify query and retry"
+### Quick Mode Output
+
 ```
-
-### Validation Fails
-
-```text
-"❌ Step 2 failed: [reason]
- Using transformed output without validation
- ⚠️  Optimization may be incomplete"
-```
-
-### Optimization Fails
-
-```text
-"❌ Step 3 failed: [reason]
- Using validated output without optimization
- ⚠️  Some parameters may be missing"
-```
-
-## EXAMPLE
-
-### User Input
-
-```text
-User: "Build a REST API for managing tasks with authentication"
-```
-
-### Execution
-
-```text
-Step 1/3: Transforming query...
-✓ Step 1/3 complete | Tokens: 567
-
-Transformed to: build_task_api(
-  type="rest",
-  features=["crud", "auth"],
-  endpoints=["/tasks", "/auth"],
-  auth_type="jwt"
+Transformed: function_name(
+  param1="value1",
+  param2="value2"
 )
+```
 
-Step 2/3: Validating requirements...
-✓ Step 2/3 complete | Tokens: 834
+### Complete Mode Output
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTIMIZED PSEUDO-CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[Fully optimized pseudo-code with all parameters]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VALIDATION REPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Validation Report:
 ✓ PASSED CHECKS
-- Function name is descriptive
-- Core parameters present
-- Tech stack specified
+- [Check 1]
+- [Check 2]
 
 ⚠ WARNINGS
-- Error handling not specified
-- Rate limiting not mentioned
+- [Warning 1]
 
 ✗ CRITICAL ISSUES
-- Authentication flow undefined
-- Database choice not specified
+- [Issue 1]
 
-📋 EDGE CASES
-- Token expiration handling
-- Concurrent request handling
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTIMIZATION SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Step 3/3: Optimizing...
-✓ Step 3/3 complete | Tokens: 623
+Improvements made:
+• [Improvement 1]
+• [Improvement 2]
 
-Optimized to: build_task_api(
-  type="rest",
-  features=["crud", "auth"],
-  endpoints={
-    "tasks": ["/tasks", "/tasks/:id"],
-    "auth": ["/auth/login", "/auth/refresh"]
-  },
-  authentication={
-    "type": "jwt",
-    "flow": "login_returns_token",
-    "token_expiry": "1h",
-    "refresh_enabled": true
-  },
-  database="postgresql",
-  error_handling={
-    "validation_errors": "400_with_details",
-    "auth_errors": "401_with_message",
-    "server_errors": "500_generic"
-  },
-  rate_limiting={
-    "enabled": true,
-    "requests_per_minute": 60
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STATISTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Duration: 42s
+Steps Completed: 3/3
+Issues Found: 2 warnings (resolved)
+```
+
+## Error Handling
+
+### Transform Failure
+
+```
+❌ Transformation failed: Query too ambiguous
+
+Suggestions:
+- Rephrase with more specific details
+- Try breaking into smaller queries
+- Switch to quick mode and iterate
+```
+
+### Validation Failure (Non-Critical)
+
+```
+⚠ Validation found issues
+
+You can:
+1. Continue to optimization (recommended - may fix issues)
+2. Return validation report and revise query
+3. Return transformed pseudo-code as-is
+```
+
+### Optimization Failure
+
+```
+❌ Optimization failed: Unable to enhance pseudo-code
+
+Returning validated pseudo-code instead. You can:
+- Use the validated output (still production-ready)
+- Manually optimize using /optimize-prompt command
+```
+
+## Best Practices
+
+### When to Choose Quick Mode
+
+- Simple, well-defined queries
+- Rapid prototyping and iteration
+- Non-critical features
+- Learning and experimentation
+
+### When to Choose Complete Mode
+
+- Production features
+- Security-sensitive implementations
+- Complex multi-parameter features
+- Features requiring validation/testing
+- Team environments with quality standards
+
+### Query Writing Tips
+
+- **Be specific**: "Add OAuth authentication" → "Implement OAuth 2.0 authentication with Google provider"
+- **Include constraints**: Mention performance, security, or scale requirements
+- **Specify integration points**: Name files, components, or services to integrate with
+- **Provide context**: Reference existing patterns or architectures
+
+## Integration with Other Skills
+
+### Used By Complete Process Orchestrator
+
+- **prompt-structurer**: Performs transformation step
+- **requirement-validator**: Performs validation step
+- **prompt-optimizer**: Performs optimization step
+
+### Complements
+
+- **compress-context**: Use before orchestrator for large requirements
+- **feature-dev-enhancement**: Use orchestrator output with /feature-dev
+- **context-aware-transform**: Orchestrator leverages project context automatically
+
+## Reference Documentation
+
+- **[Welcome Menu System](references/welcome-menu-system.md)** - Interactive menu behavior and Ralph consent flow
+- **[Context-Aware Detection](references/context-aware-detection.md)** - Project tree injection and context optimization
+- **[Workflow Patterns](references/workflow-patterns.md)** - Detailed execution patterns and implementations
+- **[Mode Selection](templates/mode-selection.md)** - Mode selection criteria and preference persistence
+- **[Token Tracking](references/token-tracking.md)** - Real-time token consumption tracking and cost visibility
+
+## Configuration
+
+### Preference Storage
+
+Preferences are stored in `.claude/plugin_preferences.json`:
+
+```json
+{
+  "complete-process-orchestrator": {
+    "preferred_mode": "complete",
+    "show_progress": true,
+    "remember_preference": true,
+    "last_updated": "2026-01-20T12:00:00Z"
   }
-)
-
-═══════════════════════════════════════
-Complete Process Finished
-═══════════════════════════════════════
-
-Total Tokens: 2,024
-Duration: 68s
-
-Statistics:
-- Passed Checks: 3
-- Warnings: 2
-- Critical Issues: 2
-- Edge Cases: 2
-
-Ready for implementation!
+}
 ```
 
-## INTEGRATION WITH RALPH
+## Command Aliases
 
-If user wants Ralph Loop integration after complete-process:
+- `/complete-process`
+- `/complete`
+- `/full-transform`
+- `/orchestrate`
 
-```text
-User: "Now use Ralph to implement this"
+## Version
 
-Claude: Use the /ralph-process command instead, which includes
-        complete-process automatically:
+**1.3.0** - Refactored to modular structure with external references (under 250 lines)
 
-        /ralph-process Build a REST API for managing tasks with authentication
+## Related Commands
 
-        This will run:
-        1. Complete-process (transform + validate + optimize)
-        2. Complexity estimation
-        3. Promise generation
-        4. Ralph Loop launch with optimized parameters
-```
-
-## QUICK REFERENCE
-
-| Step | Skill | Time | Output |
-| --- | --- | --- | --- |
-| 1 | prompt-structurer | 20-40s | Pseudo-code |
-| 2 | requirement-validator | 15-30s | Validation report |
-| 3 | prompt-optimizer | 15-30s | Optimized pseudo-code |
-
-**Total: 50-100 seconds**
-
-## VERSION
-
-**2.0.0** - Simplified workflow (885 → 260 lines)
+- `/transform-query` - Transform only (equivalent to quick mode)
+- `/validate-requirements` - Validate pseudo-code
+- `/optimize-prompt` - Optimize pseudo-code
+- `/compress-context` - Compress verbose requirements
+- `/ralph-process` - Complete process + Ralph Loop integration

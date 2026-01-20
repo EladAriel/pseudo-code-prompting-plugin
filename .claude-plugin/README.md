@@ -132,5 +132,5 @@ See the main [README.md](../README.md) for full documentation, examples, and adv
 
 ## Version
 
-**Current Version:** 1.0.9
-**Last Updated:** 2026-01-19
+**Current Version:** 1.1.0
+**Last Updated:** 2026-01-20

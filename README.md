@@ -7,18 +7,6 @@ Transform natural language requirements into structured, validated pseudo-code f
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 [![Last Updated](https://img.shields.io/badge/updated-2026--01--20-brightgreen.svg)](CHANGELOG.md)
 
-## 🎉 What's New in v1.1.0
-
-**"The Clarity Update"** - Major improvements to workflow reliability and user experience:
-
-- ✅ **Fixed:** Pseudocode process no longer ignored (simplified SKILL.md files by 55%)
-- ✅ **Added:** Token tracking after every step (`✓ Step N/M complete | Tokens: 1,234`)
-- ✅ **Added:** Progress indicators (Step N/M format)
-- ✅ **Fixed:** Eliminated conversation flow confusion
-- 📚 **New Docs:** [Quick Reference](docs/QUICK-REFERENCE.md) | [Windows Troubleshooting](docs/WINDOWS-WSL-TROUBLESHOOTING.md)
-
-See [CHANGELOG.md](CHANGELOG.md) for full details.
-
 ## Table of Contents
 
 - [Overview](#overview)
@@ -97,9 +85,9 @@ You should see `pseudo-code-prompting` in the installed plugins list.
 ### 💡 Don't Like Commands? Just Talk to Claude!
 
 If you prefer not to use slash commands, simply say:
-- **"Use pseudo-code prompting plugin"** - Claude will guide you through the transformation process
-- **"Use pseudo-code prompting plugin with Ralph"** - Claude will orchestrate the complete workflow with Ralph Loop for automated implementation
-- **Use pseudo-code prompting {{command}} to {{task}}** - Claude will invoke the plugin's command.
+- **"Run pseudo-code prompting plugin"** - Claude will guide you through the transformation process
+- **"Run pseudo-code prompting plugin with Ralph"** - Claude will orchestrate the complete workflow with Ralph Loop for automated implementation
+- **Run pseudo-code prompting {{command}}: {{task}}** - Claude will invoke the plugin's command.
 The commands: `complete process`, `compress context`, `context aware transform`, `optimize prompt`, `ralph process`, `transform query`, `validate requirements`
 
 Claude will understand your intent and invoke the appropriate skills automatically.
@@ -312,25 +300,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architectural details, incl
 
 ## Troubleshooting
 
-### Quick Reference
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions, including:
 
-See [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md) for:
-- One-page command comparison
-- Decision tree for workflow selection
-- Token budget planning
-- Quick start examples
-
-### Windows/WSL Issues
-
-See [docs/WINDOWS-WSL-TROUBLESHOOTING.md](docs/WINDOWS-WSL-TROUBLESHOOTING.md) for:
-- Phantom "Stop hook error" (bash script from Ralph Loop, not this plugin)
-- Git Bash / WSL setup instructions
-- Python hooks vs bash hooks comparison
-- Hook debugging tips
-
-### General Troubleshooting
-
-See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for:
 - Commands not working
 - Hooks not triggering
 - Skills not auto-invoked

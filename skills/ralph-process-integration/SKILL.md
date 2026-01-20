@@ -13,40 +13,60 @@ Transform query → Estimate complexity → Generate promise → Launch Ralph Lo
 
 ### Step 1: Run Complete-Process (30-90s)
 
-```text
-Action: Skill(pseudo-code-prompting:complete-process, args=user_query)
-Capture: optimized_pseudo_code, validation_report
-Display: "✓ Step 1/6 complete | Tokens: [N]"
+**Use /ralph-process when:**
+- You want automated iterative implementation after query optimization
+- The task requires multiple refinement cycles
+- You want complexity-based iteration planning
+- You need automatic completion criteria generation
+
+**Use /complete-process instead when:**
+- You only need query optimization without implementation
+- You want to review the optimized query before proceeding
+- You plan to implement manually
+
+**Use /ralph-loop directly when:**
+- You already have a well-formed query
+- You know the exact iteration count needed
+- You have specific completion criteria ready
+
+## Execution Workflow
+
+The skill follows an 8-step workflow. Track token usage per step following [token-tracking.md](references/token-tracking.md).
+
+### Step 1: Invoke Complete-Process Skill (30-90s)
+
+**Action:** Use the Skill tool to invoke complete-process
+
+```
+Skill tool with:
+  skill="pseudo-code-prompting:complete-process"
+  args="[user's query text]"
 ```
 
-### Step 2: Parse Validation Metrics (5s)
+**Outputs to Capture:**
+- Optimized pseudo-code
+- Validation report (with ✓ PASSED, ⚠ WARNINGS, ✗ CRITICAL ISSUES, 📋 EDGE CASES sections)
+- Optimization summary
+- Statistics
 
-```text
-Extract from validation_report:
-  warnings = count "- " under "⚠ WARNINGS"
-  critical = count "- " under "✗ CRITICAL ISSUES"
-  edge_cases = count "- " under "📋 EDGE CASES"
-  has_security = search "auth|security|permission|token"
-  has_error = search "error|exception|fallback"
+**Error Handling:**
+- If complete-process fails: Display error, offer retry or cancel
+- If output is incomplete: Use fallback defaults (medium complexity, 40 iterations)
 
-Display: "✓ Step 2/6 complete | Tokens: [N]
-         Warnings: [N] | Critical: [N] | Edge: [N]"
+**Display Format:**
 ```
+═══════════════════════════════════════════════════════════
+Ralph Process Integration
+═══════════════════════════════════════════════════════════
 
-### Step 3: Calculate Complexity (5s)
+Original Query:
+  "[user's query]"
 
-```text
-score = (warnings × 2) + (critical × 5) + (edge_cases × 3)
-if has_security: score += 10
-if has_error: score += 5
-
-if score ≤ 25: level=SIMPLE, iterations=20
-elif score ≤ 60: level=MEDIUM, iterations=40
-else: level=COMPLEX, iterations=80
-
-Display: "✓ Step 3/6 complete | Tokens: [N]
-         Complexity: [LEVEL] (score: [N])
-         Iterations: [N]"
+Step 1/8: Running complete-process pipeline...
+  ✓ Transform complete
+  ✓ Validation complete
+  ✓ Optimization complete
+  Duration: [X]s
 ```
 
 ### Step 4: Generate Promise (10s)
@@ -59,217 +79,212 @@ Display: "✓ Step 3/6 complete | Tokens: [N]
    - If 4-6 items: "IMPLEMENTATION COMPLETE: N requirements met"
    - Else: "IMPLEMENTATION COMPLETE AND VERIFIED"
 
-Display: "✓ Step 4/6 complete | Tokens: [N]
-         Promise: '[text]'"
+**What to Extract:**
+- Count WARNINGS (lines with "-" under "⚠ WARNINGS" section)
+- Count CRITICAL ISSUES (lines with "-" under "✗ CRITICAL ISSUES" section)
+- Count EDGE CASES (lines with "-" under "📋 EDGE CASES" section)
+- Count PASSED CHECKS (lines with "-" under "✓ PASSED CHECKS" section)
+- Detect security requirements (keywords: auth, security, permission, token, credential)
+- Detect error handling gaps (keywords: error, exception, fallback, timeout, retry)
+
+**See:** [references/complexity-scoring.md](references/complexity-scoring.md) for detailed parsing logic
+
+**Display Format:**
 ```
-
-### Step 5: Write Files to .claude/ (10s)
-
-```text
-Bash: mkdir -p .claude
-
-Write .claude/ralph-prompt.local.md:
-  # Implementation Task
-  ## Optimized Requirements
-  [optimized_pseudo_code]
-  ## Critical Issues
-  [list from validation]
-  ## Success Criteria
-  [numbered requirements]
-  ## Completion Signal
-  Output: <promise>[text]</promise>
-
-Write .claude/optimized-pseudo-code.local.md:
-  [optimized_pseudo_code]
-
-Write .claude/completion-promise.local.md:
-  # Completion Promise
-  `[promise]`
-  ## Criteria
-  [checklist]
-
-Display: "✓ Step 5/6 complete | Tokens: [N]
-         Files: 3 created in .claude/"
-```
-
-### Step 6: Launch Ralph Loop (5s)
-
-```text
-task = "[verb] [objective] following specifications in .claude/ralph-prompt.local.md"
-
-Skill(
-  skill="ralph-loop:ralph-loop",
-  args=task + " --max-iterations [N] --completion-promise [promise]"
-)
-
-Display: "✓ Step 6/6 complete | Tokens: [N]
-
-         ═══════════════════════════════════════
-         Ralph Loop Activated
-         ═══════════════════════════════════════
-
-         Task: [task]
-         Iterations: [N]
-         Promise: '[promise]'
-
-         Starting now..."
+Step 2/8: Analyzing complexity...
+  Warnings: [N]
+  Critical Issues: [N]
+  Edge Cases: [N]
+  Security Requirements: [YES/NO]
+  Error Handling Gaps: [YES/NO]
 ```
 
 ## CRITICAL RULES
 
-### Never Skip Steps
-
-- ALWAYS run complete-process first
-- ALWAYS calculate complexity (don't guess)
-- ALWAYS write files before Ralph
-- ALWAYS show token count after each step
-
-### Always Show Progress
-
-```text
-Format: "✓ Step N/6 complete | Tokens: [output_tokens]"
+**Formula:**
+```
+base_score = (warnings × 2) + (critical × 5) + (edge_cases × 3)
+modifiers = security(+10) + error_handling(+5) - many_passed_checks(-5)
+complexity_score = base_score + modifiers
 ```
 
-Display after EVERY step completion to show:
+**Classification:**
 
-- Which step just finished
-- Token consumption for that step
-- Progress through workflow (N/6)
+- Score ≤ 25: SIMPLE (20 iterations)
+- Score 26-60: MEDIUM (40 iterations)
+- Score ≥ 61: COMPLEX (80 iterations)
 
-### Always Write Files
+**See:** [references/complexity-scoring.md](references/complexity-scoring.md) for complete algorithm
 
-Ralph REQUIRES files. Never pass inline content.
-
-- Use `.local.md` extension
-- Write to `.claude/` directory
-- Verify files exist before launching
-
-## ERROR HANDLING
-
-### Complete-Process Fails
-
-```text
-"❌ Step 1 failed: [reason]
- Options: 1) Retry 2) Simplify 3) Cancel"
+**Display Format:**
 ```
-
-### Can't Parse Validation
-
-```text
-"⚠️  Using defaults: MEDIUM, 40 iterations
- Proceeding..."
+  Complexity Score: [N] ([LEVEL])
+  ✓ Recommended iterations: [20/40/80]
 ```
 
 ### Ralph Plugin Missing
 
-```text
-"❌ Ralph Loop plugin required
- Install: claude plugins install ralph-loop"
+**Action:** Extract critical requirements from validation report and format as specific promise
+
+**Promise Generation Rules:**
+
+1. Extract top 3-4 critical issues
+2. Convert negative statements to positive requirements
+3. Add edge cases if needed to reach 3-4 requirements
+4. Format as testable promise (max 100 chars)
+
+**See:** [references/promise-generation.md](references/promise-generation.md) for detailed extraction rules
+
+**Display Format:**
+```
+Step 3/8: Generating completion criteria...
+  Critical requirements identified:
+    • [Requirement 1]
+    • [Requirement 2]
+    • [Requirement 3]
+
+  ✓ Promise: "[GENERATED_PROMISE_TEXT]"
 ```
 
-### File Write Fails
+### Step 5: Write Files to .claude/ Directory
 
-```text
-"❌ Can't write .claude/ files: [reason]
- Trying: ./tmp/claude/"
+**Action:** Create the `.claude/` directory and write all required files
+
+**CRITICAL:** Ralph Loop requires files, NOT inline content. You MUST write files before invoking Ralph.
+
+**Files to Write:**
+
+1. **ralph-prompt.local.md** - Full prompt with requirements, validation, guidance
+2. **optimized-pseudo-code.local.md** - Optimized pseudo-code from complete-process
+3. **completion-promise.local.md** - Promise keyword and criteria
+
+**See:** [templates/ralph-prompt-template.md](templates/ralph-prompt-template.md) for file structure
+
+**Display Format:**
+```
+Step 4/8: Writing files to .claude/ directory...
+  ✓ Created .claude/ directory
+  ✓ Wrote ralph-prompt.local.md ([N] lines)
+  ✓ Wrote optimized-pseudo-code.local.md ([N] lines)
+  ✓ Wrote completion-promise.local.md ([N] lines)
 ```
 
-## EXAMPLES
+### Step 6: Extract Promise Keyword
 
-### Simple Task
+**Action:** Extract the promise keyword from generated promise text
 
-```text
-User: "Add dark mode toggle"
+**CRITICAL:** Ralph Loop expects ONLY the promise keyword, NOT the full text or `<promise>` tags.
 
-Step 1/6: Running transformation...
-✓ Step 1/6 complete | Tokens: 1,234
+**Extraction Logic:**
 
-Step 2/6: Analyzing metrics...
-✓ Step 2/6 complete | Tokens: 156
-  Warnings: 2 | Critical: 0 | Edge: 1
+1. If promise contains `<promise>` tags: Extract text between tags
+2. Otherwise: Use the promise text as-is
+3. Validate: No `<` or `>` characters, uppercase, < 100 chars
 
-Step 3/6: Calculating complexity...
-✓ Step 3/6 complete | Tokens: 45
-  Complexity: SIMPLE (score: 7)
-  Iterations: 20
+**Display Format:**
+```
+Step 5/8: Extracting promise keyword...
+  ✓ Promise: "[PROMISE_KEYWORD]"
+```
 
-Step 4/6: Generating promise...
-✓ Step 4/6 complete | Tokens: 89
-  Promise: 'COMPLETE: Toggle implemented AND Persistence working'
+### Step 7: Generate Task Summary
 
-Step 5/6: Writing files...
-✓ Step 5/6 complete | Tokens: 234
-  Files: 3 created in .claude/
+**Action:** Create a concise task summary for Ralph Loop invocation
 
-Step 6/6: Launching Ralph...
-✓ Step 6/6 complete | Tokens: 67
+**Format:**
+```
+"[Action verb] [main objective] following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+```
 
-═══════════════════════════════════════
+**Examples:**
+- "Implement user authentication following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+- "Create working hours tracker app following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+
+**Display Format:**
+```
+Step 6/8: Preparing Ralph Loop invocation...
+  ✓ Task summary: "[TASK_SUMMARY]"
+```
+
+### Step 8: Launch Ralph Loop
+
+**Action:** Invoke Ralph Loop via Skill tool with file references
+
+**CRITICAL INVOCATION FORMAT:**
+
+```
+Skill tool with:
+  skill="ralph-loop:ralph-loop"
+  args="[task_summary] following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md --max-iterations [iterations] --completion-promise [promise_keyword]"
+```
+
+**See:** [references/ralph-invocation-specification.md](references/ralph-invocation-specification.md) for complete invocation rules
+
+**Display Format:**
+```
+Step 7/8: Starting Ralph Loop...
+  Task: [task_summary]
+  Iterations: [N]
+  Promise: "[promise_keyword]"
+  Files: .claude/ralph-prompt.local.md, .claude/optimized-pseudo-code.local.md
+
+  ⚠️  IMPORTANT: Ralph will run continuously until:
+      • Promise is fulfilled, OR
+      • Max iterations reached
+
+  You can cancel with: /cancel-ralph
+
+Step 8/8: Ralph Loop activated
+═══════════════════════════════════════════════════════════
 Ralph Loop Activated
-═══════════════════════════════════════
-
-Task: Implement dark mode toggle following specifications
-Iterations: 20
-Promise: 'COMPLETE: Toggle implemented AND Persistence working'
-
-Starting now...
+═══════════════════════════════════════════════════════════
 ```
 
-### Complex Task
+## Error Handling
 
-```text
-User: "Build payment processing with Stripe"
+### Complete-Process Failure
 
-Step 1/6: Running transformation...
-✓ Step 1/6 complete | Tokens: 2,345
+If complete-process skill fails, display error with options:
 
-Step 2/6: Analyzing metrics...
-✓ Step 2/6 complete | Tokens: 267
-  Warnings: 10 | Critical: 6 | Edge: 8
+1. Retry with original query
+2. Simplify query and retry
+3. Cancel ralph-process
 
-Step 3/6: Calculating complexity...
-✓ Step 3/6 complete | Tokens: 56
-  Complexity: COMPLEX (score: 89)
-  Iterations: 80
+### Parsing Failure
 
-Step 4/6: Generating promise...
-✓ Step 4/6 complete | Tokens: 178
-  Promise: 'IMPLEMENTATION COMPLETE: 6 requirements met'
+If validation report cannot be parsed, use fallback defaults:
 
-Step 5/6: Writing files...
-✓ Step 5/6 complete | Tokens: 456
-  Files: 3 created in .claude/
+- Complexity: MEDIUM
+- Iterations: 40
+- Promise: "IMPLEMENTATION COMPLETE AND VERIFIED"
 
-Step 6/6: Launching Ralph...
-✓ Step 6/6 complete | Tokens: 89
+### Ralph Loop Unavailable
 
-═══════════════════════════════════════
-Ralph Loop Activated
-═══════════════════════════════════════
+If ralph-loop skill not found:
+```
+Error: Ralph Loop plugin not available
 
-Task: Implement payment processing following specifications
-Iterations: 80
-Promise: 'IMPLEMENTATION COMPLETE: 6 requirements met'
-
-⚠️  Complex task with security implications
-Ralph will iterate up to 80 times
-
-Starting now...
+The ralph-loop plugin is required for this integration.
+Please install the official ralph-loop plugin from Claude plugins.
 ```
 
-## QUICK REFERENCE
+### Very High Complexity
 
-| Step | Action | Time | Token Display |
-| --- | --- | --- | --- |
-| 1 | Complete-process | 30-90s | After completion |
-| 2 | Parse validation | 5s | After extraction |
-| 3 | Calculate complexity | 5s | After calculation |
-| 4 | Generate promise | 10s | After generation |
-| 5 | Write .claude/ files | 10s | After all writes |
-| 6 | Launch Ralph | 5s | Before handoff |
+If complexity_score > 100, warn user and recommend breaking task into smaller parts.
 
-**Total: 60-120 seconds before Ralph starts**
+## Reference Documentation
 
-## VERSION
+- **[Complexity Scoring Algorithm](references/complexity-scoring.md)** - Detailed scoring rules and parsing logic
+- **[Promise Generation Rules](references/promise-generation.md)** - How to extract and format completion promises
+- **[Ralph Invocation Specification](references/ralph-invocation-specification.md)** - Complete Ralph Loop integration details
+- **[Ralph Prompt Template](templates/ralph-prompt-template.md)** - Structure for .claude/ directory files
+- **[Token Tracking](references/token-tracking.md)** - Real-time token consumption tracking and cost visibility
 
-**2.0.0** - Simplified with token tracking (374 → 250 lines)
+## Dependencies
+
+- **complete-process-orchestrator v1.1.0+** - For query optimization pipeline
+- **ralph-loop** - For iterative implementation execution
+
+## Version
+
+**1.5.0** - Refactored to modular structure with external references (under 250 lines)

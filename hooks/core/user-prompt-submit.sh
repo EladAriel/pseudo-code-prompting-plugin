@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Claude Code Hook: UserPromptSubmit
 # Event: Triggered when user submits a prompt

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Claude Code Hook: ContextAwareTreeInjection
 # Event: Triggered on UserPromptSubmit when implementation keywords detected

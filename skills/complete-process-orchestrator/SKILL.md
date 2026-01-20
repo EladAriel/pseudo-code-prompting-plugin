@@ -1,10 +1,17 @@
+---
+name: complete-process
+description: Transform → Validate → Optimize pipeline (auto-chained)
+allowed-tools: Skill
+model: sonnet
+---
+
 # Complete Process Orchestrator
 
-Orchestrate end-to-end pseudo-code transformation workflows with automated validation and optimization.
+Auto-chain: Transform → Validate → Optimize
 
-## Purpose
+## MUST FOLLOW THIS 3-STEP WORKFLOW
 
-The Complete Process Orchestrator skill provides an automated pipeline that combines transformation, validation, and optimization into a seamless workflow. Instead of invoking each step separately, users can choose between a quick transformation or a complete process that handles everything automatically.
+When user invokes `/complete-process` or says "use complete process", run these 3 skills in sequence:
 
 ## Welcome Message and Menu System
 
@@ -19,14 +26,11 @@ When users invoke the plugin using trigger phrases, you MUST display a welcome m
 **MANDATORY**: When executing transformation, validation, or optimization steps, you MUST use the Skill tool to invoke the respective skills. NEVER handle these directly or inline.
 
 ```text
-❌ WRONG: Directly transforming the query yourself
-✅ CORRECT: Use Skill tool with skill="pseudo-code-prompting:prompt-structurer"
+Skill(pseudo-code-prompting:prompt-structurer, args=user_query)
+Output: transformed_pseudo_code
 
-❌ WRONG: Directly validating yourself
-✅ CORRECT: Use Skill tool with skill="pseudo-code-prompting:requirement-validator"
-
-❌ WRONG: Directly optimizing yourself
-✅ CORRECT: Use Skill tool with skill="pseudo-code-prompting:prompt-optimizer"
+Display: "✓ Step 1/3 complete | Tokens: [N]
+         Transformed to pseudo-code"
 ```
 
 ### 2. Context Window Optimization (MANDATORY)
@@ -152,7 +156,7 @@ Result: Optimized Pseudo-Code + Reports
 
 **See:** [references/workflow-patterns.md](references/workflow-patterns.md) for detailed execution patterns and step-by-step implementations.
 
-## Features
+This shows users:
 
 - **Automated Pipeline**: Seamlessly chains transform → validate → optimize
 - **Mode Selection**: Choose between quick or complete processing
@@ -163,7 +167,7 @@ Result: Optimized Pseudo-Code + Reports
 - **Error Recovery**: Graceful fallbacks and retry options
 - **Preference Persistence**: Remembers user's mode choice
 
-## Output Format
+### Transform Fails
 
 ### Quick Mode Output
 
@@ -187,6 +191,7 @@ OPTIMIZED PSEUDO-CODE
 VALIDATION REPORT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+Validation Report:
 ✓ PASSED CHECKS
 - [Check 1]
 - [Check 2]

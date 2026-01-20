@@ -1,18 +1,17 @@
-# Ralph Process Integration Skill
+---
+name: ralph-process
+description: Auto transform + complexity estimation + Ralph Loop launch
+allowed-tools: Read, Write, Bash, Skill
+model: sonnet
+---
 
-## Purpose
+# Ralph Process Integration
 
-The **Ralph Process Integration** skill combines the pseudo-code prompting plugin's complete-process workflow with the Ralph Loop plugin to provide an end-to-end automated implementation workflow.
+Transform query → Estimate complexity → Generate promise → Launch Ralph Loop
 
-This skill:
-1. Optimizes user queries through the complete-process pipeline (transform → validate → optimize)
-2. Analyzes the validation report to estimate complexity and iteration requirements
-3. Generates specific completion promises from validation requirements
-4. Writes all required files to `.claude/` directory for Ralph Loop
-5. Extracts promise keywords and generates task summaries
-6. Launches Ralph Loop with file references and optimized parameters for automated iterative implementation
+## MUST FOLLOW THIS 6-STEP WORKFLOW
 
-## When to Use This Skill
+### Step 1: Run Complete-Process (30-90s)
 
 **Use /ralph-process when:**
 - You want automated iterative implementation after query optimization
@@ -70,9 +69,15 @@ Step 1/8: Running complete-process pipeline...
   Duration: [X]s
 ```
 
-### Step 2: Parse Validation Report
+### Step 4: Generate Promise (10s)
 
-**Action:** Extract metrics from the validation report text
+```text
+1. Extract top 3-4 items from "✗ CRITICAL ISSUES"
+2. Convert to positive: "Missing X" → "X implemented"
+3. Format:
+   - If ≤3 items: "COMPLETE: [req1] AND [req2] AND [req3]"
+   - If 4-6 items: "IMPLEMENTATION COMPLETE: N requirements met"
+   - Else: "IMPLEMENTATION COMPLETE AND VERIFIED"
 
 **What to Extract:**
 - Count WARNINGS (lines with "-" under "⚠ WARNINGS" section)
@@ -94,7 +99,7 @@ Step 2/8: Analyzing complexity...
   Error Handling Gaps: [YES/NO]
 ```
 
-### Step 3: Calculate Complexity Score
+## CRITICAL RULES
 
 **Formula:**
 ```
@@ -117,7 +122,7 @@ complexity_score = base_score + modifiers
   ✓ Recommended iterations: [20/40/80]
 ```
 
-### Step 4: Generate Completion Promise
+### Ralph Plugin Missing
 
 **Action:** Extract critical requirements from validation report and format as specific promise
 

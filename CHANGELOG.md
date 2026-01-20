@@ -63,6 +63,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed "Command contains input redirection (<)" security check error
   - Changed invocation from inline content to file references: `"[task] following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md --max-iterations N --completion-promise KEYWORD"`
   - Updated [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md) workflow from 5 steps to 8 steps
+- **Hook Script Portability**: Fixed "execvpe(/bin/bash) failed: No such file or directory" error
+  - Changed shebang in all hook scripts from `#!/bin/bash` to `#!/usr/bin/env sh` for better portability
+  - Updated hook command paths in [hooks/hooks.json](hooks/hooks.json) to use `/usr/bin/env sh` instead of `sh`
+  - Fixed [hooks/core/user-prompt-submit.sh](hooks/core/user-prompt-submit.sh)
+  - Fixed [hooks/compression/context-compression-helper.sh](hooks/compression/context-compression-helper.sh)
+  - Fixed [hooks/tree/context-aware-tree-injection.sh](hooks/tree/context-aware-tree-injection.sh)
+  - Fixed [hooks/validation/post-transform-validation.sh](hooks/validation/post-transform-validation.sh)
+  - Made all hook scripts executable with `chmod +x`
+- **Ralph Process Workflow Clarity**: Enhanced hook output to explicitly show complete-process runs first
+  - Updated [hooks/core/user-prompt-submit.sh](hooks/core/user-prompt-submit.sh) with clearer instructions
+  - Added MANDATORY ACTION SEQUENCE section showing step-by-step process
+  - Added WORKFLOW OVERVIEW showing complete-process runs first (30-90s) before Ralph starts
+  - Added CRITICAL RULES section with explicit dos and don'ts
+  - Now clearly shows: "Step 3: The ralph-process skill will: • Run complete-process pipeline FIRST (transform → validate → optimize)"
+  - Prevents confusion about whether complete-process is being invoked automatically
 
 ### Technical Details
 
@@ -73,17 +88,74 @@ if [[ "$PROMPT" =~ [Uu]se.*(pseudo.*code.*prompting|pseudocode.*prompting).*(plu
 ```
 
 **Injected Context:**
-- `<plugin-invocation-detected>` tag with CRITICAL priority
-- Explicit Skill tool invocation instructions
+
+- `<plugin-invocation-detected>` tag with CRITICAL INSTRUCTION priority
+- Explicit Skill tool invocation instructions with MANDATORY ACTION SEQUENCE
+- WORKFLOW OVERVIEW showing complete-process runs first (30-90s)
+- CRITICAL RULES section with explicit dos and don'ts
 - DO NOT bypass rules to prevent manual implementation
 - Clear routing logic based on Ralph Loop mention
 
 **Pattern Coverage:**
+
 - "Use pseudo-code prompting plugin" → complete-process
 - "Use pseudo-code prompting plugin with Ralph" → ralph-process
 - "Use pseudocode prompting with ralph" → ralph-process
 - "Invoke pseudo-code plugin" → complete-process
 - "Invoke pseudocode workflow" → complete-process
+
+**Hook Shebang Fix:**
+```bash
+# Before (Non-portable)
+#!/bin/bash
+
+# After (Portable)
+#!/usr/bin/env sh
+```
+
+**Hook Command Fix:**
+```json
+// Before
+"command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh"
+
+// After
+"command": "/usr/bin/env sh ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh"
+```
+
+**Enhanced Hook Output:**
+```
+<plugin-invocation-detected>
+CRITICAL INSTRUCTION - READ THIS FIRST:
+
+MANDATORY ACTION SEQUENCE:
+=========================
+
+Step 1: IMMEDIATELY invoke the Skill tool (do NOT skip this):
+   skill="pseudo-code-prompting:ralph-process"
+   args="[user will provide their requirements in the next message]"
+
+Step 2: After the skill loads, you will see <command-name>/ralph-process</command-name>
+
+Step 3: The ralph-process skill will:
+   • Run complete-process pipeline FIRST (transform → validate → optimize)
+   • Analyze complexity and estimate iterations
+   • Generate completion promise
+   • Write all files to .claude/ directory
+   • Launch Ralph Loop with file references
+
+WORKFLOW OVERVIEW:
+==================
+1. ✓ complete-process runs (30-90s)
+2. ✓ Complexity analyzed
+3. ✓ Files written to .claude/
+4. ✓ Ralph Loop starts with file references
+
+CRITICAL RULES:
+===============
+✗ DO NOT skip Step 1 - invoke the Skill tool IMMEDIATELY
+✓ DO invoke the Skill tool as your FIRST action
+</plugin-invocation-detected>
+```
 
 **Hook Structure Fix:**
 ```json

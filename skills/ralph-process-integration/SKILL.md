@@ -8,7 +8,9 @@ This skill:
 1. Optimizes user queries through the complete-process pipeline (transform → validate → optimize)
 2. Analyzes the validation report to estimate complexity and iteration requirements
 3. Generates specific completion promises from validation requirements
-4. Launches Ralph Loop with optimized parameters for automated iterative implementation
+4. Writes all required files to `.claude/` directory for Ralph Loop
+5. Extracts promise keywords and generates task summaries
+6. Launches Ralph Loop with file references and optimized parameters for automated iterative implementation
 
 ## When to Use This Skill
 
@@ -61,7 +63,7 @@ Ralph Process Integration
 Original Query:
   "[user's query]"
 
-Step 1/5: Running complete-process pipeline...
+Step 1/8: Running complete-process pipeline...
 ```
 
 Wait for complete-process to finish, then display:
@@ -147,7 +149,7 @@ if validation_report contains any of ["error", "exception", "fallback", "timeout
 
 **Display to User:**
 ```
-Step 2/5: Analyzing complexity...
+Step 2/8: Analyzing complexity...
   Warnings: [N]
   Critical Issues: [N]
   Edge Cases: [N]
@@ -289,7 +291,7 @@ if len(promise) > 100:
 
 **Display to User:**
 ```
-Step 3/5: Generating completion criteria...
+Step 3/8: Generating completion criteria...
   Critical requirements identified:
     • [Requirement 1]
     • [Requirement 2]
@@ -298,104 +300,249 @@ Step 3/5: Generating completion criteria...
   ✓ Promise: "[GENERATED_PROMISE_TEXT]"
 ```
 
-### Step 5: Build Ralph Loop Prompt
+### Step 5: Write Files to .claude/ Directory
 
-**Action:** Construct a comprehensive prompt for Ralph Loop
+**Action:** Create the `.claude/` directory and write all required files
 
-**Prompt Structure:**
+**CRITICAL:** Ralph Loop requires files, NOT inline content. You MUST write files before invoking Ralph.
 
-```markdown
-# Implementation Task
+**File Writing Sequence:**
 
-## Optimized Requirements
+1. **Create directory (if needed):**
+   ```
+   Use Bash tool:
+     command: "mkdir -p .claude"
+   ```
 
-[Insert the optimized pseudo-code from complete-process output]
+2. **Write ralph-prompt.local.md:**
+   ```
+   Use Write tool:
+     file_path: ".claude/ralph-prompt.local.md"
+     content: [Full prompt with requirements, validation, guidance]
+   ```
 
-## Validation Requirements
+   **Content Structure:**
+   ```markdown
+   # Implementation Task
 
-Critical issues that must be addressed:
-[For each critical issue from validation report]
-- [Critical issue text]
+   ## Optimized Requirements
 
-Edge cases that must be handled:
-[For each edge case from validation report (top 5)]
-- [Edge case text]
+   [Insert the optimized pseudo-code from complete-process output]
 
-## Implementation Guidance
+   ## Validation Requirements
 
-Complexity Level: [SIMPLE/MEDIUM/COMPLEX]
-Estimated Iterations: [20/40/80]
+   ### Critical Issues Identified
+   [For each critical issue from validation report]
+   - [Critical issue text]
 
-[If COMPLEX:]
-This is a complex implementation. Take a systematic approach:
-1. Start with core functionality
-2. Add error handling and validation
-3. Implement edge case handling
-4. Add comprehensive tests
-5. Verify all requirements before outputting promise
+   ### Edge Cases to Handle
+   [For each edge case from validation report (top 5)]
+   - [Edge case text]
 
-[If security requirements:]
-Security Requirements Identified:
-- Implement proper authentication/authorization
-- Validate all inputs
-- Handle sensitive data securely
-- Follow security best practices
+   ## Implementation Guidance
 
-## Success Criteria
+   **Complexity Level:** [SIMPLE/MEDIUM/COMPLEX]
+   **Estimated Iterations:** [20/40/80]
 
-Implementation is complete when ALL of the following are true:
+   [If COMPLEX:]
+   This is a complex implementation. Take a systematic approach:
+   1. Start with core functionality
+   2. Add error handling and validation
+   3. Implement edge case handling
+   4. Add comprehensive tests
+   5. Verify all requirements before outputting promise
 
-[For each requirement from the promise]
-[N]. [Requirement] is fully implemented and tested
+   [If security requirements:]
+   ### Security Requirements Identified
+   - Implement proper authentication/authorization
+   - Validate all inputs
+   - Handle sensitive data securely
+   - Follow security best practices
 
-[Additional criteria based on complexity:]
-[N+1]. All tests pass
-[N+2]. Code follows best practices
-[N+3]. Error handling is comprehensive
-[N+4]. Edge cases are handled
-[N+5]. Code is production-ready
+   ## Success Criteria
 
-## Completion Signal
+   Implementation is complete when ALL of the following are true:
 
-When you have completed ALL requirements above and verified everything works:
+   [For each requirement from the promise]
+   [N]. [Requirement] is fully implemented and tested
 
-Output this EXACT text:
-<promise>[GENERATED_PROMISE_TEXT]</promise>
+   [Additional criteria based on complexity:]
+   [N+1]. All tests pass
+   [N+2]. Code follows best practices
+   [N+3]. Error handling is comprehensive
+   [N+4]. Edge cases are handled
+   [N+5]. Code is production-ready
 
-IMPORTANT RULES:
-- Only output this promise when genuinely complete
-- Do NOT lie to exit the loop - this defeats the purpose
-- If blocked, document the blocker instead of faking completion
-- Verify each requirement before claiming completion
+   ## Completion Signal
+
+   When you have completed ALL requirements above and verified everything works:
+
+   Output this EXACT text:
+   <promise>[GENERATED_PROMISE_TEXT]</promise>
+
+   ### IMPORTANT RULES
+   - Match exactly: The promise text must match character-for-character
+   - Verify first: Check ALL requirements before outputting the promise
+   - Be truthful: Only output when genuinely complete
+   - If blocked: Document the blocker instead of faking completion
+   - Test thoroughly: Run tests before claiming done
+   ```
+
+3. **Write optimized-pseudo-code.local.md:**
+   ```
+   Use Write tool:
+     file_path: ".claude/optimized-pseudo-code.local.md"
+     content: [Optimized pseudo-code from complete-process]
+   ```
+
+   **Content Structure:**
+   ```markdown
+   # Optimized Pseudo-Code
+
+   [Insert the complete optimized pseudo-code output from complete-process]
+
+   ## Implementation Notes
+
+   This pseudo-code has been validated and optimized through the complete-process pipeline.
+   All parameters, validation rules, and error handling requirements are specified above.
+   ```
+
+4. **Write completion-promise.local.md:**
+   ```
+   Use Write tool:
+     file_path: ".claude/completion-promise.local.md"
+     content: [Promise keyword and criteria]
+   ```
+
+   **Content Structure:**
+   ```markdown
+   # Completion Promise
+
+   ## Promise Keyword
+   `[PROMISE_TEXT]`
+
+   ## Completion Criteria
+
+   You MUST output `<promise>[PROMISE_TEXT]</promise>` when ALL of the following are true:
+
+   [For each requirement]
+   1. ✅ [Requirement text]
+
+   ## Verification Checklist
+   - [ ] All requirements above are met
+   - [ ] Tests pass
+   - [ ] No errors in console
+   - [ ] Code is production-ready
+   ```
+
+**Display to User:**
+```
+Step 4/6: Writing files to .claude/ directory...
+  ✓ Created .claude/ directory
+  ✓ Wrote ralph-prompt.local.md ([N] lines)
+  ✓ Wrote optimized-pseudo-code.local.md ([N] lines)
+  ✓ Wrote completion-promise.local.md ([N] lines)
+```
+
+### Step 6: Extract Promise Keyword
+
+**Action:** Extract the promise keyword from generated promise text
+
+**CRITICAL:** Ralph Loop expects ONLY the promise keyword, NOT the full text or `<promise>` tags.
+
+**Extraction Logic:**
+
+1. **If promise contains `<promise>` tags:**
+   ```
+   promise_keyword = extract_text_between("<promise>", "</promise>")
+   ```
+
+2. **Otherwise, use the promise text as-is:**
+   ```
+   promise_keyword = promise_text
+   ```
+
+3. **Validation:**
+   - Promise must not contain `<` or `>` characters (security check)
+   - Promise should be uppercase with underscores or spaces
+   - Length should be < 100 characters
+
+**Example:**
+```
+Generated promise: "COMPLETE: Auth implemented AND Tests passing"
+Promise keyword: "COMPLETE: Auth implemented AND Tests passing"
+
+OR if validation output has:
+"Output <promise>IMPLEMENTATION_COMPLETE</promise>"
+Promise keyword: "IMPLEMENTATION_COMPLETE"
 ```
 
 **Display to User:**
 ```
-Step 4/5: Preparing Ralph Loop prompt...
-  ✓ Prompt built ([N] lines)
-  ✓ Validation requirements embedded
-  ✓ Success criteria documented
+Step 5/6: Extracting promise keyword...
+  ✓ Promise: "[PROMISE_KEYWORD]"
 ```
 
-### Step 6: Launch Ralph Loop
+### Step 7: Generate Task Summary
 
-**Action:** Invoke Ralph Loop via Skill tool with computed parameters
+**Action:** Create a concise task summary for Ralph Loop invocation
 
-**Invocation:**
+**Format:**
+```
+"[Action verb] [main objective] following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+```
+
+**Examples:**
+- "Implement user authentication following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+- "Create working hours tracker app following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+- "Add dark mode toggle following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+
+**Task Summary Generation:**
+1. Extract main action from user query (implement, create, add, build, etc.)
+2. Extract main objective (user authentication, working hours tracker, etc.)
+3. Keep it under 100 characters (excluding file references)
+
+**Display to User:**
+```
+Step 6/6: Preparing Ralph Loop invocation...
+  ✓ Task summary: "[TASK_SUMMARY]"
+```
+
+### Step 8: Launch Ralph Loop
+
+**Action:** Invoke Ralph Loop via Skill tool with file references
+
+**CRITICAL INVOCATION FORMAT:**
 
 ```
 Skill tool with:
   skill="ralph-loop:ralph-loop"
-  args="--max-iterations [iterations] --completion-promise '[promise]' [prompt]"
+  args="[task_summary] following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md --max-iterations [iterations] --completion-promise [promise_keyword]"
 ```
 
-**Argument Construction:**
+**Argument Construction Example:**
 
 ```
-args = "--max-iterations " + iterations
-args += " --completion-promise '" + promise + "'"
-args += " " + prompt_text
+args = "Implement user authentication following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md --max-iterations 40 --completion-promise IMPLEMENTATION_COMPLETE"
 ```
+
+**IMPORTANT RULES:**
+
+1. **File References:**
+   - MUST reference `.claude/ralph-prompt.local.md`
+   - MUST reference `.claude/optimized-pseudo-code.local.md`
+   - Ralph will automatically look in the `.claude/` directory
+   - Do NOT use absolute paths
+
+2. **Promise Format:**
+   - Use ONLY the promise keyword (no `<promise>` tags)
+   - Do NOT include special characters like `<` or `>`
+   - Keep it concise and uppercase
+
+3. **Task Summary:**
+   - Place at the START of the args string
+   - Include "following specifications in .claude/ralph-prompt.local.md and .claude/optimized-pseudo-code.local.md"
+   - This tells Ralph where to find the detailed requirements
 
 **Pre-Launch Validation:**
 
@@ -406,9 +553,11 @@ Check if Ralph Loop skill is available:
 **Display to User:**
 
 ```
-Step 5/5: Starting Ralph Loop...
+Starting Ralph Loop...
+  Task: [task_summary]
   Iterations: [N]
-  Promise: "[promise text]"
+  Promise: "[promise_keyword]"
+  Files: .claude/ralph-prompt.local.md, .claude/optimized-pseudo-code.local.md
 
   ⚠️  IMPORTANT: Ralph will run continuously until:
       • Promise is fulfilled, OR
@@ -509,10 +658,10 @@ for better results.
 
 **Expected Flow:**
 ```
-Step 1/5: Running complete-process pipeline...
+Step 1/8: Running complete-process pipeline...
   ✓ Duration: 35s
 
-Step 2/5: Analyzing complexity...
+Step 2/8: Analyzing complexity...
   Warnings: 2
   Critical Issues: 0
   Edge Cases: 1
@@ -522,7 +671,7 @@ Step 2/5: Analyzing complexity...
   Complexity Score: 7 (SIMPLE)
   ✓ Recommended iterations: 20
 
-Step 3/5: Generating completion criteria...
+Step 3/8: Generating completion criteria...
   Critical requirements identified:
     • Dark mode state management added
     • Toggle component implemented
@@ -546,10 +695,10 @@ Starting Ralph Loop now...
 
 **Expected Flow:**
 ```
-Step 1/5: Running complete-process pipeline...
+Step 1/8: Running complete-process pipeline...
   ✓ Duration: 48s
 
-Step 2/5: Analyzing complexity...
+Step 2/8: Analyzing complexity...
   Warnings: 5
   Critical Issues: 2
   Edge Cases: 4
@@ -559,7 +708,7 @@ Step 2/5: Analyzing complexity...
   Complexity Score: 47 (MEDIUM)
   ✓ Recommended iterations: 40
 
-Step 3/5: Generating completion criteria...
+Step 3/8: Generating completion criteria...
   Critical requirements identified:
     • Authentication flow implemented
     • Email validation added
@@ -584,10 +733,10 @@ Starting Ralph Loop now...
 
 **Expected Flow:**
 ```
-Step 1/5: Running complete-process pipeline...
+Step 1/8: Running complete-process pipeline...
   ✓ Duration: 62s
 
-Step 2/5: Analyzing complexity...
+Step 2/8: Analyzing complexity...
   Warnings: 10
   Critical Issues: 6
   Edge Cases: 8
@@ -597,7 +746,7 @@ Step 2/5: Analyzing complexity...
   Complexity Score: 89 (COMPLEX)
   ✓ Recommended iterations: 80
 
-Step 3/5: Generating completion criteria...
+Step 3/8: Generating completion criteria...
   Critical requirements identified:
     • Stripe API integration complete
     • Payment validation implemented

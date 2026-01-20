@@ -87,6 +87,8 @@ You should see `pseudo-code-prompting` in the installed plugins list.
 If you prefer not to use slash commands, simply say:
 - **"Use pseudo-code prompting plugin"** - Claude will guide you through the transformation process
 - **"Use pseudo-code prompting plugin with Ralph"** - Claude will orchestrate the complete workflow with Ralph Loop for automated implementation
+- **Use pseudo-code prompting {{command}} to {{task}}** - Claude will invoke the plugin's command.
+The commands: `complete process`, `compress context`, `context aware transform`, `optimize prompt`, `ralph process`, `transform query`, `validate requirements`
 
 Claude will understand your intent and invoke the appropriate skills automatically.
 

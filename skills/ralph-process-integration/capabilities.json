@@ -1,10 +1,10 @@
 {
   "skill_id": "ralph-process-integration",
   "skill_name": "Ralph Process Integration",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "type": "orchestration",
   "category": "workflow_automation",
-  "description": "Integrate pseudo-code processing with Ralph Loop for automated iterative implementation. Analyzes query complexity, generates completion criteria, and launches Ralph Loop with optimized parameters.",
+  "description": "Integrate pseudo-code processing with Ralph Loop for automated iterative implementation. Analyzes query complexity, generates completion criteria, manages .claude/ directory files, and launches Ralph Loop with optimized parameters.",
   "depends_on": [
     "complete-process-orchestrator:1.1.0",
     "ralph-loop:ralph-loop:*"
@@ -13,7 +13,10 @@
     "automated_iteration_planning",
     "complexity_estimation",
     "promise_generation",
-    "ralph_integration"
+    "ralph_integration",
+    "file_management_claude_directory",
+    "promise_extraction",
+    "task_summary_generation"
   ],
   "user_invocable": true,
   "commands": ["ralph-process"],
@@ -24,8 +27,26 @@
     "automation",
     "complexity-estimation",
     "orchestration",
-    "workflow"
+    "workflow",
+    "file-management",
+    "promise-extraction"
   ],
+  "references": {
+    "ralph_invocation_spec": "references/ralph-invocation-specification.md"
+  },
+  "file_outputs": {
+    "location": ".claude/",
+    "files": [
+      "ralph-prompt.local.md",
+      "optimized-pseudo-code.local.md",
+      "completion-promise.local.md"
+    ],
+    "optional_files": [
+      "ralph-progress.json",
+      "ralph-execution-summary.json",
+      ".ralph-invocation.lock"
+    ]
+  },
   "triggers": {
     "keywords": [
       "use pseudo-code prompting with ralph",

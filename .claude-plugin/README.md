@@ -16,7 +16,7 @@
 /plugin install pseudo-code-prompting
 ```
 
-All features (6 skills, 5 agents, 4 commands, 3 hooks) are automatically available after installation.
+All features (8 skills, 5 agents, 7 commands, 4 hooks) are automatically available after installation.
 
 ### From GitHub (Manual)
 
@@ -36,9 +36,10 @@ ln -s /path/to/pseudo-code-prompting-plugin pseudo-code-prompting
 ## Features
 
 - **Progressive Loading**: Skills use `capabilities.json` for token-efficient discovery (4-tier architecture)
+- **8 Specialized Skills**: Structurer, analyzer, validator, optimizer, compressor, feature-dev-enhancement, complete-process-orchestrator, ralph-process-integration
 - **5 Specialized Agents**: Analyzer, transformer, validator, optimizer, compressor
-- **4 Commands**: `/transform-query`, `/validate-requirements`, `/optimize-prompt`, `/compress-context`
-- **3 Hooks**: Auto-transformation, validation, compression suggestions
+- **7 Commands**: `/transform-query`, `/validate-requirements`, `/optimize-prompt`, `/compress-context`, `/context-aware-transform`, `/complete-process`, `/ralph-process`
+- **4 Hooks**: Auto-transformation, validation, compression suggestions, context-aware tree injection
 - **60-95% Compression**: Reduce verbose requirements while preserving 100% semantics
 - **Comprehensive Validation**: Security (95% OWASP), completeness (90%), edge cases (85%)
 
@@ -131,5 +132,5 @@ See the main [README.md](../README.md) for full documentation, examples, and adv
 
 ## Version
 
-**Current Version:** 1.5.0
-**Last Updated:** 2026-01-14
+**Current Version:** 1.0.9
+**Last Updated:** 2026-01-19

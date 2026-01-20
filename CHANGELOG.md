@@ -5,6 +5,71 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2026-01-20
+
+### Fixed
+
+- **Critical: Hook JSON Parsing**: Replaced fragile shell-based JSON parsing with robust Python implementation
+  - Converted all hook scripts from shell to Python 3 for proper JSON handling
+  - Implemented `json.load(sys.stdin)` for reliable parsing instead of `sed` regex
+  - Now correctly handles escaped characters (`\"`, `\n`), nested JSON, and complex strings
+  - Fixes "UserPromptSubmit hook error" on Windows/WSL environments
+  - Created new Python hook implementations:
+    - [hooks/core/user-prompt-submit.py](hooks/core/user-prompt-submit.py)
+    - [hooks/compression/context-compression-helper.py](hooks/compression/context-compression-helper.py)
+    - [hooks/tree/context-aware-tree-injection.py](hooks/tree/context-aware-tree-injection.py)
+    - [hooks/validation/post-transform-validation.py](hooks/validation/post-transform-validation.py)
+
+- **Cross-Platform Compatibility**: Updated [hooks/hooks.json](hooks/hooks.json) to use `python3` instead of `sh`
+  - Changed from `sh ${CLAUDE_PLUGIN_ROOT}/hooks/.../*.sh` to `python3 ${CLAUDE_PLUGIN_ROOT}/hooks/.../*.py`
+  - Ensures consistent behavior across Windows, WSL, Linux, and macOS
+  - Python 3 is more reliably available than specific shell implementations
+
+### Changed
+
+- **Hook Implementation Language**: Migrated from POSIX shell scripts to Python 3
+  - Better error handling and debugging
+  - Consistent with Claude Code hooks documentation examples
+  - More maintainable and testable code
+  - Shell scripts kept as `.sh` files for reference but no longer used
+
+### Technical Details
+
+**Before (Fragile Shell Parsing):**
+
+```bash
+#!/bin/sh
+PROMPT=$(echo "$INPUT" | sed -n 's/.*"prompt"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+# ❌ Fails with: "implement a \"quoted\" feature\nwith newlines"
+```
+
+**After (Robust Python Parsing):**
+
+```python
+#!/usr/bin/env python3
+import json
+data = json.load(sys.stdin)
+prompt = data.get('prompt', '')
+# ✅ Correctly handles all JSON complexities
+```
+
+**Hook Command Changes:**
+
+```json
+// Before (Shell-based)
+"command": "sh ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh"
+
+// After (Python-based)
+"command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.py"
+```
+
+**Why This Matters:**
+
+- The official Claude Code hooks documentation recommends using `json.load()` in Python or `jq` for JSON parsing
+- Shell `sed` regex cannot reliably parse JSON with escaped characters, nested structures, or multi-line strings
+- Python's built-in JSON parser handles all edge cases correctly
+- Aligns with best practices from [hooks-guide.md](claude-code-official-ref/hooks-guide.md)
+
 ## [1.0.9] - 2026-01-19
 
 ### Added
@@ -285,6 +350,8 @@ Potential improvements for v2.x:
 
 | Version | Date | Major Changes |
 |---------|------|---------------|
+| 1.0.10 | 2026-01-20 | Python-based hooks with robust JSON parsing, cross-platform compatibility fixes |
+| 1.0.9 | 2026-01-19 | Natural language plugin invocation, Ralph process workflow clarity |
 | 1.0.8 | 2026-01-19 | Ralph Loop integration, complexity estimation, promise generation |
 | 1.0.7 | Previous | Context window optimization, mandatory skill invocation |
 | 1.0.6 | Previous | Complete-process orchestrator |

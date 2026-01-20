@@ -4,19 +4,19 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.py",
         "statusMessage": "Checking for pseudo-code transformation commands...",
         "timeout": 10
       },
       {
         "type": "command",
-        "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.sh",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.py",
         "statusMessage": "Analyzing context compression opportunities...",
         "timeout": 10
       },
       {
         "type": "command",
-        "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.sh",
+        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.py",
         "statusMessage": "Analyzing project structure for context-aware suggestions...",
         "timeout": 15
       }
@@ -27,12 +27,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/validation/post-transform-validation.sh",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/validation/post-transform-validation.py",
             "statusMessage": "Validating transformed output...",
             "timeout": 10
           }
         ]
       }
-    ]
+    ],
+    "Stop": []
   }
 }

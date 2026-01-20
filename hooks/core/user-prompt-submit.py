@@ -1,41 +1,44 @@
-#!/bin/sh
+#!/usr/bin/env python3
+"""
+Claude Code Hook: UserPromptSubmit
+Event: Triggered when user submits a prompt
+Purpose: Detect feature-dev/pseudo-prompt commands and inject transformation context
 
-# Claude Code Hook: UserPromptSubmit
-# Event: Triggered when user submits a prompt
-# Purpose: Detect feature-dev/pseudo-prompt commands and inject transformation context
-#
-# This hook applies PROMPTCONVERTER structuring to incoming prompts by:
-# 1. Detecting /feature-dev or /pseudo-prompt commands
-# 2. Extracting the natural language query
-# 3. Injecting context that activates the prompt-structurer Skill
-# 4. Allowing Claude to apply transformation rules automatically
+This hook applies PROMPTCONVERTER structuring to incoming prompts by:
+1. Detecting /feature-dev or /pseudo-prompt commands
+2. Extracting the natural language query
+3. Injecting context that activates the prompt-structurer Skill
+4. Allowing Claude to apply transformation rules automatically
+"""
 
-set -eu
+import json
+import sys
+import re
 
-# Read hook input from stdin (JSON format)
-# Schema: { session_id, transcript_path, cwd, permission_mode, hook_event_name, prompt }
-INPUT=$(cat)
+def main():
+    # Read hook input from stdin (JSON format)
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        sys.exit(0)
 
-# Extract the user prompt using POSIX-compatible method (no jq dependency)
-# Look for "prompt":"..." pattern and extract the value using sed
-PROMPT=$(echo "$INPUT" | sed -n 's/.*"prompt"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    prompt = data.get('prompt', '')
 
-# Check if prompt is empty
-if [ -z "$PROMPT" ]; then
-  exit 0
-fi
+    # Check if prompt is empty
+    if not prompt:
+        sys.exit(0)
 
-# Check for explicit plugin invocation
-# Match patterns: "Use pseudo-code prompting plugin", "Use pseudocode prompting with ralph", etc.
-case "$PROMPT" in
-  *[Uu]se*pseudo*code*prompting*plugin*|*[Uu]se*pseudo*code*prompting*with*ralph*|\
-  *[Uu]se*pseudo*code*prompting*with*Ralph*|*[Uu]se*pseudocode*prompting*plugin*|\
-  *[Uu]se*pseudocode*prompting*with*ralph*|*[Uu]se*pseudocode*prompting*with*Ralph*|\
-  *[Ii]nvoke*pseudo*plugin*|*[Ii]nvoke*pseudo*workflow*|\
-  *[Ii]nvoke*pseudocode*plugin*|*[Ii]nvoke*pseudocode*workflow*)
-    # User explicitly asked to use the plugin - inject reminder to invoke the skill
-    cat <<EOF
+    # Check for explicit plugin invocation
+    # Match patterns: "Use pseudo-code prompting plugin", "Use pseudocode prompting with ralph", etc.
+    plugin_patterns = [
+        r'[Uu]se.*pseudo.*code.*prompting.*(plugin|with.*ralph|with.*Ralph)',
+        r'[Uu]se.*pseudocode.*prompting.*(plugin|with.*ralph|with.*Ralph)',
+        r'[Ii]nvoke.*(pseudo|pseudocode).*(plugin|workflow)'
+    ]
 
+    for pattern in plugin_patterns:
+        if re.search(pattern, prompt):
+            print(f"""
 <plugin-invocation-detected>
 CRITICAL: The user explicitly requested to use the pseudo-code prompting plugin.
 
@@ -47,31 +50,29 @@ You MUST invoke the appropriate skill immediately using the Skill tool as your F
 DO NOT proceed with manual implementation. DO NOT use other tools first.
 IMMEDIATELY invoke the Skill tool, then ask the user what they want to implement.
 
-User's original request: "$PROMPT"
+User's original request: "{prompt}"
 </plugin-invocation-detected>
-EOF
-    exit 0
-    ;;
-esac
+""")
+            sys.exit(0)
 
-# Detect transformation trigger keywords
-# Match patterns: "transform", "convert to pseudo", "structure", etc.
-case "$PROMPT" in
-  *transform*pseudo*|\
-  *convert*pseudo*|\
-  structure*request*|structure*requirement*|structure*query*|\
-  formalize*request*|formalize*requirement*|formalize*query*)
-    # Extract the actual request (everything after "transform to pseudo code:" or similar)
-    REQUEST=$(echo "$PROMPT" | sed -E 's/^(transform|convert).*(pseudo|pseudo-code|pseudocode):?[[:space:]]*//i')
+    # Detect transformation trigger keywords
+    # Match patterns: "transform", "convert to pseudo", "structure", etc.
+    transform_patterns = [
+        r'(transform|convert).*(pseudo|pseudo-code|pseudocode)',
+        r'^(structure|formalize).*(request|requirement|query)'
+    ]
 
-    # Inject PROMPTCONVERTER transformation instructions directly
-    cat <<EOF
+    for pattern in transform_patterns:
+        if re.search(pattern, prompt, re.IGNORECASE):
+            # Extract the actual request (everything after "transform to pseudo code:" or similar)
+            request = re.sub(r'^(transform|convert).*(pseudo|pseudo-code|pseudocode):?\s*', '', prompt, flags=re.IGNORECASE)
 
+            print(f"""
 <promptconverter-mode>
 CRITICAL: You MUST transform the user's request into PROMPTCONVERTER pseudo-code format.
 
 USER REQUEST TO TRANSFORM:
-$REQUEST
+{request}
 
 TRANSFORMATION RULES (apply in order):
 
@@ -80,7 +81,7 @@ TRANSFORMATION RULES (apply in order):
    - Subject: What target? (api, authentication, database, function)
 
 2. CREATE FUNCTION NAME: Combine into snake_case
-   - Format: {action}_{subject} (e.g., create_api, implement_auth)
+   - Format: {{action}}_{{subject}} (e.g., create_api, implement_auth)
    - Use descriptive, unambiguous names
 
 3. EXTRACT PARAMETERS: Convert ALL details to named parameters
@@ -110,10 +111,11 @@ Output: create_crud_api(language="python", operations=["create","read","update",
 
 Now transform the user's request following these rules exactly.
 </promptconverter-mode>
-EOF
-    exit 0
-    ;;
-esac
+""")
+            sys.exit(0)
 
-# Not a pseudo-prompt command, pass through unchanged
-exit 0
+    # Not a pseudo-prompt command, pass through unchanged
+    sys.exit(0)
+
+if __name__ == '__main__':
+    main()

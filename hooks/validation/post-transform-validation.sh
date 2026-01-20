@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Claude Code Hook: PostTransformValidation
 # Event: Triggered after prompt transformation
@@ -10,22 +10,19 @@
 # 3. Provides feedback on missing parameters or ambiguities
 # 4. Suggests improvements before implementation
 
-set -euo pipefail
+set -eu
 
 # Read hook input from stdin (JSON format)
 INPUT=$(cat)
 
-# Extract the user prompt using pure bash (no jq dependency)
-if [[ "$INPUT" =~ \"prompt\":[[:space:]]*\"([^\"]*)\" ]]; then
-  PROMPT="${BASH_REMATCH[1]}"
-else
-  exit 0
-fi
+# Extract the user prompt using POSIX-compatible method (no jq dependency)
+PROMPT=$(echo "$INPUT" | sed -n 's/.*"prompt"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 
 # Check if this is a response that contains transformed pseudo-code
 # Look for the "Transformed:" marker that indicates PROMPTCONVERTER output
-if [[ "$PROMPT" =~ Transformed:[[:space:]]*([a-z_]+\() ]]; then
-  cat <<EOF
+case "$PROMPT" in
+  *Transformed:*\(*\)*)
+    cat <<EOF
 
 [AUTO-VALIDATION TRIGGERED]
 
@@ -42,12 +39,14 @@ Use the requirement-validator skill to perform comprehensive validation.
 
 If critical issues are found, suggest improvements using the prompt-optimizer skill.
 EOF
-  exit 0
-fi
+    exit 0
+    ;;
+esac
 
 # Check for validation or optimize commands
-if [[ "$PROMPT" =~ ^/(validate|optimize)[[:space:]] ]]; then
-  cat <<EOF
+case "$PROMPT" in
+  /validate\ *|/optimize\ *)
+    cat <<EOF
 
 [VALIDATION/OPTIMIZATION MODE]
 
@@ -62,8 +61,9 @@ Apply systematic validation:
 
 Provide specific, actionable recommendations for improvements.
 EOF
-  exit 0
-fi
+    exit 0
+    ;;
+esac
 
 # Pass through unchanged
 exit 0

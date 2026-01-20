@@ -61,3 +61,4 @@ release_notes.md
 # Helper scripts (local use only)
 create-pr.sh
 check-ci.sh
+claude-code-official-ref/

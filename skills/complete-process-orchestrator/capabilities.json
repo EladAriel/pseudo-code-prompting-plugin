@@ -1,7 +1,7 @@
 {
   "skill_id": "complete-process-orchestrator",
   "skill_name": "Complete Process Orchestrator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "orchestration",
   "category": "workflow_automation",
   "description": "Orchestrate end-to-end pseudo-code transformation workflows with automated validation, optimization, context-aware tree injection, and 60-80% context window reduction",
@@ -53,31 +53,53 @@
     "checkpoint_recovery",
     "context_window_optimization",
     "context_aware_tree_injection",
-    "mandatory_skill_tool_invocation"
+    "mandatory_skill_tool_invocation",
+    "welcome_menu_system",
+    "menu_state_persistence",
+    "ralph_consent_flow",
+    "keyword_based_routing"
   ],
   "metadata": {
     "author": "Elad Ariel",
     "created": "2026-01-18",
-    "updated": "2026-01-19",
-    "plugin_version": "1.6.1"
+    "updated": "2026-01-20",
+    "plugin_version": "1.0.9"
   },
   "triggers": {
     "keywords": [
       "use pseudo-code prompting plugin",
       "use pseudocode prompting plugin",
+      "use pseudo-code prompting with ralph",
+      "use pseudocode prompting with ralph",
       "invoke complete-process",
       "run complete-process",
-      "full transformation workflow"
+      "full transformation workflow",
+      "show plugin menu"
     ],
     "patterns": [
       "use.*pseudo.*code.*prompting.*plugin",
       "use.*pseudocode.*prompting.*plugin",
-      "invoke.*complete.*process"
+      "use.*pseudo.*code.*prompting.*with.*ralph",
+      "use.*pseudocode.*prompting.*with.*ralph",
+      "invoke.*complete.*process",
+      "show.*plugin.*menu"
     ],
     "contexts": [
       "user explicitly requested plugin usage",
+      "user requested plugin with ralph integration",
       "full transformation pipeline needed",
-      "optimization and validation required"
+      "optimization and validation required",
+      "user wants to see available commands"
+    ],
+    "menu_keywords": [
+      "help",
+      "commands",
+      "transform",
+      "validate",
+      "optimize",
+      "compress",
+      "complete",
+      "ralph"
     ]
   },
   "auto_invoke_on": [

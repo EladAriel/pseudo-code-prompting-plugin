@@ -178,13 +178,20 @@ Transformed: add_dark_mode_toggle(
 **Progress:**
 ```
 Step 1/3: 🔄 Transforming query to pseudo-code... ✓ (12s)
+✓ Step 1/3 complete | Tokens: 1,234
+
 Step 2/3: ✓ Validating requirements... ✓ (8s)
+✓ Step 2/3 complete | Tokens: 2,567
+
 Step 3/3: ⚡ Optimizing for implementation... ✓ (22s)
+✓ Step 3/3 complete | Tokens: 3,891
 
 ✓ Pipeline complete! Review output below.
+
+Total duration: 42 seconds | Total tokens: 3,891
 ```
 
-**Output (42 seconds):**
+**Output:**
 ```
 Optimized: implement_jwt_authentication(
   token_type="jwt",

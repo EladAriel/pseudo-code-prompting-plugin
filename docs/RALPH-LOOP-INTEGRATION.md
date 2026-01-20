@@ -141,6 +141,7 @@ Step 1/5: Running complete-process pipeline...
   ✓ Validation complete
   ✓ Optimization complete
   Duration: 45s
+✓ Step 1/5 complete | Tokens: 2,345
 
 Step 2/5: Analyzing complexity...
   Warnings: 5
@@ -151,6 +152,7 @@ Step 2/5: Analyzing complexity...
 
   Complexity Score: 47 (MEDIUM)
   ✓ Recommended iterations: 40
+✓ Step 2/5 complete | Tokens: 2,567
 
 Step 3/5: Generating completion criteria...
   Critical requirements identified:
@@ -159,11 +161,13 @@ Step 3/5: Generating completion criteria...
     • Requirement 3
 
   ✓ Promise: "IMPLEMENTATION COMPLETE: 3 requirements met"
+✓ Step 3/5 complete | Tokens: 2,789
 
 Step 4/5: Preparing Ralph Loop prompt...
   ✓ Prompt built (287 lines)
   ✓ Validation requirements embedded
   ✓ Success criteria documented
+✓ Step 4/5 complete | Tokens: 2,891
 
 Step 5/5: Starting Ralph Loop...
   Iterations: 40
@@ -176,9 +180,11 @@ Step 5/5: Starting Ralph Loop...
   You can cancel with: /cancel-ralph
 
 Starting Ralph Loop now...
+✓ Step 5/5 complete | Tokens: 3,012
 
 ═══════════════════════════════════════════════════════════
 Ralph Loop Activated
+Total tokens: 3,012
 ═══════════════════════════════════════════════════════════
 ```
 

@@ -1,7 +1,7 @@
 {
   "skill_id": "ralph-process-integration",
   "skill_name": "Ralph Process Integration",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "type": "orchestration",
   "category": "workflow_automation",
   "description": "Integrate pseudo-code processing with Ralph Loop for automated iterative implementation. Analyzes query complexity, generates completion criteria, manages .claude/ directory files, and launches Ralph Loop with optimized parameters.",
@@ -32,7 +32,11 @@
     "promise-extraction"
   ],
   "references": {
-    "ralph_invocation_spec": "references/ralph-invocation-specification.md"
+    "complexity_scoring": "references/complexity-scoring.md",
+    "promise_generation": "references/promise-generation.md",
+    "ralph_invocation_spec": "references/ralph-invocation-specification.md",
+    "ralph_prompt_template": "templates/ralph-prompt-template.md",
+    "token_tracking": "references/token-tracking.md"
   },
   "file_outputs": {
     "location": ".claude/",

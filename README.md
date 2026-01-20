@@ -2,7 +2,7 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.0.10-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 [![Last Updated](https://img.shields.io/badge/updated-2026--01--20-brightgreen.svg)](CHANGELOG.md)
@@ -85,9 +85,9 @@ You should see `pseudo-code-prompting` in the installed plugins list.
 ### 💡 Don't Like Commands? Just Talk to Claude!
 
 If you prefer not to use slash commands, simply say:
-- **"Use pseudo-code prompting plugin"** - Claude will guide you through the transformation process
-- **"Use pseudo-code prompting plugin with Ralph"** - Claude will orchestrate the complete workflow with Ralph Loop for automated implementation
-- **Use pseudo-code prompting {{command}} to {{task}}** - Claude will invoke the plugin's command.
+- **"Run pseudo-code prompting plugin"** - Claude will guide you through the transformation process
+- **"Run pseudo-code prompting plugin with Ralph"** - Claude will orchestrate the complete workflow with Ralph Loop for automated implementation
+- **Run pseudo-code prompting {{command}}: {{task}}** - Claude will invoke the plugin's command.
 The commands: `complete process`, `compress context`, `context aware transform`, `optimize prompt`, `ralph process`, `transform query`, `validate requirements`
 
 Claude will understand your intent and invoke the appropriate skills automatically.

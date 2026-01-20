@@ -5,6 +5,84 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.1.0] - 2026-01-20
+
+### Added
+
+- **Token Count Display & Progress Tracking**
+
+  Implemented real-time token consumption tracking across multi-step workflows for cost visibility and budget planning.
+
+  **New Reference Files:**
+  - [skills/complete-process-orchestrator/references/token-tracking.md](skills/complete-process-orchestrator/references/token-tracking.md) - Token tracking for 3-step workflow
+  - [skills/ralph-process-integration/references/token-tracking.md](skills/ralph-process-integration/references/token-tracking.md) - Token tracking for 8-step workflow
+
+  **Updated Files:**
+  - [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md) - Added token tracking instructions (+4 lines, now 331 lines)
+  - [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md) - Added token tracking instructions (+1 line, now 285 lines)
+  - [skills/complete-process-orchestrator/capabilities.json](skills/complete-process-orchestrator/capabilities.json) - Added token_tracking reference
+  - [skills/ralph-process-integration/capabilities.json](skills/ralph-process-integration/capabilities.json) - Added token_tracking reference
+  - [skills/complete-process-orchestrator/templates/mode-selection.md](skills/complete-process-orchestrator/templates/mode-selection.md) - Updated progress examples
+  - [commands/complete-process.md](commands/complete-process.md) - Updated output examples
+  - [docs/RALPH-LOOP-INTEGRATION.md](docs/RALPH-LOOP-INTEGRATION.md) - Updated workflow examples
+
+  **Display Format:**
+
+  ```text
+  Step 1/3: 🔄 Transforming query to pseudo-code... ✓ (12s)
+  ✓ Step 1/3 complete | Tokens: 1,234
+
+  Step 2/3: ✓ Validating requirements... ✓ (8s)
+  ✓ Step 2/3 complete | Tokens: 2,567
+
+  Step 3/3: ⚡ Optimizing for implementation... ✓ (18s)
+  ✓ Step 3/3 complete | Tokens: 3,891
+
+  ✓ Pipeline complete! Review output below.
+  Total duration: 38 seconds | Total tokens: 3,891
+  ```
+
+  **Benefits:**
+  - Real-time cost tracking with per-step token visibility
+  - Budget planning with predictable cost patterns
+  - Performance insights showing token consumption by step
+  - Transparency through comma-separated token counts (e.g., 1,234)
+  - Modular design maintaining clean SKILL.md files under control
+
+### Changed
+
+- **Skills Modular Structure Refactoring**
+
+  Refactored two major orchestrator skills to improve maintainability, readability, and reduce token usage:
+
+  **Ralph Process Integration (v1.5.0 → v1.6.0)**
+  - Refactored [skills/ralph-process-integration/SKILL.md](skills/ralph-process-integration/SKILL.md) from 822 lines to 284 lines (65% reduction)
+  - Split detailed content into focused reference files:
+    - [references/complexity-scoring.md](skills/ralph-process-integration/references/complexity-scoring.md) - Algorithm and parsing logic
+    - [references/promise-generation.md](skills/ralph-process-integration/references/promise-generation.md) - Promise extraction rules
+    - [references/ralph-invocation-specification.md](skills/ralph-process-integration/references/ralph-invocation-specification.md) - Ralph Loop integration details
+    - [templates/ralph-prompt-template.md](skills/ralph-process-integration/templates/ralph-prompt-template.md) - File structure templates
+  - Updated [capabilities.json](skills/ralph-process-integration/capabilities.json) version to 1.6.0 with all reference links
+
+  **Complete Process Orchestrator (v1.2.0 → v1.3.0)**
+  - Refactored [skills/complete-process-orchestrator/SKILL.md](skills/complete-process-orchestrator/SKILL.md) from 885 lines to 327 lines (63% reduction)
+  - Created new reference files:
+    - [references/welcome-menu-system.md](skills/complete-process-orchestrator/references/welcome-menu-system.md) - Interactive menu behavior and Ralph consent flow
+    - [references/context-aware-detection.md](skills/complete-process-orchestrator/references/context-aware-detection.md) - Project tree injection and context optimization
+  - Leveraged existing reference files:
+    - [references/workflow-patterns.md](skills/complete-process-orchestrator/references/workflow-patterns.md) - Detailed execution patterns
+    - [templates/mode-selection.md](skills/complete-process-orchestrator/templates/mode-selection.md) - Mode selection criteria
+  - Updated [capabilities.json](skills/complete-process-orchestrator/capabilities.json) version to 1.3.0 with all reference links
+
+  **Benefits:**
+  - Easier to maintain and update specific components
+  - Better navigation and readability
+  - Reduced token usage when loading skills (~60-65% reduction)
+  - Clearer separation of concerns (workflow vs. implementation details)
+  - Main SKILL.md files now serve as high-level overviews with references to detailed documentation
+
 ## [1.0.10] - 2026-01-20
 
 ### Fixed

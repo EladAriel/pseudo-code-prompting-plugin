@@ -15,7 +15,7 @@
 
 This error is **NOT from your pseudo-code-prompting plugin**.
 
-Your [hooks.json:37](hooks/hooks.json#L37) correctly has:
+Your [hooks.json:37](../hooks/hooks.json#L37) correctly has:
 ```json
 "Stop": []
 ```
@@ -151,7 +151,7 @@ python --version
 
 ### Explanation
 
-Hooks in [hooks.json](hooks/hooks.json) have timeout settings:
+Hooks in [hooks.json](../hooks/hooks.json) have timeout settings:
 
 ```json
 {

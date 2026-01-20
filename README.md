@@ -2,10 +2,22 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.0.10-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 [![Last Updated](https://img.shields.io/badge/updated-2026--01--20-brightgreen.svg)](CHANGELOG.md)
+
+## 🎉 What's New in v1.1.0
+
+**"The Clarity Update"** - Major improvements to workflow reliability and user experience:
+
+- ✅ **Fixed:** Pseudocode process no longer ignored (simplified SKILL.md files by 55%)
+- ✅ **Added:** Token tracking after every step (`✓ Step N/M complete | Tokens: 1,234`)
+- ✅ **Added:** Progress indicators (Step N/M format)
+- ✅ **Fixed:** Eliminated conversation flow confusion
+- 📚 **New Docs:** [Quick Reference](docs/QUICK-REFERENCE.md) | [Windows Troubleshooting](docs/WINDOWS-WSL-TROUBLESHOOTING.md)
+
+See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ## Table of Contents
 
@@ -300,8 +312,25 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for architectural details, incl
 
 ## Troubleshooting
 
-See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions, including:
+### Quick Reference
 
+See [docs/QUICK-REFERENCE.md](docs/QUICK-REFERENCE.md) for:
+- One-page command comparison
+- Decision tree for workflow selection
+- Token budget planning
+- Quick start examples
+
+### Windows/WSL Issues
+
+See [docs/WINDOWS-WSL-TROUBLESHOOTING.md](docs/WINDOWS-WSL-TROUBLESHOOTING.md) for:
+- Phantom "Stop hook error" (bash script from Ralph Loop, not this plugin)
+- Git Bash / WSL setup instructions
+- Python hooks vs bash hooks comparison
+- Hook debugging tips
+
+### General Troubleshooting
+
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for:
 - Commands not working
 - Hooks not triggering
 - Skills not auto-invoked

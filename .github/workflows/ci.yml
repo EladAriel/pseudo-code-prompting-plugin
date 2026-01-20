@@ -158,8 +158,10 @@ jobs:
                   continue
                 fi
                 # Check if file exists (relative to file location)
+                # Strip anchor fragment (#...) from link before checking
+                target="${link%%#*}"
                 dir=$(dirname "$file")
-                if [ ! -f "$dir/$link" ] && [ ! -f "$link" ]; then
+                if [ ! -f "$dir/$target" ] && [ ! -f "$target" ]; then
                   echo "❌ Broken link in $file: $link"
                   exit 1
                 fi

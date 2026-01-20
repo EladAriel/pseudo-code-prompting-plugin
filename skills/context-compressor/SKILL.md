@@ -1,280 +1,151 @@
-# Context Compressor Skill
+---
+name: context-compressor
+description: Compress verbose text into token-efficient pseudo-code
+allowed-tools: Read
+model: sonnet
+---
 
-## Purpose
+# Context Compressor
 
-Compress long conversations and context into efficient pseudo-code summaries to manage token limits and maintain conversation continuity across extended sessions.
+Convert verbose requirements into concise pseudo-code format.
 
-## Core Concept
+## WHAT THIS DOES
 
-Transform verbose conversation history into structured, token-efficient pseudo-code that preserves:
-- Key decisions and outcomes
-- State changes and progress
-- Critical context and dependencies
-- Action items and next steps
+Transforms long-winded descriptions into compact function-call syntax:
 
-## Compression Methodology
+```text
+Before (150 tokens):
+"We need to build a user authentication system. It should support
+multiple providers like Google and GitHub. Users should be able
+to sign in with OAuth. We need JWT tokens that expire after 1 hour.
+Also add refresh token support. Make sure passwords are hashed."
 
-### 1. Conversation Analysis
-
-Identify compressible elements:
-- **Redundant exchanges**: Repeated questions/answers
-- **Verbose explanations**: Can be condensed to function calls
-- **Decision trails**: Compress to decision outcomes
-- **Code discussions**: Extract to pseudo-code operations
-
-### 2. Pseudo-Code Encoding
-
-Transform conversation segments into structured format:
-
-```
-# Original (150 tokens):
-"We discussed adding user authentication. After considering 
-various options, we decided to implement OAuth 2.0 with Google 
-and GitHub as providers. We also need to add JWT token 
-management and refresh token handling. The tokens should 
-expire after 24 hours."
-
-# Compressed (35 tokens):
-implement_authentication(
-  type="oauth2",
+After (35 tokens):
+implement_auth(
+  type="oauth",
   providers=["google", "github"],
-  token_management="jwt",
-  refresh_enabled=true,
-  token_ttl="24h"
+  tokens={"type": "jwt", "expiry": "1h", "refresh": true},
+  password_hashing="bcrypt"
 )
 ```
 
-### 3. State Tracking
+**Compression: 76% reduction**
 
-Maintain current state in compressed format:
+## COMPRESSION RULES
 
-```
-# Project State
-project_state(
-  phase="implementation",
-  completed=["architecture", "database_schema", "api_design"],
-  in_progress=["authentication"],
-  pending=["testing", "deployment"],
-  blockers=[]
-)
+### Rule 1: Extract Actions → Function Names
+
+```text
+"Build a REST API" → build_rest_api(...)
+"Add user authentication" → add_authentication(...)
+"Implement caching" → implement_caching(...)
 ```
 
-### 4. Decision Registry
+### Rule 2: Extract Details → Parameters
 
-Track decisions made during conversation:
-
-```
-# Decision Log
-decision(
-  id="AUTH-001",
-  topic="authentication_method",
-  chosen="oauth2",
-  alternatives_considered=["session_based", "api_keys"],
-  rationale="better_security_and_ux",
-  timestamp="2026-01-13T11:00:00Z"
-)
+```text
+"Support Google and GitHub" → providers=["google", "github"]
+"Expire after 1 hour" → expiry="1h"
+"Use Redis for caching" → cache_type="redis"
 ```
 
-## Compression Strategies
+### Rule 3: Group Related Info → Objects
 
-### High-Value Preservation
-
-Always preserve:
-- **Current goals/objectives**
-- **Active decisions and their rationale**
-- **Blocking issues or critical dependencies**
-- **Explicit user preferences and constraints**
-
-### Safe Compression
-
-Can be heavily compressed:
-- Intermediate discussion steps
-- Explanatory text (convert to function parameters)
-- Historical context (summarize outcomes only)
-- Resolved issues (keep resolution, compress discussion)
-
-### Example Transformations
-
-#### Code Review Discussion → Pseudo-Code
-```
-# Before (200 tokens):
-"Looking at the authentication module, I noticed several 
-potential improvements. First, the password hashing could 
-use bcrypt instead of sha256 for better security. Second, 
-we should add rate limiting to prevent brute force attacks. 
-Third, the session management needs to handle concurrent 
-logins better. Let's implement these changes."
-
-# After (45 tokens):
-review_authentication(
-  findings=[
-    "upgrade_hashing: sha256 -> bcrypt",
-    "add_rate_limiting: prevent_brute_force",
-    "improve_session_mgmt: handle_concurrent_logins"
-  ],
-  action="implement_improvements"
-)
+```text
+"JWT tokens that expire after 1 hour with refresh support"
+→ tokens={"type": "jwt", "expiry": "1h", "refresh": true}
 ```
 
-#### Feature Discussion → State Update
+### Rule 4: Remove Filler Words
+
+Remove: "we need to", "should", "make sure", "also", "it would be nice"
+
+## OUTPUT FORMAT
+
+```text
+# Compressed Pseudo-Code
+
+[function_call]
+
+## Compression Stats
+
+Original: [N] tokens
+Compressed: [N] tokens
+Reduction: [N]% ([N] tokens saved)
 ```
-# Before (180 tokens):
-"We've been working on the user dashboard feature. We've 
-completed the layout design and integrated the chart library. 
-Currently implementing the data fetching logic. Still need 
-to add real-time updates and export functionality. The 
-export should support CSV and PDF formats."
 
-# After (50 tokens):
-feature_progress(
-  feature="user_dashboard",
-  status="in_progress",
-  completed=["layout_design", "chart_integration"],
-  current="data_fetching_logic",
-  pending=["realtime_updates", "export(formats=['csv','pdf'])"]
-)
+## EXAMPLE
+
+### Input (Verbose)
+
+```text
+We're building a task management application. Users should be able
+to create, read, update, and delete tasks. Each task has a title,
+description, due date, and priority level. We need to implement
+user authentication so only logged-in users can access their tasks.
+Use JWT tokens for authentication. The API should be RESTful with
+proper HTTP status codes. We also need to add input validation to
+make sure task titles aren't empty and due dates are in the future.
+Error messages should be user-friendly. Oh, and we should add rate
+limiting to prevent abuse.
+
+(125 tokens)
 ```
 
-## Compression Levels
+### Output (Compressed)
 
-### Level 1: Light Compression (70% retention)
-- Preserve most context
-- Condense repetitive elements
-- Use for recent conversation segments
+```text
+# Compressed Pseudo-Code
 
-### Level 2: Medium Compression (50% retention)
-- Convert discussions to outcomes
-- Use pseudo-code for decisions
-- Use for mid-range history
-
-### Level 3: Heavy Compression (30% retention)
-- Outcome-only summaries
-- Minimal context preservation
-- Use for older conversation segments
-
-## When to Compress
-
-### Automatic Triggers
-- Token count approaching 80% of limit
-- Conversation exceeds 50 exchanges
-- Phase transitions in workflow
-- User requests summary
-
-### Manual Triggers
-- User says "compress context"
-- User says "summarize conversation"
-- User says "what have we discussed?"
-
-## Output Format
-
-### Compressed Context Block
-
-```markdown
-# Conversation Summary (Compressed)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-## Project Context
-project(
-  name="UserAuthSystem",
-  phase="implementation",
-  started="2026-01-13"
+build_task_management_app(
+  features=["crud"],
+  task_schema={
+    "title": "string:required",
+    "description": "string:optional",
+    "due_date": "datetime:required",
+    "priority": "enum:[low,medium,high]"
+  },
+  auth={
+    "type": "jwt",
+    "required": true
+  },
+  api={
+    "type": "rest",
+    "status_codes": "standard"
+  },
+  validation={
+    "title": "not_empty",
+    "due_date": "future_only"
+  },
+  error_handling="user_friendly_messages",
+  rate_limiting="enabled"
 )
 
-## Completed Actions
-✓ implement_database_schema()
-✓ create_api_endpoints(count=5)
-✓ setup_authentication(type="oauth2")
+## Compression Stats
 
-## Current Focus
-→ implement_rate_limiting(endpoints=["auth", "api"])
-→ add_testing(coverage="unit_and_integration")
-
-## Pending Tasks
-- deploy_to_staging()
-- perform_security_audit()
-- update_documentation()
-
-## Key Decisions
-decision("AUTH-001", chosen="oauth2", rationale="security_and_ux")
-decision("DB-001", chosen="postgresql", rationale="relational_needs")
-
-## Blockers
-- None
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Original: 2,400 tokens → Compressed: 320 tokens (87% reduction)
+Original: 125 tokens
+Compressed: 68 tokens
+Reduction: 46% (57 tokens saved)
 ```
 
-## Integration with Other Skills
+## WHEN TO USE
 
-### Works with:
-- **prompt-structurer**: Use pseudo-code format for compression
-- **prompt-optimizer**: Further optimize compressed pseudo-code
-- **requirement-validator**: Validate nothing critical was lost
-- **feature-dev-enhancement**: Track phase-based progress
+Use compression when:
 
-## Best Practices
+- User provides long descriptions
+- Requirements are buried in prose
+- Context window is filling up
+- Need to summarize progress
+- Documenting decisions compactly
 
-1. **Compress incrementally**: Don't wait until token limit
-2. **Preserve user voice**: Keep explicit user requirements verbatim
-3. **Version summaries**: Allow reverting to more detailed versions
-4. **Validate compression**: Ensure no critical information lost
-5. **Use references**: Link to full conversation if available
+## QUICK RULES
 
-## Example Usage
+1. **Preserve all** semantic information
+2. **Remove filler** words and phrases
+3. **Group related** parameters into objects
+4. **Use abbreviations** (auth, API, DB) where clear
+5. **Show compression** stats (tokens saved)
 
-### User Request
-"We've been talking for a while. Can you compress our conversation so far?"
+## VERSION
 
-### Response
-```markdown
-I'll compress our conversation using pseudo-code summaries:
-
-# Compressed Context
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-## Session Goal
-implement_feature(
-  name="user_authentication",
-  requirements=["oauth2", "jwt", "refresh_tokens"],
-  deadline="2026-01-20"
-)
-
-## Progress
-completed_tasks([
-  "analyze_requirements()",
-  "design_architecture(pattern='oauth2')",
-  "implement_database(tables=['users','tokens','sessions'])",
-  "create_endpoints(auth=['login','logout','refresh'])"
-])
-
-current_task(
-  "implement_token_refresh()",
-  status="in_progress",
-  remaining=["validation", "testing"]
-)
-
-## Next Steps
-1. complete_token_refresh()
-2. add_rate_limiting(strategy="token_bucket")
-3. implement_testing(types=["unit", "integration"])
-4. deploy_to_staging()
-
-## Key Constraints
-- security_level="enterprise"
-- compatibility="preserve_existing_sessions"
-- performance="<100ms_response_time"
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Token Reduction: 2,100 → 280 tokens (87% saved)
-```
-
-This preserves all critical information while dramatically reducing token usage. We can continue from here.
-```
-
-## Metrics
-
-- **Typical Compression Ratio**: 70-90% token reduction
-- **Information Retention**: 95%+ of critical context
-- **Processing Time**: <2 seconds per 1000 tokens
-- **Accuracy**: 98%+ preservation of decisions and outcomes
+**2.0.0** - Simplified (280 → 150 lines)

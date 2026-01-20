@@ -16,18 +16,21 @@
 This error is **NOT from your pseudo-code-prompting plugin**.
 
 Your [hooks.json:37](../hooks/hooks.json#L37) correctly has:
+
 ```json
 "Stop": []
 ```
 
 The error comes from the **Ralph Loop plugin** trying to execute bash scripts on Windows:
-```
+
+```markdown
 "C:\Users\[user]\.claude\plugins\cache\claude-plugins-official\ralph-loop\96276205880a/scripts/setup-ralph-loop.sh"
 ```
 
 ### Why This Happens
 
 Ralph Loop uses bash scripts (`.sh` files) which require:
+
 - Git Bash
 - WSL (Windows Subsystem for Linux)
 - MSYS2
@@ -39,7 +42,7 @@ On Windows, if none of these are available or properly configured, the bash scri
 
 #### Option 1: Install Git Bash (Recommended)
 
-1. Install Git for Windows: https://git-scm-downloads.microsoft.com
+1. Install Git for Windows: [Installation Link](https://git-scm-downloads.microsoft.com)
 2. During installation, select "Use Git and optional Unix tools from Command Prompt"
 3. Restart Claude Code
 4. Test: `bash --version` in terminal
@@ -47,14 +50,18 @@ On Windows, if none of these are available or properly configured, the bash scri
 #### Option 2: Use WSL
 
 1. Enable WSL in PowerShell (Admin):
+
    ```powershell
    wsl --install
    ```
+
 2. Restart computer
 3. Set default bash to WSL:
+
    ```powershell
    wsl --set-default Ubuntu
    ```
+
 4. Test: `wsl bash --version`
 
 #### Option 3: Contact Ralph Loop Maintainers
@@ -62,6 +69,7 @@ On Windows, if none of these are available or properly configured, the bash scri
 The Ralph Loop plugin should support Python hooks (like your plugin does) instead of bash scripts on Windows.
 
 File an issue at the Ralph Loop repository suggesting:
+
 - Migrate hooks from bash scripts to Python scripts
 - Add Windows compatibility checks
 - Provide fallback for missing bash
@@ -168,6 +176,7 @@ Increase timeout in your local settings:
 
 1. Create `.claude/settings.local.json` in your project
 2. Override timeout:
+
    ```json
    {
      "hooks": {
@@ -201,6 +210,7 @@ Your pseudo-code-prompting plugin uses **Python hooks**, which is the correct ap
 ```
 
 **Benefits:**
+
 - ✅ Works on Windows without Git Bash/WSL
 - ✅ Uses Python's `json` module for parsing
 - ✅ Clean error handling with try/except
@@ -250,6 +260,7 @@ export CLAUDE_DEBUG_HOOKS=true
 ### Check Hook Logs
 
 Hook output appears in:
+
 - Claude Code console (View → Output → Claude Code)
 - Hook execution summary in chat
 
@@ -274,9 +285,9 @@ python3 $CLAUDE_PLUGIN_ROOT/hooks/core/user-prompt-submit.py
 
 ## Need Help?
 
-1. **Your plugin issues:** File at https://github.com/EladAriel/pseudo-code-prompting-plugin/issues
+1. **Your plugin issues:** File at [Plugin Issues](https://github.com/EladAriel/pseudo-code-prompting-plugin/issues)
 2. **Ralph Loop issues:** File at Ralph Loop repository (bash script compatibility)
-3. **Claude Code issues:** File at https://github.com/anthropics/claude-code/issues
+3. **Claude Code issues:** File at [Claude Issues](https://github.com/anthropics/claude-code/issues)
 
 ## Version
 

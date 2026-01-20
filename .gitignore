@@ -58,5 +58,6 @@ release_notes.md
 # Claude Code only loads: skills/, agents/, commands/, hooks/, plugin.json
 # examples/ folder is safe for demo projects
 
-# PR helper scripts (local use only)
+# Helper scripts (local use only)
 create-pr.sh
+check-ci.sh

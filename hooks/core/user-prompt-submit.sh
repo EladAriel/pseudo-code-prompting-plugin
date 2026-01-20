@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Claude Code Hook: UserPromptSubmit
 # Event: Triggered when user submits a prompt
@@ -35,68 +35,19 @@ fi
 if [[ "$PROMPT" =~ [Uu]se.*(pseudo.*code.*prompting|pseudocode.*prompting).*(plugin|with.*ralph|with.*Ralph) ]] || \
    [[ "$PROMPT" =~ [Ii]nvoke.*(pseudo|pseudocode).*(plugin|workflow) ]]; then
 
-  # Detect if this is a Ralph request
-  USE_RALPH=false
-  if [[ "$PROMPT" =~ [Ww]ith.*[Rr]alph ]]; then
-    USE_RALPH=true
-  fi
-
   # User explicitly asked to use the plugin - inject reminder to invoke the skill
   cat <<EOF
 
 <plugin-invocation-detected>
-CRITICAL INSTRUCTION - READ THIS FIRST:
+CRITICAL: The user explicitly requested to use the pseudo-code prompting plugin.
 
-The user explicitly requested to use the pseudo-code prompting plugin.
+You MUST invoke the appropriate skill immediately using the Skill tool as your FIRST action:
 
-MANDATORY ACTION SEQUENCE:
-=========================
+- If user mentioned "with Ralph" or "with ralph": Use skill="pseudo-code-prompting:ralph-process"
+- Otherwise: Use skill="pseudo-code-prompting:complete-process"
 
-Step 1: IMMEDIATELY invoke the Skill tool (do NOT skip this):
-EOF
-
-  if [ "$USE_RALPH" = true ]; then
-    cat <<EOF
-   skill="pseudo-code-prompting:ralph-process"
-   args="[user will provide their requirements in the next message]"
-
-Step 2: After the skill loads, you will see <command-name>/ralph-process</command-name>
-   This means the skill is loaded and ready. You MUST follow its instructions.
-
-Step 3: The ralph-process skill will:
-   • Run complete-process pipeline FIRST (transform → validate → optimize)
-   • Analyze complexity and estimate iterations
-   • Generate completion promise
-   • Write all files to .claude/ directory
-   • Launch Ralph Loop with file references
-
-WORKFLOW OVERVIEW:
-==================
-1. ✓ complete-process runs (30-90s)
-2. ✓ Complexity analyzed
-3. ✓ Files written to .claude/
-4. ✓ Ralph Loop starts with file references
-EOF
-  else
-    cat <<EOF
-   skill="pseudo-code-prompting:complete-process"
-   args="[user will provide their requirements in the next message]"
-
-Step 2: After the skill loads, follow the complete-process workflow
-EOF
-  fi
-
-  cat <<EOF
-
-CRITICAL RULES:
-===============
-✗ DO NOT skip Step 1 - invoke the Skill tool IMMEDIATELY
-✗ DO NOT use other tools before invoking the skill
-✗ DO NOT proceed with manual implementation
-✗ DO NOT just explain what the skill does - INVOKE IT
-
-✓ DO invoke the Skill tool as your FIRST action
-✓ DO ask the user for their requirements after the skill loads
+DO NOT proceed with manual implementation. DO NOT use other tools first.
+IMMEDIATELY invoke the Skill tool, then ask the user what they want to implement.
 
 User's original request: "$PROMPT"
 </plugin-invocation-detected>

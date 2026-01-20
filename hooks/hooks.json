@@ -4,19 +4,19 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "/usr/bin/env sh ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh",
+        "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.sh",
         "statusMessage": "Checking for pseudo-code transformation commands...",
         "timeout": 10
       },
       {
         "type": "command",
-        "command": "/usr/bin/env sh ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.sh",
+        "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.sh",
         "statusMessage": "Analyzing context compression opportunities...",
         "timeout": 10
       },
       {
         "type": "command",
-        "command": "/usr/bin/env sh ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.sh",
+        "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.sh",
         "statusMessage": "Analyzing project structure for context-aware suggestions...",
         "timeout": 15
       }
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh ${CLAUDE_PLUGIN_ROOT}/hooks/validation/post-transform-validation.sh",
+            "command": "/usr/bin/env bash ${CLAUDE_PLUGIN_ROOT}/hooks/validation/post-transform-validation.sh",
             "statusMessage": "Validating transformed output...",
             "timeout": 10
           }

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Claude Code Hook: ContextCompressionHelper
 # Event: Triggered when verbose requirements are detected

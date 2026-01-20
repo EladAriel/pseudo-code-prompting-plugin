@@ -2,10 +2,10 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.0.9-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.10-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
-[![Last Updated](https://img.shields.io/badge/updated-2026--01--19-brightgreen.svg)](CHANGELOG.md)
+[![Last Updated](https://img.shields.io/badge/updated-2026--01--20-brightgreen.svg)](CHANGELOG.md)
 
 ## Table of Contents
 
@@ -180,12 +180,16 @@ Skills are automatically invoked by Claude when relevant keywords/patterns are d
 
 ### ⚡ 4 Automated Hooks
 
+All hooks are implemented in Python 3 for robust JSON parsing and cross-platform compatibility.
+
 | Hook | Trigger | Purpose |
 |------|---------|---------|
 | **user-prompt-submit** | User input | Detect /feature-dev commands, inject transformation |
 | **post-transform-validation** | After transformation | Auto-validate output |
 | **context-compression-helper** | Verbose input (>100 words) | Suggest compression |
 | **context-aware-tree-injection** | Implementation keywords | Analyze project structure for architecture-aware suggestions |
+
+**Note:** As of v1.0.10, all hooks use Python 3 with `json.load()` for reliable JSON parsing, ensuring proper handling of escaped characters, nested JSON, and complex strings across all platforms (Windows, WSL, Linux, macOS).
 
 ### 🌳 Context-Aware `/transform-query`
 

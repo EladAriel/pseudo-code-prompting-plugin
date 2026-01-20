@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Claude Code Hook: ContextCompressionHelper
 # Event: Triggered when verbose requirements are detected
@@ -9,20 +9,16 @@
 # 2. Suggests using context-compressor skill for better efficiency
 # 3. Helps maintain token efficiency in conversations
 
-set -euo pipefail
+set -eu
 
 # Read hook input from stdin (JSON format)
 INPUT=$(cat)
 
-# Extract the user prompt using pure bash (no jq dependency)
-if [[ "$INPUT" =~ \"prompt\":[[:space:]]*\"([^\"]*)\" ]]; then
-  PROMPT="${BASH_REMATCH[1]}"
-else
-  exit 0
-fi
+# Extract the user prompt using POSIX-compatible method (no jq dependency)
+PROMPT=$(echo "$INPUT" | sed -n 's/.*"prompt"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 
 # Check if prompt is empty
-if [[ -z "$PROMPT" ]]; then
+if [ -z "$PROMPT" ]; then
   exit 0
 fi
 
@@ -30,10 +26,12 @@ fi
 WORD_COUNT=$(echo "$PROMPT" | wc -w)
 
 # Detect verbose requirements (more than 100 words and contains requirement keywords)
-if [[ $WORD_COUNT -gt 100 ]] && [[ "$PROMPT" =~ (implement|create|add|build|need|want|should|must|require) ]]; then
-  # Check if it's a feature request or requirement specification
-  if [[ "$PROMPT" =~ (feature|endpoint|authentication|database|API|system|function|service) ]]; then
-    cat <<EOF
+if [ "$WORD_COUNT" -gt 100 ]; then
+  case "$PROMPT" in
+    *implement*|*create*|*add*|*build*|*need*|*want*|*should*|*must*|*require*)
+      case "$PROMPT" in
+        *feature*|*endpoint*|*authentication*|*database*|*API*|*system*|*function*|*service*)
+          cat <<EOF
 
 [VERBOSE REQUIREMENT DETECTED - ${WORD_COUNT} words]
 
@@ -47,13 +45,17 @@ Example: /compress-context [your verbose requirement]
 
 Proceeding with current request...
 EOF
-    exit 0
-  fi
+          exit 0
+          ;;
+      esac
+      ;;
+  esac
 fi
 
 # Check for explicit compression commands
-if [[ "$PROMPT" =~ ^/(compress|compress-context)[[:space:]] ]]; then
-  cat <<EOF
+case "$PROMPT" in
+  /compress\ *|/compress-context\ *)
+    cat <<EOF
 
 [CONTEXT COMPRESSION MODE]
 
@@ -67,8 +69,9 @@ Applying compression techniques to transform verbose requirements into concise p
 
 Use the context-compressor skill to systematically compress the requirement.
 EOF
-  exit 0
-fi
+    exit 0
+    ;;
+esac
 
 # Pass through unchanged
 exit 0

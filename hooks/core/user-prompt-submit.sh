@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Claude Code Hook: UserPromptSubmit
 # Event: Triggered when user submits a prompt
@@ -10,33 +10,31 @@
 # 3. Injecting context that activates the prompt-structurer Skill
 # 4. Allowing Claude to apply transformation rules automatically
 
-set -euo pipefail
+set -eu
 
 # Read hook input from stdin (JSON format)
 # Schema: { session_id, transcript_path, cwd, permission_mode, hook_event_name, prompt }
 INPUT=$(cat)
 
-# Extract the user prompt using pure bash (no jq dependency)
-# Look for "prompt":"..." pattern and extract the value
-if [[ "$INPUT" =~ \"prompt\":[[:space:]]*\"([^\"]*)\" ]]; then
-  PROMPT="${BASH_REMATCH[1]}"
-else
-  # No prompt found, exit
-  exit 0
-fi
+# Extract the user prompt using POSIX-compatible method (no jq dependency)
+# Look for "prompt":"..." pattern and extract the value using sed
+PROMPT=$(echo "$INPUT" | sed -n 's/.*"prompt"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
 
 # Check if prompt is empty
-if [[ -z "$PROMPT" ]]; then
+if [ -z "$PROMPT" ]; then
   exit 0
 fi
 
 # Check for explicit plugin invocation
 # Match patterns: "Use pseudo-code prompting plugin", "Use pseudocode prompting with ralph", etc.
-if [[ "$PROMPT" =~ [Uu]se.*(pseudo.*code.*prompting|pseudocode.*prompting).*(plugin|with.*ralph|with.*Ralph) ]] || \
-   [[ "$PROMPT" =~ [Ii]nvoke.*(pseudo|pseudocode).*(plugin|workflow) ]]; then
-
-  # User explicitly asked to use the plugin - inject reminder to invoke the skill
-  cat <<EOF
+case "$PROMPT" in
+  *[Uu]se*pseudo*code*prompting*plugin*|*[Uu]se*pseudo*code*prompting*with*ralph*|\
+  *[Uu]se*pseudo*code*prompting*with*Ralph*|*[Uu]se*pseudocode*prompting*plugin*|\
+  *[Uu]se*pseudocode*prompting*with*ralph*|*[Uu]se*pseudocode*prompting*with*Ralph*|\
+  *[Ii]nvoke*pseudo*plugin*|*[Ii]nvoke*pseudo*workflow*|\
+  *[Ii]nvoke*pseudocode*plugin*|*[Ii]nvoke*pseudocode*workflow*)
+    # User explicitly asked to use the plugin - inject reminder to invoke the skill
+    cat <<EOF
 
 <plugin-invocation-detected>
 CRITICAL: The user explicitly requested to use the pseudo-code prompting plugin.
@@ -52,20 +50,22 @@ IMMEDIATELY invoke the Skill tool, then ask the user what they want to implement
 User's original request: "$PROMPT"
 </plugin-invocation-detected>
 EOF
-
-  exit 0
-fi
+    exit 0
+    ;;
+esac
 
 # Detect transformation trigger keywords
 # Match patterns: "transform", "convert to pseudo", "structure", etc.
-if [[ "$PROMPT" =~ (transform|convert).*(pseudo|pseudo-code|pseudocode) ]] || \
-   [[ "$PROMPT" =~ ^(structure|formalize).*(request|requirement|query) ]]; then
+case "$PROMPT" in
+  *transform*pseudo*|*transform*pseudo-code*|*transform*pseudocode*|\
+  *convert*pseudo*|*convert*pseudo-code*|*convert*pseudocode*|\
+  structure*request*|structure*requirement*|structure*query*|\
+  formalize*request*|formalize*requirement*|formalize*query*)
+    # Extract the actual request (everything after "transform to pseudo code:" or similar)
+    REQUEST=$(echo "$PROMPT" | sed -E 's/^(transform|convert).*(pseudo|pseudo-code|pseudocode):?[[:space:]]*//i')
 
-  # Extract the actual request (everything after "transform to pseudo code:" or similar)
-  REQUEST=$(echo "$PROMPT" | sed -E 's/^(transform|convert).*(pseudo|pseudo-code|pseudocode):?\s*//i')
-
-  # Inject PROMPTCONVERTER transformation instructions directly
-  cat <<EOF
+    # Inject PROMPTCONVERTER transformation instructions directly
+    cat <<EOF
 
 <promptconverter-mode>
 CRITICAL: You MUST transform the user's request into PROMPTCONVERTER pseudo-code format.
@@ -111,9 +111,9 @@ Output: create_crud_api(language="python", operations=["create","read","update",
 Now transform the user's request following these rules exactly.
 </promptconverter-mode>
 EOF
-
-  exit 0
-fi
+    exit 0
+    ;;
+esac
 
 # Not a pseudo-prompt command, pass through unchanged
 exit 0

@@ -1,6 +1,6 @@
 {
   "name": "pseudo-code-prompting",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Transform natural language into structured, validated pseudo-code with context-aware architecture analysis, semantic caching, Ralph Loop integration, and intelligent path injection - 8 skills, 5 agents, 7 commands, and 4 hooks for optimal implementation clarity and automated iterative development",
   "author": {
     "name": "Elad Ariel",

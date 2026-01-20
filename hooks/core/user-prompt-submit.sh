@@ -57,8 +57,8 @@ esac
 # Detect transformation trigger keywords
 # Match patterns: "transform", "convert to pseudo", "structure", etc.
 case "$PROMPT" in
-  *transform*pseudo*|*transform*pseudo-code*|*transform*pseudocode*|\
-  *convert*pseudo*|*convert*pseudo-code*|*convert*pseudocode*|\
+  *transform*pseudo*|\
+  *convert*pseudo*|\
   structure*request*|structure*requirement*|structure*query*|\
   formalize*request*|formalize*requirement*|formalize*query*)
     # Extract the actual request (everything after "transform to pseudo code:" or similar)

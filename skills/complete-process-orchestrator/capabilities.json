@@ -56,7 +56,6 @@
     "mandatory_skill_tool_invocation",
     "welcome_menu_system",
     "menu_state_persistence",
-    "ralph_consent_flow",
     "keyword_based_routing"
   ],
   "metadata": {
@@ -69,8 +68,6 @@
     "keywords": [
       "use pseudo-code prompting plugin",
       "use pseudocode prompting plugin",
-      "use pseudo-code prompting with ralph",
-      "use pseudocode prompting with ralph",
       "invoke complete-process",
       "run complete-process",
       "full transformation workflow",
@@ -79,14 +76,11 @@
     "patterns": [
       "use.*pseudo.*code.*prompting.*plugin",
       "use.*pseudocode.*prompting.*plugin",
-      "use.*pseudo.*code.*prompting.*with.*ralph",
-      "use.*pseudocode.*prompting.*with.*ralph",
       "invoke.*complete.*process",
       "show.*plugin.*menu"
     ],
     "contexts": [
       "user explicitly requested plugin usage",
-      "user requested plugin with ralph integration",
       "full transformation pipeline needed",
       "optimization and validation required",
       "user wants to see available commands"
@@ -98,8 +92,7 @@
       "validate",
       "optimize",
       "compress",
-      "complete",
-      "ralph"
+      "complete"
     ]
   },
   "auto_invoke_on": [

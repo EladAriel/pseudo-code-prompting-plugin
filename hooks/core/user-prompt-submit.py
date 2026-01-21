@@ -29,10 +29,11 @@ def main():
         sys.exit(0)
 
     # Check for explicit plugin invocation
-    # Match patterns: "Use pseudo-code prompting plugin", "Use pseudocode prompting with ralph", etc.
+    # Match patterns: "Use pseudo-code prompting plugin", "Run pseudo-code prompting", etc.
     plugin_patterns = [
-        r'[Uu]se.*pseudo.*code.*prompting.*(plugin|with.*ralph|with.*Ralph)',
-        r'[Uu]se.*pseudocode.*prompting.*(plugin|with.*ralph|with.*Ralph)',
+        r'[Uu]se.*pseudo.*code.*prompting.*plugin',
+        r'[Uu]se.*pseudocode.*prompting.*plugin',
+        r'[Rr]un.*pseudo.*code.*prompting.*plugin',
         r'[Ii]nvoke.*(pseudo|pseudocode).*(plugin|workflow)'
     ]
 
@@ -42,10 +43,9 @@ def main():
 <plugin-invocation-detected>
 CRITICAL: The user explicitly requested to use the pseudo-code prompting plugin.
 
-You MUST invoke the appropriate skill immediately using the Skill tool as your FIRST action:
+You MUST invoke the complete-process skill immediately using the Skill tool as your FIRST action:
 
-- If user mentioned "with Ralph" or "with ralph": Use skill="pseudo-code-prompting:ralph-process"
-- Otherwise: Use skill="pseudo-code-prompting:complete-process"
+Use skill="pseudo-code-prompting:complete-process"
 
 DO NOT proceed with manual implementation. DO NOT use other tools first.
 IMMEDIATELY invoke the Skill tool, then ask the user what they want to implement.

@@ -9,6 +9,23 @@ model: sonnet
 
 This Skill enhances the feature-dev plugin workflow by applying PROMPTCONVERTER methodology to structure feature requests into unambiguous pseudo-code directives.
 
+## Memory Integration (START - MANDATORY)
+
+Before enhancing feature-dev workflows, load session memory:
+
+```
+# Step 1: Create memory directory (permission-free)
+Bash(command="mkdir -p .claude/pseudo-code-prompting")
+
+# Step 2: Load memory files (permission-free)
+Read(file_path=".claude/pseudo-code-prompting/patterns.md")
+```
+
+**Memory is used for**:
+- Check patterns.md for feature-specific patterns (OAuth, caching, etc.)
+- Apply learned structuring patterns from previous feature requests
+- Ensure consistency with previously implemented features
+
 ## Instructions
 
 When working with feature-dev requests, apply structuring at each phase:
@@ -98,4 +115,33 @@ This Skill improves feature-dev workflow by:
 - **Clarifying requirements** before architecture begins
 - **Enabling coordination** through explicit parameters
 - **Facilitating review** with testable, specific criteria
+
+## Memory Update (END - MANDATORY)
+
+After completing feature-dev workflow, update memory with patterns:
+
+```
+# Read current memory
+Read(file_path=".claude/pseudo-code-prompting/patterns.md")
+
+# If new feature pattern discovered, update patterns.md
+Edit(file_path=".claude/pseudo-code-prompting/patterns.md",
+     old_string="## [Domain] Patterns",
+     new_string="## [Domain] Patterns
+
+### Feature-Dev: [Feature Type]
+[Structured pseudo-code pattern for this feature type]
+[Parameters commonly needed for this feature]")
+```
+
+**Update when:**
+- New feature type structured successfully (OAuth, caching, etc.)
+- Feature-specific parameter patterns discovered
+- Successful feature workflow completed
+
+**Memory Benefits:**
+- Learn feature-specific structuring patterns
+- Build library of feature pseudo-code templates
+- Improve feature-dev efficiency over time
+- Ensure consistency across similar features
 - **Creating patterns** for future feature-dev requests

@@ -186,7 +186,7 @@ jobs:
           echo "Testing context-aware-tree-injection hook..."
 
           # Simulate hook input
-          echo '{"prompt":"implement user authentication","cwd":"'$(pwd)'"}' | bash hooks/tree/context-aware-tree-injection.sh
+          echo '{"prompt":"implement user authentication","cwd":"'$(pwd)'"}' | python3 hooks/tree/context-aware-tree-injection.py
 
           echo "✅ Hook execution test passed"
 
@@ -215,8 +215,8 @@ jobs:
             ".claude-plugin/marketplace.json"
             "hooks/hooks.json"
             "hooks/tree/get_context_tree.py"
-            "hooks/tree/context-aware-tree-injection.sh"
-            "hooks/core/user-prompt-submit.sh"
+            "hooks/tree/context-aware-tree-injection.py"
+            "hooks/core/user-prompt-submit.py"
             "README.md"
             "CHANGELOG.md"
             "LICENSE"

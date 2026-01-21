@@ -150,10 +150,10 @@ jobs:
           echo "Testing plugin functionality..."
 
           # Test tree generation
-          python hooks/get_context_tree.py . --max-depth 3 --max-files 50
+          python3 hooks/tree/get_context_tree.py . --max-depth 3 --max-files 50
 
           # Test hook execution
-          echo '{"prompt":"implement test","cwd":"'$(pwd)'"}' | bash hooks/context-aware-tree-injection.sh
+          echo '{"prompt":"implement test","cwd":"'$(pwd)'"}' | python3 hooks/tree/context-aware-tree-injection.py
 
           echo "✅ Plugin functionality verified"
 

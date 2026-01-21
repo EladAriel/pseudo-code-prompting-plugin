@@ -1,6 +1,6 @@
 # Welcome Message and Menu System
 
-When users invoke the plugin using trigger phrases like "use pseudo-code prompting plugin" or "use pseudo-code prompting with ralph", you MUST display a welcome message with an interactive menu.
+When users invoke the plugin using trigger phrases like "use pseudo-code prompting plugin" or "run pseudo-code prompting plugin", you MUST display a welcome message with an interactive menu.
 
 ## Welcome Message Structure
 
@@ -21,12 +21,8 @@ Transform natural language into structured, validated pseudo-code.
    • compress-context - Compress verbose requirements
    • complete-process - Full workflow (transform + validate + optimize)
 
-🤖 **Ralph Loop Integration**
-   Want automated implementation with Ralph Loop?
-   Say 'use ralph' or 'with ralph' to start
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 Quick: help | transform | validate | optimize | ralph
+💡 Quick: help | transform | validate | optimize | complete
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -36,8 +32,7 @@ Display the welcome menu when the user's message contains ANY of these patterns:
 
 - "use pseudo-code prompting plugin"
 - "use pseudocode prompting plugin"
-- "use pseudo-code prompting with ralph"
-- "use pseudocode prompting with ralph"
+- "run pseudo-code prompting plugin"
 - "invoke complete-process"
 - "show plugin menu"
 
@@ -57,7 +52,7 @@ Since Claude Code doesn't have technical state management between turns, menu pe
 2. **Menu Reminder Footer**: Append this to all responses while menu is active:
    ```
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   💡 Quick access: help | transform | validate | optimize | ralph
+   💡 Quick access: help | transform | validate | optimize | complete
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ```
 
@@ -69,7 +64,6 @@ Track these conceptual states (via conversation context, not technical state):
 
 - `menu_displayed`: Was welcome menu shown in recent turns?
 - `selection_made`: Has user selected a specific command/skill?
-- `ralph_mode_requested`: Did user mention "ralph" or "with ralph"?
 
 ## User Selection Routing
 
@@ -84,7 +78,6 @@ When user's message contains menu keywords, route as follows:
 | "optimize", "optimize-prompt" | Optimize pseudo-code | `pseudo-code-prompting:prompt-optimizer` |
 | "compress", "compress-context" | Compress verbose text | `pseudo-code-prompting:context-compressor` |
 | "complete", "complete-process", "full workflow" | Run full pipeline | Execute complete mode workflow |
-| "ralph", "with ralph", "use ralph" | Show Ralph consent then invoke | See Ralph Consent Flow below |
 
 ### Keyword Detection Logic
 
@@ -94,52 +87,21 @@ on_user_message:
     detected_keywords = parse_for_menu_keywords(user_message)
 
     if detected_keywords.length > 0:
-      if detected_keywords.includes("ralph"):
-        show_ralph_consent_flow()
-      else:
-        route_to_skill(detected_keywords[0])
+      route_to_skill(detected_keywords[0])
     else:
       respond_to_user_question()
       append_menu_reminder_footer()
 ```
 
-## Ralph Consent Flow
+## Command Execution
 
-When user mentions "ralph", "with ralph", or "use ralph", you MUST:
+When a user selects a command from the menu, you MUST:
 
-1. **Show Consent Message**:
+1. **Invoke the appropriate skill** using the Skill tool
 
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🤖 Ralph Loop Integration
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. **Provide feedback** to the user about which skill is being executed
 
-Ralph Loop will automate the complete implementation with iterative
-development, including:
-  • Complexity estimation
-  • Promise generation from validation
-  • Automated iteration planning
-  • Progressive implementation
-
-This will run multiple automated iterations. Continue?
-
-Options:
-  • Say 'yes', 'confirm', or 'proceed' to start Ralph Loop
-  • Say 'no', 'cancel', or 'manual' for manual workflow
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-2. **Wait for Explicit Confirmation**: Do NOT proceed until user explicitly confirms
-
-3. **Detect Confirmation Keywords**:
-   - **YES**: "yes", "confirm", "proceed", "use ralph", "start", "go ahead"
-   - **NO**: "no", "cancel", "skip", "manual mode", "manual", "not now"
-   - **AMBIGUOUS**: Any other response → Ask again with clearer options
-
-4. **On Confirmation**: Invoke skill `pseudo-code-prompting:ralph-process-integration`
-
-5. **On Rejection**: Return to menu, remind user of other options
+3. **Wait for skill completion** before returning to menu if needed
 
 ## Menu Exit Conditions
 
@@ -172,19 +134,15 @@ Stop displaying menu reminders when ANY of these occur:
 
 **Assistant**: *Shows comprehensive plugin documentation*
 
-### Example 2: Ralph Integration Flow
+### Example 2: Complete Process Flow
 
-**User**: "use pseudo-code prompting with ralph"
+**User**: "use pseudo-code prompting plugin"
 
 **Assistant**: *Displays welcome menu*
 
-**User**: "use ralph"
+**User**: "complete"
 
-**Assistant**: *Shows Ralph consent message*
-
-**User**: "yes"
-
-**Assistant**: *Invokes `pseudo-code-prompting:ralph-process-integration`*
+**Assistant**: *Invokes complete-process workflow*
 
 ### Example 3: Menu Persistence
 

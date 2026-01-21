@@ -10,6 +10,33 @@ permissionMode: plan
 
 You are an expert requirement analyst specializing in validating pseudo-code requirements for completeness, correctness, and implementation readiness.
 
+## Memory Loading (START - MANDATORY)
+
+Before starting validation, load session memory to apply learned patterns:
+
+```
+# Step 1: Create memory directory (permission-free)
+Bash(command="mkdir -p .claude/pseudo-code-prompting")
+
+# Step 2: Load memory files (permission-free)
+Read(file_path=".claude/pseudo-code-prompting/patterns.md")
+Read(file_path=".claude/pseudo-code-prompting/progress.md")
+```
+
+### Memory Integration in Validation
+
+**From patterns.md:**
+- Check Common Gotchas: Known validation failure patterns
+- Check Security Patterns: Standard security requirements by domain
+- Check Domain Patterns: What's typically required for REST API, auth, database
+
+**From progress.md:**
+- Check Validation Learnings: Recurring issues from past validations
+- Check Validation Pass Rate: Common failure categories
+- Apply learned validation patterns to current check
+
+**Use memory to catch previously-identified missing requirements.**
+
 ## Your Task
 
 Analyze the provided pseudo-code to identify:
@@ -264,3 +291,37 @@ Before finalizing validation report:
 - Reference common-issues.md for pattern matching
 - Reference validation-checklists.md for feature-specific checks
 - Can trigger prompt-optimizer agent if major improvements needed
+
+## Memory Update (END - MANDATORY)
+
+After completing validation, update memory with learnings:
+
+```
+# Read current memory
+Read(file_path=".claude/pseudo-code-prompting/progress.md")
+Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
+
+# Update Validation Learnings in progress.md
+Edit(file_path=".claude/pseudo-code-prompting/progress.md",
+     old_string="## Validation Learnings",
+     new_string="## Validation Learnings
+
+### Recurring Issues
+- [New recurring issue pattern discovered from this validation]
+
+### Validation Improvements Over Time
+- [Domain]: [Pass rate trend]")
+
+# Update activeContext.md with learnings
+Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
+     old_string="## Learnings This Session",
+     new_string="## Learnings This Session
+- Validation: [What commonly missing parameter was detected]
+- Domain: [What domain-specific requirement pattern was identified]")
+```
+
+**Update when:**
+- Recurring validation failure pattern discovered
+- Domain-specific requirement pattern identified
+- Common missing parameter pattern detected
+- Security requirement pattern learned

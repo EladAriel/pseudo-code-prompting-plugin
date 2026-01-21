@@ -9,15 +9,35 @@ model: sonnet
 
 Auto-chain: Transform → Validate → Optimize
 
+## Memory Integration (START - MANDATORY)
+
+Before starting the orchestration pipeline, load session memory:
+
+```
+# Step 1: Create memory directory (permission-free)
+Bash(command="mkdir -p .claude/pseudo-code-prompting")
+
+# Step 2: Load memory files (permission-free)
+Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
+Read(file_path=".claude/pseudo-code-prompting/patterns.md")
+Read(file_path=".claude/pseudo-code-prompting/progress.md")
+```
+
+**Memory is passed through pipeline**:
+- Transform step receives memory context from patterns.md
+- Validation step uses patterns.md + progress.md for learned validations
+- Optimization step applies patterns.md + progress.md for effective optimizations
+- Memory is updated at END of pipeline with complete results
+
 ## MUST FOLLOW THIS 3-STEP WORKFLOW
 
 When user invokes `/complete-process` or says "use complete process", run these 3 skills in sequence:
 
 ## Welcome Message and Menu System
 
-When users invoke the plugin using trigger phrases, you MUST display a welcome message with an interactive menu for skill selection and Ralph Loop integration.
+When users invoke the plugin using trigger phrases, you MUST display a welcome message with an interactive menu for skill selection.
 
-**See:** [references/welcome-menu-system.md](references/welcome-menu-system.md) for complete menu behavior, routing logic, and Ralph consent flow.
+**See:** [references/welcome-menu-system.md](references/welcome-menu-system.md) for complete menu behavior and routing logic.
 
 ## CRITICAL IMPLEMENTATION REQUIREMENTS
 
@@ -162,7 +182,7 @@ This shows users:
 - **Mode Selection**: Choose between quick or complete processing
 - **Context-Aware**: Leverages project structure for relevant transformations
 - **Token Optimization**: Reduces context usage by 60-80%
-- **Menu System**: Interactive command selection with Ralph Loop integration
+- **Menu System**: Interactive command selection
 - **Progress Tracking**: Real-time feedback during multi-step execution
 - **Error Recovery**: Graceful fallbacks and retry options
 - **Preference Persistence**: Remembers user's mode choice
@@ -293,7 +313,7 @@ Returning validated pseudo-code instead. You can:
 
 ## Reference Documentation
 
-- **[Welcome Menu System](references/welcome-menu-system.md)** - Interactive menu behavior and Ralph consent flow
+- **[Welcome Menu System](references/welcome-menu-system.md)** - Interactive menu behavior and routing logic
 - **[Context-Aware Detection](references/context-aware-detection.md)** - Project tree injection and context optimization
 - **[Workflow Patterns](references/workflow-patterns.md)** - Detailed execution patterns and implementations
 - **[Mode Selection](templates/mode-selection.md)** - Mode selection criteria and preference persistence
@@ -327,10 +347,42 @@ Preferences are stored in `.claude/plugin_preferences.json`:
 
 **1.3.0** - Refactored to modular structure with external references (under 250 lines)
 
+## Memory Update (END - MANDATORY)
+
+After completing the full pipeline, update memory with results:
+
+```
+# Read current memory
+Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
+Read(file_path=".claude/pseudo-code-prompting/progress.md")
+
+# Update Recent Transformations with pipeline results
+Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
+     old_string="## Recent Transformations",
+     new_string="## Recent Transformations
+- Pipeline: Transform → Validate → Optimize (compression: X%, validation: pass/warnings, optimizations: N)")
+
+# Update Progress with pipeline metrics
+Edit(file_path=".claude/pseudo-code-prompting/progress.md",
+     old_string="## Transformation History",
+     new_string="## Transformation History
+- [x] [Input query] - Complete pipeline (duration: Xs, issues: Y, optimizations: Z)")
+```
+
+**Update when:**
+- Complete pipeline finishes successfully
+- Validation issues discovered and resolved
+- Optimization patterns applied effectively
+
+**Memory Benefits:**
+- Each agent in pipeline uses learned patterns
+- Validation failures inform future validations
+- Optimization patterns compound over time
+- User preferences applied consistently
+
 ## Related Commands
 
 - `/transform-query` - Transform only (equivalent to quick mode)
 - `/validate-requirements` - Validate pseudo-code
 - `/optimize-prompt` - Optimize pseudo-code
 - `/compress-context` - Compress verbose requirements
-- `/ralph-process` - Complete process + Ralph Loop integration

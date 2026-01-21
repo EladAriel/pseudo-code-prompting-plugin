@@ -60,11 +60,16 @@ pseudo-code-prompting-plugin/
 │   ├── optimize-prompt.md
 │   ├── transform-query.md
 │   └── validate-requirements.md
-├── hooks/                       # 3 hooks + registration
+├── hooks/                       # Python hooks + registration
 │   ├── hooks.json              # Hook registration
-│   ├── user-prompt-submit.sh
-│   ├── post-transform-validation.sh
-│   └── context-compression-helper.sh
+│   ├── core/
+│   │   └── user-prompt-submit.py
+│   ├── compression/
+│   │   └── context-compression-helper.py
+│   ├── tree/
+│   │   └── context-aware-tree-injection.py
+│   └── validation/
+│       └── post-transform-validation.py
 ├── README.md                    # Main documentation
 ├── CHANGELOG.md                 # Version history
 ├── CONTRIBUTING.md              # This file

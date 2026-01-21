@@ -249,7 +249,7 @@ jobs:
 
           # Test 2: Hook with keyword trigger
           echo "Test 2: Hook trigger test"
-          echo '{"prompt":"implement feature","cwd":"'$(pwd)'"}' | bash hooks/tree/context-aware-tree-injection.sh > /tmp/hook-output.txt
+          echo '{"prompt":"implement feature","cwd":"'$(pwd)'"}' | python3 hooks/tree/context-aware-tree-injection.py > /tmp/hook-output.txt
           if grep -q "CONTEXT-AWARE MODE" /tmp/hook-output.txt; then
             echo "✅ Hook triggered and injected context"
           else
@@ -258,7 +258,7 @@ jobs:
 
           # Test 3: Hook with non-keyword (should pass through)
           echo "Test 3: Hook pass-through test"
-          echo '{"prompt":"hello world","cwd":"'$(pwd)'"}' | bash hooks/tree/context-aware-tree-injection.sh > /tmp/passthrough.txt
+          echo '{"prompt":"hello world","cwd":"'$(pwd)'"}' | python3 hooks/tree/context-aware-tree-injection.py > /tmp/passthrough.txt
           if [ ! -s /tmp/passthrough.txt ]; then
             echo "✅ Hook correctly passed through non-keyword prompt"
           else

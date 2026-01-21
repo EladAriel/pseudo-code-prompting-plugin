@@ -3,22 +3,34 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "type": "command",
-        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.py",
-        "statusMessage": "Checking for pseudo-code transformation commands...",
-        "timeout": 10
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.py",
+            "statusMessage": "Checking for pseudo-code transformation commands...",
+            "timeout": 10
+          }
+        ]
       },
       {
-        "type": "command",
-        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.py",
-        "statusMessage": "Analyzing context compression opportunities...",
-        "timeout": 10
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/compression/context-compression-helper.py",
+            "statusMessage": "Analyzing context compression opportunities...",
+            "timeout": 10
+          }
+        ]
       },
       {
-        "type": "command",
-        "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.py",
-        "statusMessage": "Analyzing project structure for context-aware suggestions...",
-        "timeout": 15
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/tree/context-aware-tree-injection.py",
+            "statusMessage": "Analyzing project structure for context-aware suggestions...",
+            "timeout": 15
+          }
+        ]
       }
     ],
     "PostToolUse": [

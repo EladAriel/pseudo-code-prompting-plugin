@@ -59,14 +59,14 @@ flowchart TD
 | `post-transform-validation` | After transformation | Auto-validates output |
 
 ### Layer 2: Commands (User-Invoked)
-| Command | Purpose | Agents Used |
-|---------|---------|-------------|
-| `/complete-process` | Full pipeline | transformer → validator → optimizer |
-| `/transform-query` | Basic transformation | transformer |
-| `/compress-context` | Reduce verbosity | compressor |
-| `/validate-requirements` | Quality check | validator |
-| `/optimize-prompt` | Enhance specs | optimizer |
-| `/context-aware-transform` | Architecture-aware | analyzer → transformer |
+| Command | Purpose | Agents Used | Workflow |
+|---------|---------|-------------|----------|
+| `/complete-process` | Full automated pipeline | transformer → validator → optimizer | Fully automated chain with TODO generation |
+| `/transform-query` | Basic transformation | transformer | Single step |
+| `/compress-context` | Reduce verbosity | compressor | Single step |
+| `/validate-requirements` | Quality check | validator | Single step |
+| `/optimize-prompt` | Enhance specs | optimizer | Single step |
+| `/context-aware-transform` | Architecture-aware | analyzer → transformer | Two-step process |
 
 ### Layer 3: Agents (Processing)
 | Agent | Specialization | Input → Output |
@@ -87,12 +87,12 @@ flowchart TD
 
 ## Data Flow
 
-### Example: Complete Process Command
+### Example: Complete Process Command (Automated Chain)
 ```mermaid
 sequenceDiagram
     participant U as User
     participant H as Hooks
-    participant C as Command
+    participant O as Orchestrator
     participant A1 as Transform Agent
     participant A2 as Validate Agent
     participant A3 as Optimize Agent
@@ -101,21 +101,34 @@ sequenceDiagram
     U->>H: "implement JWT auth"
     H->>H: Detect "implement" keyword
     H->>H: Scan project structure
-    H->>C: Inject PROJECT_TREE context
-    C->>A1: Transform with context
+    H->>O: Inject PROJECT_TREE context
+
+    Note over O: AUTOMATED CHAIN STARTS
+
+    O->>A1: Transform with context
     A1->>S: Load prompt-structurer
     S-->>A1: PROMPTCONVERTER rules
-    A1-->>C: Pseudo-code with real paths
-    C->>A2: Validate pseudo-code
+    A1-->>O: Pseudo-code + NEXT_AGENT: validator
+
+    Note over O: Auto-invokes next agent (no stop)
+
+    O->>A2: Validate pseudo-code
     A2->>S: Load requirement-validator
     S-->>A2: Validation checklists
-    A2-->>C: Validation report
-    C->>A3: Optimize pseudo-code
+    A2-->>O: Validation report + NEXT_AGENT: optimizer
+
+    Note over O: Auto-invokes next agent (no stop)
+
+    O->>A3: Optimize pseudo-code
     A3->>S: Load prompt-optimizer
     S-->>A3: Enhancement patterns
-    A3-->>C: Production-ready output
-    C->>H: Post-transform hook
-    H-->>U: Final output + report
+    A3-->>O: Optimized output + TODO_LIST + WORKFLOW_CONTINUES: NO
+
+    Note over O: Chain complete
+
+    O->>O: Generate implementation TODOs
+    O->>H: Post-transform hook
+    H-->>U: Optimized function + TODOs
 ```
 
 ## Directory Structure
@@ -164,13 +177,16 @@ Skills load on-demand based on context, not all at once. Reduces memory and toke
 ### 2. Hook-Driven Context
 Hooks automatically inject project structure, user can focus on request not context gathering.
 
-### 3. Agent Pipeline
-Agents are composable - can run individually or in sequence (complete-process).
+### 3. Automated Agent Chaining
+Agents communicate via structured signals (`WORKFLOW_CONTINUES`, `NEXT_AGENT`) enabling fully automated pipeline execution without user intervention.
 
 ### 4. Context Window Optimization
 Complete-process removes intermediate outputs, keeping only query + final result (60-80% token reduction).
 
-### 5. Memory Persistence
+### 5. Automatic TODO Generation
+The optimizer extracts implementation tasks from optimized pseudo-code parameters, creating actionable TODOs via TodoWrite tool.
+
+### 6. Memory Persistence
 Session memory survives conversation compaction:
 - `.claude/pseudo-code-prompting/activeContext.md` - Current transformations
 - `.claude/pseudo-code-prompting/patterns.md` - Learned patterns

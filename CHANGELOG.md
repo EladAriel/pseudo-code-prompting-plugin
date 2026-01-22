@@ -9,7 +9,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.4] - 2026-01-21
 
+### Added
+
+#### Fully Automated Workflow System
+
+- **Automated Agent Chaining Protocol** - Complete-process workflow now runs Transform → Validate → Optimize continuously without user intervention
+- **Structured Agent Communication** - Each agent outputs workflow signals (`WORKFLOW_CONTINUES`, `NEXT_AGENT`, `CHAIN_PROGRESS`)
+- **Chain Execution Loop** - Orchestrator automatically invokes next agent based on output signals
+- **Automatic TODO Generation** - Implementation tasks automatically extracted from optimized pseudo-code parameters
+- **TodoWrite Integration** - Orchestrator creates actual todos after optimization completes
+
 ### Changed
+
+#### Complete-Process Orchestrator
+
+- **BREAKING**: Workflow now fully automated - no stops between Transform/Validate/Optimize steps
+- Changed agent invocation from `Skill` tool to `Task` tool for proper agent execution
+- Updated orchestrator to check agent outputs for `NEXT_AGENT` signal and invoke immediately
+- Final output now includes only optimized pseudo-code + generated todos (no intermediate steps)
+
+#### Agent Output Formats
+
+- **prompt-transformer.md** - Added `WORKFLOW_CONTINUES: YES` and `NEXT_AGENT: requirement-validator` to output
+- **requirement-validator.md** - Added `WORKFLOW_CONTINUES: YES` and `NEXT_AGENT: prompt-optimizer` to output
+- **prompt-optimizer.md** - Added `WORKFLOW_CONTINUES: NO`, `TODO_LIST`, and `CHAIN_COMPLETE` to output
+
+### Enhanced
+
+#### Documentation
 
 - **Documentation Restructure** - Complete overhaul for user-friendliness
 
@@ -71,6 +98,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Visual workflows for better understanding
   - Clear use cases and benefits
   - Faster time to value for new users
+
+### Technical Details
+
+The automated workflow is inspired by the cc10x router pattern and implements:
+
+1. **Structured Output Protocol**: Agents communicate via standardized signals
+2. **Chain Enforcement**: Orchestrator ensures workflow completes to end
+3. **Context Optimization**: Intermediate outputs removed, keeping only final result
+4. **Todo Generation**: Parameters become actionable implementation tasks
+
+**Migration Note**: Existing `/complete-process` usage remains the same - the automation happens transparently. The only user-visible change is the elimination of manual "continue" prompts between steps.
 
 ## [1.1.3] - 2026-01-21
 

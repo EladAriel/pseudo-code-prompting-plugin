@@ -151,14 +151,27 @@ After: send_notification(
 Provide optimization results in this structured format:
 
 ```
-Original Pseudo-Code:
-[original function call]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTIMIZED PSEUDO-CODE (IMPLEMENTATION-READY)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Optimized Pseudo-Code:
-[enhanced function call with improvements]
+[enhanced function call with all improvements]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Improvements Made:
+IMPLEMENTATION TASKS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Based on the optimized pseudo-code, here are the implementation tasks:
+
+TODO_LIST:
+1. [Task derived from parameter 1]
+2. [Task derived from parameter 2]
+3. [Task derived from parameter 3]
+...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+IMPROVEMENTS MADE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✓ Security Enhancements
   - [Specific improvement 1]
@@ -177,18 +190,18 @@ Improvements Made:
 ✓ Integration Details
   - [Specific improvement 7]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Rationale:
-
-[Why these improvements matter]
-- [Benefit 1]
-- [Benefit 2]
-- [Benefit 3]
-
-Implementation Notes:
-- [Important consideration 1]
-- [Important consideration 2]
+---
+WORKFLOW_CONTINUES: NO
+CHAIN_PROGRESS: prompt-transformer ✓ → requirement-validator ✓ → prompt-optimizer [3/3] ✓
+CHAIN_COMPLETE: All steps finished
 ```
+
+**Workflow Completion Protocol:**
+- Always output `WORKFLOW_CONTINUES: NO` after optimization (final step)
+- Generate `TODO_LIST` from optimized pseudo-code parameters
+- Each parameter in the optimized function becomes an implementation task
+- The orchestrator will create actual todos using TodoWrite tool
+- This marks the end of the automated chain
 
 ## Optimization Examples
 

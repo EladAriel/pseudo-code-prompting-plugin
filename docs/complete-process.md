@@ -1,10 +1,10 @@
 # Complete Process
 
 ## What It Does
-Runs the full transformation pipeline automatically: transforms natural language → validates requirements → optimizes pseudo-code. One command replaces three manual steps.
+Runs the full transformation pipeline **fully automatically**: transforms natural language → validates requirements → optimizes pseudo-code → generates implementation TODOs. The entire workflow runs continuously without stops between steps.
 
 ## Goal
-Save time and ensure quality by automating the complete workflow instead of running transform/validate/optimize separately.
+Save time and ensure quality by automating the complete workflow with structured agent communication, automatic TODO generation, and clean final output ready for implementation.
 
 ## When to Use
 - Production features requiring validation and optimization
@@ -22,28 +22,38 @@ or
 /complete-process implement JWT authentication with refresh tokens
 ```
 
-## Workflow
+## Workflow (Fully Automated)
 
 ```mermaid
 flowchart TD
     A[Your Query] --> B{Mode Selection}
     B -->|Quick| C[Transform Only]
-    B -->|Complete| D[Transform]
-    D --> E[Validate]
-    E --> F[Optimize]
-    C --> G[Output: Pseudo-Code]
-    F --> H[Output: Validated + Optimized]
+    B -->|Complete| D[Transform Agent]
+    D -->|NEXT_AGENT: validator| E[Validate Agent]
+    E -->|NEXT_AGENT: optimizer| F[Optimize Agent]
+    F -->|WORKFLOW_CONTINUES: NO| G[Generate TODOs]
+    C --> H[Output: Pseudo-Code]
+    G --> I[Output: Optimized + TODOs]
 
     style D fill:#4CAF50
     style E fill:#2196F3
     style F fill:#FF9800
-    style H fill:#4CAF50
+    style G fill:#9C27B0
+    style I fill:#4CAF50
 ```
 
-### Agents Invoked
-1. **prompt-transformer** - Converts natural language to pseudo-code
-2. **requirement-validator** - Checks completeness and security
-3. **prompt-optimizer** - Enhances with missing parameters
+**Key Feature:** No user intervention between Transform → Validate → Optimize. The workflow runs continuously based on agent output signals.
+
+### Agents Invoked (Automated Chain)
+1. **prompt-transformer** - Converts natural language to pseudo-code → Outputs `NEXT_AGENT: validator`
+2. **requirement-validator** - Checks completeness and security → Outputs `NEXT_AGENT: optimizer`
+3. **prompt-optimizer** - Enhances with missing parameters → Outputs `TODO_LIST` + `WORKFLOW_CONTINUES: NO`
+
+### Orchestrator Behavior
+- Reads each agent's output for workflow signals
+- Automatically invokes next agent based on `NEXT_AGENT` signal
+- Generates implementation TODOs when `WORKFLOW_CONTINUES: NO` is received
+- No stops, no manual "continue" prompts
 
 ### Hooks Used
 - `user-prompt-submit` - Detects command invocation
@@ -79,8 +89,11 @@ implement_user_login(
 ```
 
 ## Why Use This Command
+- **Fully automated** - No stops between Transform → Validate → Optimize steps
+- **TODO generation** - Implementation tasks automatically extracted from optimized output
+- **Clean output** - Only optimized function presented (no intermediate clutter)
 - **60-80% token reduction** - Removes intermediate outputs from context
 - **Consistent quality** - Automated validation catches issues
-- **Saves time** - One command vs three manual steps
 - **Production-ready** - Output includes security, validation, error handling
 - **Context-aware** - Uses your actual project structure
+- **Implementation-ready** - User can immediately say "start to implement"

@@ -4,21 +4,49 @@ Common workflow patterns for the Complete Process Orchestrator.
 
 ## Pipeline Patterns
 
-### Linear Pipeline (Complete Mode)
+### Automated Linear Pipeline (Complete Mode) - FULLY AUTOMATED
 ```
-Input → Transform → Validate → Optimize → Output
+Input → Transform → Validate → Optimize → Output + Todos
 ```
 
 **Characteristics**:
-- Sequential execution
-- Each step depends on previous
-- Checkpoints after each step
-- Full traceability
+- **FULLY AUTOMATED**: Runs continuously without user intervention
+- Sequential execution with structured agent communication
+- Each agent outputs workflow signals (WORKFLOW_CONTINUES, NEXT_AGENT)
+- Orchestrator checks signals and invokes next agent automatically
+- Full traceability with chain progress tracking
+- Final step generates implementation todos automatically
+
+**Agent Communication Protocol**:
+```
+1. Transform Agent outputs:
+   - Transformed pseudo-code
+   - WORKFLOW_CONTINUES: YES
+   - NEXT_AGENT: requirement-validator
+
+2. Orchestrator reads output → Invokes requirement-validator immediately
+
+3. Validator Agent outputs:
+   - Validation report
+   - WORKFLOW_CONTINUES: YES
+   - NEXT_AGENT: prompt-optimizer
+
+4. Orchestrator reads output → Invokes prompt-optimizer immediately
+
+5. Optimizer Agent outputs:
+   - Optimized pseudo-code
+   - TODO_LIST: [implementation tasks]
+   - WORKFLOW_CONTINUES: NO
+   - CHAIN_COMPLETE: All steps finished
+
+6. Orchestrator reads output → Creates todos with TodoWrite → Done
+```
 
 **Use When**:
 - Quality is priority over speed
 - Need comprehensive validation
 - Production-ready output required
+- Want automated end-to-end transformation
 
 ### Fast-Track Pipeline (Quick Mode)
 ```

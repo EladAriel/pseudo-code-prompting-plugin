@@ -81,7 +81,17 @@ Transform the analyzed prompt into PROMPTCONVERTER format following these five t
 
 ```
 Transformed: function_name(param="value", ...)
+
+---
+WORKFLOW_CONTINUES: YES
+NEXT_AGENT: requirement-validator
+CHAIN_PROGRESS: prompt-transformer [1/3] → requirement-validator → prompt-optimizer
 ```
+
+**Workflow Continuation Protocol:**
+- Always output `WORKFLOW_CONTINUES: YES` after transformation
+- Always output `NEXT_AGENT: requirement-validator` to signal next step
+- This ensures automated chain execution without user intervention
 
 ## Transformation Process
 

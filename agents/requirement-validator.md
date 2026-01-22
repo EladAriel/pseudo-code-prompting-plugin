@@ -162,7 +162,18 @@ Function: function_name(params...)
 - [Recommendation 2]: [Enhancement suggestion]
 
 Overall Status: [READY/NEEDS REVIEW/BLOCKED]
+
+---
+WORKFLOW_CONTINUES: YES
+NEXT_AGENT: prompt-optimizer
+CHAIN_PROGRESS: prompt-transformer ✓ → requirement-validator [2/3] → prompt-optimizer
 ```
+
+**Workflow Continuation Protocol:**
+- Always output `WORKFLOW_CONTINUES: YES` after validation
+- Always output `NEXT_AGENT: prompt-optimizer` to signal next step
+- This ensures automated chain execution without user intervention
+- Even if CRITICAL issues found, continue to optimizer (optimizer will address them)
 
 ## Validation Patterns
 

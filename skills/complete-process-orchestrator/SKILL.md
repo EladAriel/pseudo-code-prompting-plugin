@@ -93,32 +93,79 @@ Before invoking the transform step, you MUST ensure the context-aware tree injec
 ### Quick Mode Execution
 
 1. **Validate Input**: Check query length (10-5000 characters)
-2. **Invoke Transform Skill**:
-   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-structurer" args="[user query]"`
-   - Extract ONLY the transformed output
+2. **Invoke Transform Agent**:
+   - Use: `Task tool with subagent_type="pseudo-code-prompting:prompt-transformer"`
+   - Extract ONLY the transformed output from agent result
 3. **Return Result**: Output the transformed pseudo-code
-4. **Clean Up**: Do NOT keep the transform tool output in context
+4. **Clean Up**: Do NOT keep intermediate outputs in context
 
-### Complete Mode Execution
+### Complete Mode Execution (Automated Chain)
+
+**CRITICAL**: This is a FULLY AUTOMATED workflow. Do NOT stop between steps. Execute the chain continuously.
 
 1. **Validate Input**: Check query length (10-5000 characters)
+
 2. **Step 1/3: Transform**
-   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-structurer" args="[user query]"`
-   - Extract: `transformed_output` (single variable)
-   - Clean: Remove full tool output from context
+   - Use: `Task tool with subagent_type="pseudo-code-prompting:prompt-transformer"`
+   - Pass: User query + PROJECT_TREE context + memory context
+   - Agent outputs: `WORKFLOW_CONTINUES: YES` + `NEXT_AGENT: requirement-validator`
+   - Extract: `transformed_output` from agent
    - Track token usage per step following [token-tracking.md](references/token-tracking.md)
-3. **Step 2/3: Validate**
-   - Use: `Skill tool with skill="pseudo-code-prompting:requirement-validator" args="[transformed_output]"`
-   - Extract: `validation_report` (single variable)
-   - Clean: Remove full tool output AND transformed_output from context
+
+3. **Check Agent Output** for workflow continuation signal
+   - Look for `NEXT_AGENT: requirement-validator` in agent output
+   - Immediately invoke next agent (DO NOT STOP)
+
+4. **Step 2/3: Validate**
+   - Use: `Task tool with subagent_type="pseudo-code-prompting:requirement-validator"`
+   - Pass: `transformed_output` + memory context
+   - Agent outputs: `WORKFLOW_CONTINUES: YES` + `NEXT_AGENT: prompt-optimizer`
+   - Extract: `validation_report` from agent
    - Track token usage per step following [token-tracking.md](references/token-tracking.md)
-4. **Step 3/3: Optimize**
-   - Use: `Skill tool with skill="pseudo-code-prompting:prompt-optimizer" args="[transformed_output]"`
-   - Extract: `optimized_output` (final result)
-   - Clean: Remove full tool output from context
+
+5. **Check Agent Output** for workflow continuation signal
+   - Look for `NEXT_AGENT: prompt-optimizer` in agent output
+   - Immediately invoke next agent (DO NOT STOP)
+
+6. **Step 3/3: Optimize**
+   - Use: `Task tool with subagent_type="pseudo-code-prompting:prompt-optimizer"`
+   - Pass: `transformed_output` + `validation_report` + memory context
+   - Agent outputs: `WORKFLOW_CONTINUES: NO` + `TODO_LIST` (implementation tasks)
+   - Extract: `optimized_output` + `todo_list` from agent
    - Track token usage per step following [token-tracking.md](references/token-tracking.md)
-5. **Return Result**: Output optimized pseudo-code + validation report + optimization summary
-6. **Final Context**: Keep ONLY original query + final outputs
+
+7. **Chain Complete** - Check for `WORKFLOW_CONTINUES: NO`
+   - Generate implementation todos using TodoWrite tool
+   - Present final output: optimized pseudo-code + reports
+   - Update memory with pipeline results
+
+8. **Final Context**: Keep ONLY original query + final optimized pseudo-code
+
+### Chain Enforcement Protocol
+
+**NEVER stop after one agent.** The workflow is NOT complete until the chain finishes.
+
+After EACH agent completes, check its output for:
+- `NEXT_AGENT: X` → **Immediately invoke that agent**
+- `WORKFLOW_CONTINUES: NO` → **Chain complete, generate todos**
+
+**Chain Execution Loop:**
+```
+1. Invoke agent via Task tool
+2. Read agent output
+3. Check output for:
+   a. NEXT_AGENT: X → Invoke agent X immediately
+   b. WORKFLOW_CONTINUES: NO → Chain complete
+4. Return to step 1 until chain complete
+```
+
+### Implementation Readiness
+
+After optimization completes:
+1. **Extract optimized function** from agent output
+2. **Generate implementation todos** from optimized pseudo-code parameters
+3. **Present clean output**: Only the optimized function, not intermediate steps
+4. **Trigger next action**: User can say "start to implement" or todos auto-create tasks
 
 ## When to Use
 

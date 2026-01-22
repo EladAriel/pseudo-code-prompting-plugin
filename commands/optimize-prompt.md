@@ -7,31 +7,6 @@ argument-hint: [pseudo-code]
 
 Enhance pseudo-code by adding missing parameters, clarifying ambiguities, and ensuring implementation readiness.
 
-## Memory Phase: Load Context
-
-**Purpose**: Load patterns and optimization history from prior sessions
-
-```
-Bash(command="mkdir -p .claude/pseudo-code-prompting")
-Read(file_path=".claude/pseudo-code-prompting/patterns.md")
-Read(file_path=".claude/pseudo-code-prompting/progress.md")
-```
-
-**Actions**:
-1. Create memory directory if not exists
-2. Load patterns.md to check for:
-   - Security patterns learned before
-   - Optimization techniques that worked
-   - Domain-specific best practices
-3. Load progress.md to check for:
-   - What optimizations succeeded before
-   - Common issues that were fixed
-   - Quality metrics from previous optimizations
-
-**Result**: Will apply proven optimization strategies.
-
----
-
 ## Task
 
 Optimize the following pseudo-code: `$ARGUMENTS`
@@ -218,30 +193,3 @@ Improvements Made:
 3. **Follow Patterns** - Use common parameter names (auth, timeout, validation)
 4. **Consider Context** - Simple scripts need less than production APIs
 5. **Maintain Readability** - Group related parameters logically
-
----
-
-## Memory Phase: Record Results
-
-**Purpose**: Save optimization results for future reference
-
-**After optimization completes:**
-
-```
-Read(file_path=".claude/pseudo-code-prompting/progress.md")
-
-Edit(file_path=".claude/pseudo-code-prompting/progress.md",
-     old_string="## Optimization Results",
-     new_string="## Optimization Results
-| Transformation | Before Optimization | After Optimization | Improvement |
-|----------------|--------------------|--------------------|-------------|
-| [Today's optimization] | [what was missing] | [what was added] | [summary] |
-[... keep existing results ...]")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## Last Updated",
-     new_string="## Last Updated
-2026-01-22 [current time] - Optimization completed")
-```
-
-**Why**: Next optimization pass will learn from previous successful patterns.

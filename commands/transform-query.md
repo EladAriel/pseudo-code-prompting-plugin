@@ -7,35 +7,6 @@ argument-hint: [query]
 
 Transform the provided natural language query into concise, function-like pseudo-code format following PROMPTCONVERTER methodology. When project structure context is available, include actual file paths from your codebase.
 
-## Memory Phase: Load Context
-
-**Purpose**: Load user naming preferences and learned patterns (KEY FIX)
-
-```
-Bash(command="mkdir -p .claude/pseudo-code-prompting")
-Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
-Read(file_path=".claude/pseudo-code-prompting/patterns.md")
-```
-
-**Actions**:
-1. Create memory directory if not exists
-2. Load activeContext.md to check for:
-   - User's naming style (snake_case, camelCase, etc.)
-   - Preferred verbosity level
-   - Parameter naming conventions
-3. Load patterns.md to check for:
-   - Stack-specific naming patterns
-   - Domain conventions previously learned
-
-**Critical**: This is the KEY FIX - transform-query previously ran blind without knowing user preferences. Now it will:
-- Apply learned naming conventions
-- Respect user's preferred parameter style
-- Use consistent patterns from prior sessions
-
-**Result**: Transformations will automatically use user's established conventions.
-
----
-
 ## Task
 
 User query: `$ARGUMENTS`
@@ -308,40 +279,6 @@ Output: Pseudo-code with actual file paths from your project
 - Recommendations align with your existing architecture
 - New files follow your project's conventions
 - Integration points are explicit
-
-## Memory Phase: Preserve Transformation
-
-**Purpose**: Save discovered naming conventions and patterns (KEY FIX COMPLETION)
-
-**After transformation completes:**
-
-```
-Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## Recent Transformations",
-     new_string="## Recent Transformations
-- [Today's transform]: Input query → Output pseudo-code (naming: [detected_style])
-[... keep last 10 transformations ...]")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## User Preferences",
-     new_string="## User Preferences
-| Preference | Value | Source |
-|------------|-------|--------|
-| Naming Style | [detected from output] | Inferred from this session |
-| Parameter Style | [detected pattern] | Inferred from this session |
-[... keep existing preferences ...]")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## Last Updated",
-     new_string="## Last Updated
-2026-01-22 [current time] - Transform completed with preferences")
-```
-
-**Why**: KEY FIX ensures next transform will automatically apply user's naming style without asking.
-
----
 
 ## Related Commands
 

@@ -7,26 +7,6 @@ argument-hint: [verbose-requirements]
 
 Transform verbose, detailed requirements into concise pseudo-code while preserving all essential information.
 
-## Memory Phase: Load Context
-
-**Purpose**: Load user compression preferences from prior sessions
-
-```
-Bash(command="mkdir -p .claude/pseudo-code-prompting")
-Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
-```
-
-**Actions**:
-1. Create memory directory if not exists
-2. Load activeContext.md to check:
-   - User's preferred compression ratio
-   - Previous compression style
-   - Project context for project-specific preferences
-
-**Note**: If file doesn't exist or project changed, proceed with defaults.
-
----
-
 ## Task
 
 Compress the following verbose requirements: `$ARGUMENTS`
@@ -258,34 +238,6 @@ Compressed pseudo-code should:
 3. **Be Consistent** - Use the same compression style throughout
 4. **Validate Completeness** - Ensure nothing critical was lost
 5. **Optimize Readability** - Compressed doesn't mean cryptic
-
-## Memory Phase: Preserve Preferences
-
-**Purpose**: Save discovered compression style preferences for next session
-
-**After compression completes:**
-
-```
-Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## User Preferences",
-     new_string="## User Preferences
-| Preference | Value | Source |
-|------------|-------|--------|
-| Compression Ratio | [ratio achieved in this session] | Session 2026-01-22 |
-| Compression Style | [concise/detailed/technical] | Inferred from output |
-[... keep existing preferences ...]")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## Last Updated",
-     new_string="## Last Updated
-2026-01-22 [current time]")
-```
-
-**Why**: Next time user runs `/compress-context`, it will load their preferred compression style.
-
----
 
 ## Integration with Other Commands
 

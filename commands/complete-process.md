@@ -20,6 +20,7 @@ The complete-process command provides an orchestrated workflow that automates th
 - Automatic TODO generation from optimized pseudo-code parameters
 - Clean final output with only the optimized function (no intermediate clutter)
 - Implementation-ready with structured task list
+- **CRITICAL**: Memory loaded ONCE at pipeline start (not repeated in each step for consistency)
 
 ## Usage
 
@@ -38,6 +39,27 @@ The complete-process command provides an orchestrated workflow that automates th
 /complete-process
 > Enter your query: _
 ```
+
+## Pre-Pipeline: Load Memory (REQUIRED)
+
+**Purpose**: Load user context and learned patterns BEFORE pipeline starts
+
+```
+Bash(command="mkdir -p .claude/pseudo-code-prompting")
+Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
+Read(file_path=".claude/pseudo-code-prompting/patterns.md")
+Read(file_path=".claude/pseudo-code-prompting/progress.md")
+```
+
+**Critical**: Load memory ONCE here, before Transform step begins. This ensures:
+- All 3 steps use the same context (no stale loads between steps)
+- Transform knows user preferences for naming style
+- Validate knows learned validation patterns
+- Optimize knows successful optimization history
+
+**Do NOT load memory in individual steps** - agents will update it, orchestrator finalizes it.
+
+---
 
 ## How It Works
 
@@ -120,6 +142,38 @@ Duration: 42s
 Steps Completed: 3/3
 Issues Found: 2 warnings (resolved)
 ```
+
+---
+
+## Post-Pipeline: Update Memory (REQUIRED)
+
+**Purpose**: Finalize memory updates after complete pipeline finishes
+
+**After Optimize step completes:**
+
+```
+Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
+
+Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
+     old_string="## Learnings This Session",
+     new_string="## Learnings This Session
+- Complete pipeline finished: Transform → Validate → Optimize
+- All patterns and preferences from this session integrated
+- Ready for next transformation")
+
+Edit(file_path=".claude/pseudo-code-prompting/progress.md",
+     old_string="## Transformation History",
+     new_string="## Transformation History
+- [x] Complete pipeline for [today's requirement] - 100% optimization success
+[... keep existing history ...]")
+
+Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
+     old_string="## Last Updated",
+     new_string="## Last Updated
+2026-01-22 [current time] - Complete pipeline finished")
+```
+
+**Why**: Pipeline learnings persist to next session, improving all 6 commands.
 
 ## Examples
 

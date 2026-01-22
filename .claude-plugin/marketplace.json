@@ -1,16 +1,16 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pseudo-code-prompting",
-  "version": "1.1.4",
-  "description": "Transform natural language into structured, validated pseudo-code with session memory, context-aware architecture analysis, semantic caching, and intelligent path injection - 8 skills, 5 agents, 6 commands, 4 hooks with persistent memory for pattern learning and preference retention",
+  "version": "1.1.5",
+  "description": "Transform natural language into structured, validated pseudo-code with full session memory integration across all commands, project context isolation, context-aware architecture analysis, and intelligent learning - 8 skills, 5 agents, 6 commands, 4 hooks with comprehensive memory lifecycle and per-project pattern learning",
   "owner": {
     "name": "Elad Ariel"
   },
   "plugins": [
     {
       "name": "pseudo-code-prompting",
-      "description": "Transform natural language requirements into structured, validated pseudo-code with session memory, context-aware architecture analysis, and semantic caching. Includes 8 skills (with session-memory), 5 agents, 6 commands, and 4 hooks with persistent memory for pattern learning, user preference retention, and quality improvement over time.",
-      "version": "1.1.4",
+      "description": "Transform natural language requirements into structured, validated pseudo-code with comprehensive session memory integration, project context isolation, context-aware architecture analysis, and intelligent learning. Includes 8 skills with full memory lifecycle, 5 agents, 6 commands, and 4 hooks with per-project pattern learning, automatic user preference retention, and continuous quality improvement.",
+      "version": "1.1.5",
       "author": {
         "name": "Elad Ariel"
       },

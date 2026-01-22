@@ -7,30 +7,6 @@ argument-hint: [feature request or implementation query]
 
 Transform user requests by analyzing existing project structure (Rule A) or creating a virtual skeleton for empty projects (Rule B).
 
-## Memory Phase: Load Context
-
-**Purpose**: Load learned patterns from prior sessions
-
-```
-Bash(command="mkdir -p .claude/pseudo-code-prompting")
-Read(file_path=".claude/pseudo-code-prompting/patterns.md")
-Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
-```
-
-**Actions**:
-1. Create memory directory if not exists
-2. Load patterns.md to check for:
-   - Stack-specific patterns learned from previous projects
-   - Domain patterns (REST API, auth, database, etc.)
-   - Tech stack conventions used before
-3. Load activeContext.md to check for:
-   - Current project context
-   - User architectural preferences
-
-**Result**: Will apply learned patterns to this transformation.
-
----
-
 ## Task
 
 User request: `$ARGUMENTS`
@@ -520,33 +496,6 @@ Architecture Alignment Notes:
    - Mention related files that will interact
    - Note configuration changes needed
    - Identify import/export points
-
-## Memory Phase: Preserve Learned Patterns
-
-**Purpose**: Save discovered architectural patterns for next session
-
-**After transformation completes:**
-
-```
-Read(file_path=".claude/pseudo-code-prompting/patterns.md")
-
-Edit(file_path=".claude/pseudo-code-prompting/patterns.md",
-     old_string="## User-Specific Conventions",
-     new_string="## User-Specific Conventions
-
-### Architecture Patterns Discovered
-- [Pattern from this analysis]: [How it was applied]
-- [Previous patterns continue below...]")
-
-Edit(file_path=".claude/pseudo-code-prompting/activeContext.md",
-     old_string="## Last Updated",
-     new_string="## Last Updated
-2026-01-22 [current time] - Context-aware transformation completed")
-```
-
-**Why**: Next context-aware transformation will reuse these patterns for consistency.
-
----
 
 ## Integration
 

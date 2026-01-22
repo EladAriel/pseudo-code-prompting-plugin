@@ -7,6 +7,156 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.5] - 2026-01-22
+
+### Added
+
+#### Comprehensive Session Memory Integration & Context Isolation
+
+- **Memory Lifecycle Integration** - All 6 commands now load memory at START and update at END
+  - `compress-context` - Loads/preserves compression style preferences
+  - `context-aware-transform` - Loads/preserves architectural patterns
+  - `optimize-prompt` - Loads/preserves optimization history
+  - `transform-query` - **KEY FIX**: Loads/preserves user naming preferences (fixes broken functionality)
+  - `validate-requirements` - Loads/preserves validation patterns
+  - `complete-process` - Orchestrator loads memory once at pipeline start
+
+- **Project Context Isolation** - Automatic context validation and auto-reset on project switch
+  - Updated `activeContext.md` schema with `Project Path` tracking
+  - Auto-resets context when user switches projects (prevents stale pattern injection)
+  - Maintains per-project memory isolation
+
+- **Hook Context Validation** - `context-aware-tree-injection.py` enhanced with project detection
+  - Detects when project context changes
+  - Warns user with `[PROJECT_CONTEXT_CHANGE_DETECTED]` message
+  - Provides clear feedback about context switching and auto-reset strategy
+
+- **Documentation & Integration Guide**
+  - New file: `skills/session-memory/command-integration-template.md` (435 lines)
+  - Comprehensive memory pattern templates for future command modifications
+  - Common mistakes to avoid with fixes
+  - Testing procedures and success criteria
+  - Integration matrix for which memory files to use per command
+
+### Changed
+
+#### Complete-Process Orchestrator Memory Coordination
+
+- **CRITICAL FIX**: Memory now loads ONCE at pipeline start (not repeated in each step)
+  - Pre-Pipeline phase: Load all 3 memory files before Transform step begins
+  - All 3 steps (Transform/Validate/Optimize) use same loaded context
+  - Post-Pipeline phase: Update all 3 memory files after pipeline completes
+  - Ensures consistency and prevents stale memory loads between steps
+
+#### Session Memory SKILL Documentation
+
+- Expanded `skills/session-memory/SKILL.md` with Project Context Auto-Reset Strategy section (85 lines added)
+- Documented per-project memory isolation mechanism
+- Added implementation guidance for project path validation
+
+### Fixed
+
+#### Key Issue: Transform-Query Command Now Respects User Preferences
+
+**Root Cause**: `transform-query` was running blind without loading user naming preferences and learned patterns from prior sessions.
+
+**Solution**: Added memory loading phase that:
+- Loads `activeContext.md` to check for user's naming style (snake_case, camelCase, etc.)
+- Loads `patterns.md` to apply stack-specific naming patterns
+- Automatically applies learned naming conventions from previous sessions
+- Eliminates need for user to specify preferences repeatedly
+
+**Impact**: Transformations now automatically use user's established conventions across sessions.
+
+#### Hook Context Validation
+
+- Fixed `context-aware-tree-injection.py` to detect project context changes
+- Prevents stale tree injection when switching between projects
+- Warns user clearly about context switches
+
+### Technical Details
+
+**Memory Integration Pattern** (applied to all 6 commands):
+```
+START:
+  1. Bash(command="mkdir -p .claude/pseudo-code-prompting")
+  2. Read activeContext.md (user preferences)
+  3. Read patterns.md (learned patterns)
+  4. Read progress.md (history/metrics)
+
+DURING:
+  Apply loaded preferences and patterns to transformation
+
+END:
+  1. Update activeContext.md with new preferences/learnings
+  2. Update patterns.md with discovered patterns
+  3. Update progress.md with metrics/history
+  4. Update timestamp
+```
+
+**Pipeline Orchestration** (complete-process only):
+```
+PRE-PIPELINE:
+  Load all 3 memory files ONCE before Transform step
+
+TRANSFORM → VALIDATE → OPTIMIZE:
+  All 3 steps use same loaded context (no reloads between steps)
+
+POST-PIPELINE:
+  Update all 3 memory files ONCE after Optimize step
+```
+
+**Project Context Auto-Reset** (all commands):
+```
+ON COMMAND START:
+  1. Extract "Current Project:" from activeContext.md
+  2. Compare with os.path.abspath(os.getcwd())
+  3. If project changed:
+     - Auto-reset activeContext to empty template
+     - Set new Project Path
+     - Clear user preferences (project-specific)
+     - Clear recent transformations (project-specific)
+  4. If same project:
+     - Use existing context normally
+```
+
+### Migration Notes
+
+- Existing workflows continue to work unchanged
+- Memory integration is transparent to users
+- First time running commands will create memory directory and files
+- Project switching automatically triggers context reset (no user action needed)
+- All memory operations are permission-free (use Read/Edit/Write/Bash only)
+
+### Files Modified
+
+- `commands/compress-context.md` (+48 lines) - Added memory phases
+- `commands/context-aware-transform.md` (+51 lines) - Added memory phases
+- `commands/optimize-prompt.md` (+52 lines) - Added memory phases
+- `commands/transform-query.md` (+63 lines) - Added memory phases + KEY FIX
+- `commands/validate-requirements.md` (+59 lines) - Added memory phases
+- `commands/complete-process.md` (+54 lines) - Added Pre/Post-Pipeline phases
+- `hooks/tree/context-aware-tree-injection.py` (+33 lines) - Added project context validation
+- `skills/session-memory/SKILL.md` (+85 lines) - Added Project Context Auto-Reset Strategy
+
+### New Files Created
+
+- `skills/session-memory/command-integration-template.md` (435 lines) - Integration guide
+
+**Total:** 8 files modified, 1 new file, 443 insertions
+
+### Success Criteria Met
+
+✅ All 6 commands load user preferences and learned patterns
+✅ Pipeline commands coordinate memory across steps
+✅ Memory persists across sessions (transforms reuse patterns)
+✅ Project context validation prevents stale injection
+✅ Hook warns when project context switches
+✅ No regression in transformation logic or output format
+✅ Comprehensive documentation and templates provided
+
+---
+
 ## [1.1.4] - 2026-01-21
 
 ### Added

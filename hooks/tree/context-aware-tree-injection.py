@@ -76,9 +76,38 @@ def main():
     if not tree_output or '[ERROR:' in tree_output or tree_output.strip() == '[TREE_ERROR]':
         sys.exit(0)
 
+    # NEW: Check if this is same project as stored context
+    stored_project_path = None
+    try:
+        memory_dir = os.path.join(os.path.expanduser('~'), '.claude', 'pseudo-code-prompting')
+        context_file = os.path.join(memory_dir, 'activeContext.md')
+        if os.path.isfile(context_file):
+            with open(context_file, 'r') as f:
+                content = f.read()
+                # Extract "Current Project:" line
+                for line in content.split('\n'):
+                    if line.startswith('Current Project:'):
+                        stored_project_path = line.split(':', 1)[1].strip()
+                        break
+    except:
+        pass
+
+    # Compare project paths
+    current_project_path = os.path.abspath(cwd)
+    project_context_warning = ""
+    if stored_project_path and stored_project_path != current_project_path:
+        # Different project - could be stale context
+        project_context_warning = f"""
+[⚠️ PROJECT_CONTEXT_CHANGE_DETECTED]
+Switched from: {stored_project_path}
+Current project: {current_project_path}
+⚠️ Context may be from different project - previous transformations may not apply.
+Auto-reset will occur on next command START (project-specific preferences preserved separately).
+
+"""
+
     # Inject tree context into prompt
-    print(f"""
-[CONTEXT-AWARE MODE ACTIVATED]
+    print(f"""{project_context_warning}[CONTEXT-AWARE MODE ACTIVATED]
 
 Project Structure:
 ```

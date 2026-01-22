@@ -107,6 +107,11 @@ Without memory persistence:
 ```markdown
 # Active Context
 
+## Project Path
+Current Project: [absolute path to project directory]
+Last Updated: [ISO timestamp]
+Status: [same_project | auto_reset_from_previous_project]
+
 ## Current Transformation
 [What requirement is being transformed right now]
 
@@ -340,6 +345,86 @@ Keep memory files trim for token efficiency:
 2. **Active Patterns**: Promote to patterns.md when seen 3+ times.
 3. **Learnings**: Integrate into patterns.md after validation.
 4. **Progress Metrics**: Keep detailed last 5 sessions, summarize older.
+
+## Project Context Auto-Reset Strategy
+
+When loading memory, validate and auto-reset if switching projects:
+
+### Implementation (Every Command START)
+
+```python
+# Step 1: Create memory directory
+Bash(command="mkdir -p .claude/pseudo-code-prompting")
+
+# Step 2: Load activeContext.md
+Read(file_path=".claude/pseudo-code-prompting/activeContext.md")
+
+# Step 3: Extract "Project Path:" from activeContext.md
+# Parse the file to find line: "Current Project: [path]"
+
+# Step 4: Get current working directory
+# cwd = os.path.abspath(os.getcwd())
+
+# Step 5: Compare paths
+# If stored_project_path != cwd:
+#   AUTO-RESET activeContext to empty template with new Project Path
+# Else:
+#   Use context normally
+```
+
+### What Gets Reset on Project Switch
+
+When user switches projects (cwd changes):
+
+```markdown
+# Active Context (AUTO-RESET)
+
+## Project Path
+Current Project: [new cwd]
+Last Updated: [current timestamp]
+Status: auto_reset_from_previous_project
+
+## Current Transformation
+[Empty - starting fresh in new project]
+
+## User Preferences
+[Empty - project-specific preferences don't carry over]
+
+## Recent Transformations
+[Empty - project-specific history reset]
+
+## Active Patterns
+[Empty - will rebuild patterns in new project]
+
+## Learnings This Session
+[Empty - starting fresh]
+
+## Blockers / Issues
+None
+
+## Last Updated
+[current timestamp]
+```
+
+### Why Auto-Reset on Project Switch?
+
+Prevents stale preferences/patterns from affecting work in different project:
+
+- **Naming Style**: "snake_case" preference from Python project shouldn't force Python naming in Node.js project
+- **Patterns**: "JWT auth" pattern from API project shouldn't suggest JWT for database optimization
+- **Context**: User preferences are per-project, not global across machines
+- **Accuracy**: Ensures memory always reflects current project state
+
+### Manual Override (Optional)
+
+If user wants to preserve context across projects (rare):
+
+```
+# Don't auto-reset, keep previous project context
+# User can manually copy patterns between projects if needed
+```
+
+---
 
 ## Pre-Compaction Memory Safety
 

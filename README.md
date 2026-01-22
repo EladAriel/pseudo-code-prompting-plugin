@@ -2,7 +2,7 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.1.4-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.5-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 
@@ -111,13 +111,21 @@ implement_auth(
 - **Edge case detection** - Spots unhandled scenarios
 - **Error handling** - Ensures proper error responses
 
-### Session Memory
+### Session Memory & Learning
 
-Learns your preferences and patterns across sessions:
+Learns your preferences and patterns across sessions with automatic project isolation:
 
-- User preferences (naming style, verbosity, security focus)
-- Domain patterns (REST APIs, auth, database queries)
-- Transformation history and quality metrics
+- **User Preferences** - Naming style, verbosity, security focus (applied automatically)
+- **Domain Patterns** - REST APIs, auth, database queries (discovered and reused)
+- **Transformation History** - Quality metrics and optimization results
+- **Project Isolation** - Auto-resets context when you switch projects (prevents stale patterns)
+- **KEY FIX** - transform-query now remembers your naming conventions across sessions
+
+**All commands integrate memory loading/updating:**
+- Load preferences and patterns at START
+- Apply learned context during transformation
+- Update memory with discoveries at END
+- Project context validates automatically (prevents cross-project contamination)
 
 ## Performance Metrics
 

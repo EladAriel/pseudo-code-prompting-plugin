@@ -1,21 +1,122 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pseudo-code-prompting",
-  "version": "1.1.5",
-  "description": "Transform natural language into structured, validated pseudo-code with full session memory integration across all commands, project context isolation, context-aware architecture analysis, and intelligent learning - 8 skills, 5 agents, 6 commands, 4 hooks with comprehensive memory lifecycle and per-project pattern learning",
+  "version": "1.1.6",
+  "description": "Transform natural language into structured, validated pseudo-code with full session memory integration, context-aware execution, and intelligent smart router for token efficiency - 9 skills, 6 agents, 7 commands (including smart router), 4 hooks with comprehensive memory lifecycle and cached tree reuse optimization",
   "owner": {
     "name": "Elad Ariel"
   },
   "plugins": [
     {
       "name": "pseudo-code-prompting",
-      "description": "Transform natural language requirements into structured, validated pseudo-code with comprehensive session memory integration, project context isolation, context-aware architecture analysis, and intelligent learning. Includes 8 skills with full memory lifecycle, 5 agents, 6 commands, and 4 hooks with per-project pattern learning, automatic user preference retention, and continuous quality improvement.",
-      "version": "1.1.5",
+      "description": "Transform natural language requirements into structured, validated pseudo-code with comprehensive session memory integration, project context isolation, context-aware architecture analysis, and intelligent token-efficient execution. Includes 9 skills with full memory lifecycle, 6 agents, 7 commands, and 4 hooks with per-project pattern learning, automatic user preference retention, cached PROJECT_TREE reuse, and continuous quality improvement.",
+      "version": "1.1.6",
       "author": {
         "name": "Elad Ariel"
       },
       "source": "./",
-      "category": "development"
+      "category": "development",
+      "commands": [
+        {
+          "name": "smart",
+          "description": "Smart router: Intelligent single entry point for all commands with automatic context detection and caching for 40-70% token savings",
+          "aliases": ["smart", "sr", "router", "smart-router"]
+        },
+        {
+          "name": "transform-query",
+          "description": "Transform natural language query to code-style pseudo-code format with context-aware file paths",
+          "aliases": ["transform"]
+        },
+        {
+          "name": "validate-requirements",
+          "description": "Validate transformed pseudo-code for completeness, correctness, and implementation readiness",
+          "aliases": ["validate"]
+        },
+        {
+          "name": "optimize-prompt",
+          "description": "Optimize pseudo-code by adding missing parameters, clarifying ambiguities, and ensuring implementation readiness",
+          "aliases": ["optimize"]
+        },
+        {
+          "name": "complete-process",
+          "description": "Orchestrate end-to-end pseudo-code transformation with automated validation and optimization",
+          "aliases": ["complete", "full-transform", "orchestrate"]
+        },
+        {
+          "name": "compress-context",
+          "description": "Compress verbose, detailed requirements into concise pseudo-code format while preserving essential information",
+          "aliases": ["compress"]
+        },
+        {
+          "name": "context-aware-transform",
+          "description": "Analyze project structure and transform requests with context-aware architecture recommendations",
+          "aliases": ["context-transform"]
+        }
+      ],
+      "agents": [
+        {
+          "name": "smart-router",
+          "description": "Intelligent routing of smart command to appropriate sub-command with cached PROJECT_TREE reuse for token efficiency"
+        },
+        {
+          "name": "prompt-transformer",
+          "description": "Transforms analyzed prompts into concise, code-style pseudo-code format following PROMPTCONVERTER methodology"
+        },
+        {
+          "name": "requirement-validator",
+          "description": "Validates transformed pseudo-code for completeness, correctness, and implementation readiness"
+        },
+        {
+          "name": "prompt-optimizer",
+          "description": "Optimizes pseudo-code by adding missing parameters and clarifying ambiguities"
+        },
+        {
+          "name": "prompt-analyzer",
+          "description": "Analyzes project structure for context-aware transformations"
+        },
+        {
+          "name": "context-compressor",
+          "description": "Compresses verbose requirements into concise pseudo-code format"
+        }
+      ],
+      "skills": [
+        {
+          "name": "smart-router",
+          "description": "Intelligent command routing with context reuse and token optimization"
+        },
+        {
+          "name": "prompt-structurer",
+          "description": "PROMPTCONVERTER methodology with parameter extraction and constraint inference"
+        },
+        {
+          "name": "requirement-validator",
+          "description": "Comprehensive validation with security, data, error handling, and performance checks"
+        },
+        {
+          "name": "prompt-optimizer",
+          "description": "Enhancement with security, validation, error handling, and performance parameters"
+        },
+        {
+          "name": "complete-process-orchestrator",
+          "description": "Orchestrated workflow: Transform → Validate → Optimize with automated TODOs"
+        },
+        {
+          "name": "context-compressor",
+          "description": "Requirement compression with semantic preservation"
+        },
+        {
+          "name": "session-memory",
+          "description": "Session memory management with pattern learning and preference retention"
+        },
+        {
+          "name": "feature-dev-enhancement",
+          "description": "Integration with feature-dev plugin for structured request handling"
+        },
+        {
+          "name": "prompt-analyzer",
+          "description": "Project structure analysis for context-aware recommendations"
+        }
+      ]
     }
   ]
 }

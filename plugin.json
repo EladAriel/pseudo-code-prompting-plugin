@@ -1,7 +1,7 @@
 {
   "name": "pseudo-code-prompting",
-  "version": "1.1.5",
-  "description": "Transform natural language into structured, validated pseudo-code with full session memory integration across all commands, project context isolation, context-aware architecture analysis, and intelligent learning - 8 skills, 5 agents, 6 commands, 4 hooks with comprehensive memory lifecycle and per-project pattern learning",
+  "version": "1.1.6",
+  "description": "Transform natural language into structured, validated pseudo-code with full session memory integration, context-aware execution, and intelligent token efficiency - 9 skills, 6 agents, 7 commands, 4 hooks with comprehensive memory lifecycle and cached tree reuse optimization",
   "author": {
     "name": "Elad Ariel",
     "url": "https://github.com/EladAriel/pseudo-code-prompting-plugin"
@@ -27,6 +27,10 @@
     "complexity-estimation",
     "session-memory",
     "pattern-learning",
-    "preference-retention"
+    "preference-retention",
+    "context-caching",
+    "token-efficiency",
+    "smart-router",
+    "intelligent-routing"
   ]
 }

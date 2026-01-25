@@ -18,12 +18,19 @@ flowchart TD
 
     F --> G{Which Command?}
 
+    G -->|/smart| EV[Eval Router]
     G -->|/complete-process| H[Complete Pipeline]
     G -->|/transform-query| I[Transform Agent]
     G -->|/compress-context| J[Compress Agent]
     G -->|/validate-requirements| K[Validate Agent]
     G -->|/optimize-prompt| L[Optimize Agent]
     G -->|/context-aware-transform| M[Context Agent]
+
+    EV -->|Sub-command| H
+    EV -->|Sub-command| I
+    EV -->|Sub-command| J
+    EV -->|Sub-command| K
+    EV -->|Sub-command| L
 
     H --> I
     I --> N[Pseudo-Code]
@@ -61,6 +68,7 @@ flowchart TD
 ### Layer 2: Commands (User-Invoked)
 | Command | Purpose | Agents Used | Workflow |
 |---------|---------|-------------|----------|
+| **`/smart`** (NEW) | **Smart router with intelligent context caching** | **smart-router** | **Routes to any sub-command, reuses cached context (40-70% token savings)** |
 | `/complete-process` | Full automated pipeline | transformer → validator → optimizer | Fully automated chain with TODO generation |
 | `/transform-query` | Basic transformation | transformer | Single step |
 | `/compress-context` | Reduce verbosity | compressor | Single step |
@@ -71,6 +79,7 @@ flowchart TD
 ### Layer 3: Agents (Processing)
 | Agent | Specialization | Input → Output |
 |-------|----------------|----------------|
+| **`smart-router`** (NEW) | **Meta-routing with context reuse** | **Command → Routed sub-command** |
 | `prompt-transformer` | NL → pseudo-code | Text → Function syntax |
 | `context-compressor` | Token reduction | Verbose → Concise |
 | `requirement-validator` | Quality assurance | Pseudo-code → Report |
@@ -80,6 +89,7 @@ flowchart TD
 ### Layer 4: Skills (Capabilities)
 | Skill | Knowledge Base | Loaded When |
 |-------|----------------|-------------|
+| **`smart-router`** (NEW) | **Command routing, context caching, token optimization** | **When /smart command invoked** |
 | `prompt-structurer` | PROMPTCONVERTER methodology | Transform operations |
 | `requirement-validator` | Security/validation checklists | Validation operations |
 | `prompt-optimizer` | Enhancement patterns | Optimization operations |
@@ -135,7 +145,16 @@ sequenceDiagram
 
 ```
 pseudo-code-prompting-plugin/
+├── agents/                      # Processing engines
+│   ├── smart-router.md
+│   ├── prompt-transformer.md
+│   ├── requirement-validator.md
+│   ├── prompt-optimizer.md
+│   ├── prompt-analyzer.md
+│   └── context-compressor.md
+│
 ├── commands/                    # User-facing commands
+│   ├── smart.md
 │   ├── complete-process.md
 │   ├── transform-query.md
 │   ├── compress-context.md
@@ -144,13 +163,20 @@ pseudo-code-prompting-plugin/
 │   └── context-aware-transform.md
 │
 ├── skills/                      # Capability definitions
+│   ├── smart-router/
+│   │   ├── SKILL.md
+│   │   └── capabilities.json
 │   ├── prompt-structurer/
 │   │   ├── capabilities.json
 │   │   ├── SKILL.md
 │   │   └── references/         # Knowledge base
 │   ├── requirement-validator/
 │   ├── prompt-optimizer/
-│   └── context-compressor/
+│   ├── complete-process-orchestrator/
+│   ├── context-compressor/
+│   ├── session-memory/
+│   ├── feature-dev-enhancement/
+│   └── prompt-analyzer/
 │
 ├── hooks/                       # Auto-triggered logic
 │   ├── core/

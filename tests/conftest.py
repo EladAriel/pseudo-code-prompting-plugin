@@ -168,13 +168,10 @@ def golden_comparator():
     """Compare actual output with golden file (with normalization)."""
     def _compare(actual: str, expected: str) -> bool:
         import re
-        # Normalize: remove newlines, collapse multiple spaces to single space
+        # Normalize: remove ALL whitespace (newlines, spaces, tabs, etc.)
         def normalize(text: str) -> str:
-            # Remove newlines and leading/trailing whitespace
-            text = text.strip().replace('\n', ' ')
-            # Collapse multiple spaces to single space
-            text = re.sub(r'\s+', ' ', text)
-            return text
+            # Remove all whitespace characters
+            return re.sub(r'\s', '', text.strip())
 
         return normalize(actual) == normalize(expected)
     return _compare

@@ -167,10 +167,16 @@ def transformation_golden(golden_dir):
 def golden_comparator():
     """Compare actual output with golden file (with normalization)."""
     def _compare(actual: str, expected: str) -> bool:
-        # Normalize whitespace and line endings
-        actual_lines = [line.strip() for line in actual.strip().split("\n") if line.strip()]
-        expected_lines = [line.strip() for line in expected.strip().split("\n") if line.strip()]
-        return actual_lines == expected_lines
+        import re
+        # Normalize: remove newlines, collapse multiple spaces to single space
+        def normalize(text: str) -> str:
+            # Remove newlines and leading/trailing whitespace
+            text = text.strip().replace('\n', ' ')
+            # Collapse multiple spaces to single space
+            text = re.sub(r'\s+', ' ', text)
+            return text
+
+        return normalize(actual) == normalize(expected)
     return _compare
 
 

@@ -1,0 +1,18 @@
+create_authentication(
+  type="jwt",
+  flow="bearer",
+  token_expiration=3600,
+  refresh_token_expiration=86400,
+  secret_key="env:JWT_SECRET",
+  algorithm="HS256",
+  validation=[
+    "token_signature_verification",
+    "expiration_check",
+    "revocation_list_check"
+  ],
+  error_handling={
+    "expired": {"code": 401, "message": "Token expired"},
+    "invalid": {"code": 401, "message": "Invalid token"},
+    "missing": {"code": 401, "message": "Token required"}
+  }
+)

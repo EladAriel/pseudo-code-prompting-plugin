@@ -1,0 +1,11 @@
+configure_rate_limiting(
+  strategy="token_bucket",
+  limits={
+    "default": {"requests": 100, "window": "1m"},
+    "premium": {"requests": 1000, "window": "1m"},
+    "admin": "unlimited"
+  },
+  key_strategy="ip:user_id",
+  response_codes={"rate_limited": 429},
+  headers={"retry_after": "seconds"}
+)

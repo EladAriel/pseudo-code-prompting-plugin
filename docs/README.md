@@ -18,7 +18,7 @@ Each command doc includes:
 
 | Command | Purpose | Read Time |
 |---------|---------|-----------|
-| **[smart](smart-plugin.md)** (NEW) | **Smart router: Intelligent command routing with context caching** | **1 min** |
+| **[smart](smart.md)** (NEW) | **Smart router: Intelligent command routing with context caching** | **1 min** |
 | [complete-process](complete-process.md) | Full pipeline: transform → validate → optimize | 1 min |
 | [transform-query](transform-query.md) | Convert natural language to pseudo-code | 1 min |
 | [compress-context](compress-context.md) | Reduce verbose requirements by 80-95% | 1 min |
@@ -46,17 +46,17 @@ Each command doc includes:
 
 **New to the plugin?**
 1. Start with [complete-process.md](complete-process.md) - it's the main command
-2. Learn about [smart.md](smart-plugin.md) - new meta-command for token efficiency
+2. Learn about [smart](smart.md) - new meta-command for token efficiency
 3. Read [ARCHITECTURE.md](ARCHITECTURE.md) to understand the system
 4. Explore individual commands as needed
 
 **Multi-command workflows (NEW)?**
-- Use [smart](smart-plugin.md) for 40-70% token savings on multiple commands
+- Use [smart](smart.md) for 40-70% token savings on multiple commands
 - Automatic context reuse across transform → validate → optimize
 - See smart doc for real-world workflow examples
 
 **Need a specific transformation?**
-- Multiple commands → [smart.md](smart-plugin.md) (saves tokens!)
+- Multiple commands → [smart](smart.md) (saves tokens!)
 - Long requirements → [compress-context.md](compress-context.md)
 - Basic structuring → [transform-query.md](transform-query.md)
 - Quality check → [validate-requirements.md](validate-requirements.md)

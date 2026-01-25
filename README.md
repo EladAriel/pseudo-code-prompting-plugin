@@ -58,7 +58,7 @@ Or use slash commands:
 
 | Command | What It Does | When to Use |
 |---------|--------------|-------------|
-| **[smart](commands/smart.md)** (NEW) | **Smart router: Intelligent routing with context caching** | **Multi-command workflows, automatic context reuse** |
+| **[smart](docs/smart.md)** (NEW) | **Smart router: Intelligent routing with context caching** | **Multi-command workflows, automatic context reuse** |
 | [complete-process](docs/complete-process.md) | Full pipeline: transform → validate → optimize | Production features, complex requirements |
 | [transform-query](docs/transform-query.md) | Basic transformation to pseudo-code | Quick iteration, simple structuring |
 | [compress-context](docs/compress-context.md) | Reduce verbose requirements by 80-95% | Long descriptions, token optimization |

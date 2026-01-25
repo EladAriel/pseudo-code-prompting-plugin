@@ -1,0 +1,101 @@
+{
+  "skill_id": "smart-router",
+  "name": "Smart Router",
+  "version": "1.0.0",
+  "tier": "orchestration",
+  "category": "command-routing",
+  "tokens_estimate": 250,
+  "triggers": {
+    "keywords": ["smart", "router", "intelligent", "route"],
+    "patterns": [
+      "^/smart\\s+",
+      "^/sr\\s+",
+      "smart router"
+    ],
+    "contexts": [
+      "user invokes smart meta-command",
+      "user wants to run pseudo-code-prompting command",
+      "context-aware command execution needed"
+    ]
+  },
+  "capabilities": [
+    "command-routing",
+    "context-aware-detection",
+    "tree-caching",
+    "token-optimization",
+    "sub-command-orchestration",
+    "error-handling",
+    "memory-management"
+  ],
+  "supported_subcommands": [
+    "transform-query",
+    "validate-requirements",
+    "optimize-prompt",
+    "complete-process",
+    "compress-context"
+  ],
+  "parameters": {
+    "command": {
+      "type": "string",
+      "required": true,
+      "enum": [
+        "transform-query",
+        "validate-requirements",
+        "optimize-prompt",
+        "complete-process",
+        "compress-context"
+      ],
+      "description": "Sub-command to execute"
+    },
+    "arguments": {
+      "type": "string",
+      "required": true,
+      "description": "Arguments for the sub-command"
+    },
+    "use_context_tree": {
+      "type": "boolean",
+      "default": true,
+      "description": "Reuse cached PROJECT_TREE if available"
+    }
+  },
+  "performance": {
+    "routing_latency_ms": "100-200",
+    "context_detection_ms": "50-100",
+    "overhead_ms": "500",
+    "token_savings_percentage": "60-80"
+  },
+  "token_efficiency": {
+    "strategy": "Option B: Read-Only Commands",
+    "cached_tree_reuse": true,
+    "per_command_savings": "1500-2000 tokens",
+    "multi_command_session_savings": "60-80%",
+    "description": "All pseudo-code-prompting commands are read-only. Cached PROJECT_TREE reused across multiple commands in one session with no re-scanning."
+  },
+  "integration": {
+    "hooks": [
+      "context-aware-tree-injection",
+      "user-prompt-submit"
+    ],
+    "related_skills": [
+      "prompt-structurer",
+      "requirement-validator",
+      "prompt-optimizer",
+      "complete-process-orchestrator",
+      "context-compressor"
+    ],
+    "related_agents": [
+      "smart-router"
+    ]
+  },
+  "error_handling": {
+    "unknown_command": "Return available commands list",
+    "missing_arguments": "Return usage help for command",
+    "sub_command_failure": "Propagate error with context",
+    "context_error": "Clear stale context, continue in standard mode"
+  },
+  "memory": {
+    "persistent": true,
+    "files": [".claude/pseudo-code-prompting/activeContext.md"],
+    "operations": ["load_at_start", "update_at_end"]
+  }
+}

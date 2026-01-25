@@ -1,0 +1,15 @@
+execute_database_query(
+  operation="select",
+  table="users",
+  filters={"status": "active"},
+  parameters={"name": "string", "email": "email"},
+  joins=[],
+  ordering=[{"field": "created_at", "direction": "desc"}],
+  limit=100,
+  offset=0,
+  validation=[
+    "sql_injection_prevention",
+    "parameter_binding",
+    "query_timeout"
+  ]
+)

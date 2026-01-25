@@ -1,0 +1,11 @@
+create_validation_endpoint(
+  endpoint="/api/validate",
+  validations={
+    "email": {"type": "email", "required": true},
+    "password": {"type": "string", "min_length": 12, "required": true},
+    "username": {"type": "string", "pattern": "^[a-z0-9_-]+$", "required": true}
+  },
+  response={"valid": "boolean", "errors": ["string"]},
+  security=["input_sanitization", "rate_limiting"],
+  rate_limit={"max": 50, "window": "1h"}
+)

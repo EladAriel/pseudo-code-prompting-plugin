@@ -1,0 +1,10 @@
+configure_pagination(
+  strategy="offset_limit",
+  default_page_size=20,
+  max_page_size=100,
+  request_parameters={"page": "integer", "limit": "integer"},
+  response_schema={
+    "data": ["object"],
+    "pagination": {"page": "integer", "limit": "integer", "total": "integer", "pages": "integer"}
+  }
+)

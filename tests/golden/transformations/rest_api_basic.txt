@@ -1,0 +1,11 @@
+create_rest_api(
+  path="/api/users",
+  method="GET",
+  request_schema={},
+  response_codes={
+    "200": {"users": [{"id": "uuid", "name": "string", "email": "email"}]},
+    "400": "validation_error"
+  },
+  authentication="none",
+  validation=[]
+)

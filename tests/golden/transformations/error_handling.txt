@@ -1,0 +1,11 @@
+configure_error_handling(
+  strategy="graceful_degradation",
+  error_codes={
+    "400": {"message": "Bad Request", "action": "return_error"},
+    "401": {"message": "Unauthorized", "action": "redirect_to_login"},
+    "500": {"message": "Internal Server Error", "action": "log_and_retry"},
+    "503": {"message": "Service Unavailable", "action": "circuit_breaker"}
+  },
+  logging={"level": "error", "include_stacktrace": true},
+  monitoring=["error_rate", "response_time", "failed_requests"]
+)

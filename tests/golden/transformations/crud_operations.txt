@@ -1,0 +1,12 @@
+create_crud_operations(
+  resource="users",
+  operations=["create", "read", "update", "delete"],
+  endpoints={
+    "create": {"method": "POST", "path": "/api/users", "response": 201},
+    "read": {"method": "GET", "path": "/api/users/:id", "response": 200},
+    "update": {"method": "PUT", "path": "/api/users/:id", "response": 200},
+    "delete": {"method": "DELETE", "path": "/api/users/:id", "response": 204}
+  },
+  authentication="jwt",
+  validation=["input_validation", "authorization_check"]
+)

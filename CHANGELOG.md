@@ -5,6 +5,33 @@ All notable changes to the Pseudo-Code Prompting Plugin will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 (2026-01-26)
+
+
+### Features
+
+* Add complete-process hook orchestration system (v1.2.0) ([8428032](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/84280321180d107d978a7071c320d04dea2df968))
+* Add context aware tree injection and GitHub Actions CI/CD workflows ([df9274b](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/df9274b2c10ac3cc0f73b91f7b59239512cedb27))
+* add natural language plugin invocation support (v1.0.9) ([1e2985a](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/1e2985abc03ff24ef05ad030fdfeacec1b8789d2))
+* Complete Process Orchestrator v1.6.1 - Critical efficiency improvements ([8efc73e](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/8efc73e13efe41fa64f6a3fab36ec41408c257b6))
+* Migrate hooks to Python 3 for robust JSON parsing (v1.0.10) ([b365b57](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/b365b57ca5c50b52f4c4d95069180f063e393dd1))
+* v1.1.5 - Comprehensive Session Memory Integration & Context Isolation ([b86c07e](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/b86c07e2259fba0cdd410b9905546ef2cde54f2f))
+
+
+### Bug Fixes
+
+* **ci:** skip anchor links in markdown validation and add workflow setup guide ([de46bfc](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/de46bfc3a054f3e2fc7f8676230a0a951f6467b1))
+* **ci:** skip directory links in markdown validation and add branch protection guide ([c0b7eef](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/c0b7eef6bb7884f615eb6f682b2f96733927762f))
+* Fix failing hook tests on Windows - timeout test and encoding issues ([e22cd39](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/e22cd39ccdbf2d24448193dca5d0880859f59478))
+* Remove cache file references from CI workflow ([74bcb1d](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/74bcb1de7f94d4a25dcfaca624c87fec63103c08))
+* Rename stage-output-filter.py to stage_output_filter.py and fix regex patterns ([c412e70](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/c412e70c15b3231efe1e8943e8b77c3d3c385f60))
+* Resolve shellcheck warning SC2034 in confirm-cache-use.sh ([48a8332](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/48a8332bbaec6347b9f6d08ab3fab304cd1a1cfa))
+* Skip integration test requiring pytest plugin setup ([1e2716a](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/1e2716a489a8275e67183d43093cb8d217f12cb8))
+* Update gitignore to ignore entire .claude/pseudo-code-prompting directory ([4744c69](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/4744c697b94d58fd53180227772d09ade18e6ec3))
+* Update marketplace.json version and fix shellcheck warnings ([dd2118a](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/dd2118ac57bd73b9d385b297f2594668b771618a))
+* Use bash instead of sh for hook scripts ([b41132f](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/b41132fa58d5bfadd6c3a9f5354bd81a5c91e7e6))
+* v1.1.5 - Correct session memory implementation to be executable directives ([630b660](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/630b66046ee6016c49a330283ed2b8220d4327ca))
+
 ## [Unreleased]
 
 ## [1.2.0] - 2026-01-26

@@ -30,46 +30,29 @@ jobs:
           pip install -r requirements-test.txt
 
       - name: Run pytest with markers
-        run: |
-          pytest tests/ -v --tb=short --color=yes \
-            -m "not slow" \
-            --cov=hooks --cov-report=xml --cov-report=term-missing
+        run: pytest tests/ -v --tb=short --color=yes -m "not slow" --cov=hooks --cov-report=xml --cov-report=term-missing
 
       - name: Run cache validation tests
-        run: |
-          pytest tests/test_cache_validation/ -v -m cache \
-            --tb=short
+        run: pytest tests/test_cache_validation/ -v -m cache --tb=short
 
       - name: Run performance benchmarks
         if: matrix.os == 'ubuntu-latest'
-        run: |
-          pytest tests/test_performance_benchmarks/ -v -m performance \
-            --tb=short
+        run: pytest tests/test_performance_benchmarks/ -v -m performance --tb=short
 
       - name: Run cross-platform tests
-        run: |
-          pytest tests/test_cross_platform/ -v -m integration \
-            --tb=short
+        run: pytest tests/test_cross_platform/ -v -m integration --tb=short
 
       - name: Run hook timing tests
-        run: |
-          pytest tests/test_hook_timing/ -v -m hook \
-            --tb=short
+        run: pytest tests/test_hook_timing/ -v -m hook --tb=short
 
       - name: Run quality metrics tests
-        run: |
-          pytest tests/test_quality_metrics/ -v -m golden \
-            --tb=short
+        run: pytest tests/test_quality_metrics/ -v -m golden --tb=short
 
       - name: Run parallel execution tests
-        run: |
-          pytest tests/test_parallel_execution/ -v -m parallel \
-            --tb=short
+        run: pytest tests/test_parallel_execution/ -v -m parallel --tb=short
 
       - name: Run error recovery tests
-        run: |
-          pytest tests/test_error_recovery/ -v -m integration \
-            --tb=short
+        run: pytest tests/test_error_recovery/ -v -m integration --tb=short
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
@@ -81,8 +64,8 @@ jobs:
 
       - name: Generate test report
         if: always()
-        run: |
-          pytest tests/ --tb=no --co -q > test_report_${{ matrix.os }}_py${{ matrix.python-version }}.txt || true
+        shell: bash
+        run: pytest tests/ --tb=no --co -q > test_report_${{ matrix.os }}_py${{ matrix.python-version }}.txt || true
 
       - name: Upload test report
         if: always()

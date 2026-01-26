@@ -57,7 +57,7 @@ class TestHookLatency:
 
         assert max_deviation < avg * 0.5, "Hook latencies have high variance"
 
-    def test_cumulative_hook_overhead(self, latency_tracker, performance_monitor):
+    def test_cumulative_hook_overhead(self, latency_tracker, performance_monitor, golden_performance_baseline):
         """Measure total overhead of hook execution."""
         total_ops = 0
 
@@ -71,9 +71,10 @@ class TestHookLatency:
 
         total_duration = performance_monitor.metrics["duration_ms"]
         overhead_percent = latency_tracker.get_cumulative_overhead(total_duration)
+        max_overhead = golden_performance_baseline["hook_latency"]["cumulative_overhead_max_percent"]
 
-        assert overhead_percent < 50, \
-            f"Hook overhead {overhead_percent:.1f}% is too high"
+        assert overhead_percent < max_overhead, \
+            f"Hook overhead {overhead_percent:.1f}% exceeds threshold {max_overhead}%"
 
     def test_hook_latency_under_load(self, latency_tracker, concurrent_executor):
         """Measure hook latency under concurrent load."""
@@ -141,11 +142,11 @@ class TestHookLatency:
         max_latency = golden_performance_baseline["hook_latency"]["single_max_ms"]
 
         if should_pass:
-            assert latency_ms < max_latency, \
-                f"Should pass: {latency_ms}ms < {max_latency}ms"
+            assert latency_ms <= max_latency, \
+                f"Should pass: {latency_ms}ms <= {max_latency}ms"
         else:
-            assert latency_ms >= max_latency, \
-                f"Should fail: {latency_ms}ms >= {max_latency}ms"
+            assert latency_ms > max_latency, \
+                f"Should fail: {latency_ms}ms > {max_latency}ms"
 
     def test_hook_latency_across_types(self, latency_tracker):
         """Measure latencies of different hook types."""

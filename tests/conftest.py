@@ -5,8 +5,14 @@ import pytest
 import json
 import tempfile
 import subprocess
+import time
+import tracemalloc
+import sys
 from pathlib import Path
-from typing import Dict, Any, Callable
+from typing import Dict, Any, Callable, List
+from concurrent.futures import ThreadPoolExecutor
+import threading
+from collections import defaultdict
 
 
 # ============================================================================
@@ -403,3 +409,452 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "chaining: mark test as an agent chaining protocol test"
     )
+    config.addinivalue_line(
+        "markers", "cache: mark test as a cache validation test"
+    )
+    config.addinivalue_line(
+        "markers", "performance: mark test as a performance benchmark test"
+    )
+    config.addinivalue_line(
+        "markers", "parallel: mark test as a parallel execution test"
+    )
+
+
+# ============================================================================
+# NEW FIXTURES FOR TEST SUITE ENHANCEMENTS
+# ============================================================================
+
+@pytest.fixture
+def large_project_structure(tmp_path):
+    """Generate synthetic project structures with configurable file counts."""
+    def _generate(scale: str = "1k") -> Path:
+        scale_map = {
+            "1k": 1000,
+            "10k": 10000,
+            "50k": 50000,
+            "100k": 100000
+        }
+        file_count = scale_map.get(scale, 1000)
+
+        # Create directory structure
+        base = tmp_path / f"project_{scale}"
+        base.mkdir(exist_ok=True)
+
+        # Create nested directories with files
+        files_per_dir = 50
+        dir_levels = 5
+
+        for i in range(file_count):
+            dir_path = base
+            for level in range(dir_levels):
+                dir_path = dir_path / f"dir_{level}_{i % (file_count // (10 ** level) if level < 3 else 100)}"
+
+            dir_path.mkdir(parents=True, exist_ok=True)
+            file_path = dir_path / f"file_{i}.py"
+            file_path.write_text(f"# File {i}\nindex = {i}\n")
+
+        return base
+
+    return _generate
+
+
+@pytest.fixture
+def performance_monitor():
+    """Track execution time and memory usage."""
+    class PerformanceMonitor:
+        def __init__(self):
+            self.start_time = None
+            self.end_time = None
+            self.memory_before = 0
+            self.memory_after = 0
+            self.metrics = {}
+
+        def __enter__(self):
+            self.start_time = time.perf_counter()
+            self.memory_before = self._get_memory_mb()
+            tracemalloc.start()
+            return self
+
+        def __exit__(self, *args):
+            self.end_time = time.perf_counter()
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            self.memory_after = peak / 1024 / 1024
+
+            self.metrics = {
+                "start_time": self.start_time,
+                "end_time": self.end_time,
+                "duration_ms": (self.end_time - self.start_time) * 1000,
+                "memory_before": self.memory_before,
+                "memory_after": self.memory_after,
+                "memory_delta_mb": self.memory_after - self.memory_before
+            }
+
+        def _get_memory_mb(self) -> float:
+            try:
+                import psutil
+                process = psutil.Process()
+                return process.memory_info().rss / 1024 / 1024
+            except ImportError:
+                return 0.0
+
+    return PerformanceMonitor()
+
+
+@pytest.fixture
+def cache_state_tracker():
+    """Track cache hit/miss metrics."""
+    class CacheStateTracker:
+        def __init__(self):
+            self.hits = 0
+            self.misses = 0
+            self.evictions = 0
+            self.operations = []
+            self.lock = threading.Lock()
+
+        def record_hit(self):
+            with self.lock:
+                self.hits += 1
+                self.operations.append(("hit", time.perf_counter()))
+
+        def record_miss(self):
+            with self.lock:
+                self.misses += 1
+                self.operations.append(("miss", time.perf_counter()))
+
+        def record_eviction(self):
+            with self.lock:
+                self.evictions += 1
+                self.operations.append(("eviction", time.perf_counter()))
+
+        def get_metrics(self) -> Dict[str, Any]:
+            total = self.hits + self.misses
+            hit_rate = (self.hits / total * 100) if total > 0 else 0
+
+            lookup_times = []
+            for i in range(1, len(self.operations)):
+                lookup_times.append(
+                    (self.operations[i][1] - self.operations[i-1][1]) * 1000
+                )
+
+            avg_lookup = sum(lookup_times) / len(lookup_times) if lookup_times else 0
+
+            return {
+                "hits": self.hits,
+                "misses": self.misses,
+                "hit_rate": hit_rate,
+                "evictions": self.evictions,
+                "total_operations": total,
+                "average_lookup_time_ms": avg_lookup
+            }
+
+        def reset(self):
+            with self.lock:
+                self.hits = 0
+                self.misses = 0
+                self.evictions = 0
+                self.operations = []
+
+    return CacheStateTracker()
+
+
+@pytest.fixture
+def concurrent_executor():
+    """Execute functions concurrently."""
+    class ConcurrentExecutor:
+        def __init__(self):
+            self.results = []
+            self.timings = {}
+
+        def run_agents(self, functions: List[Callable], max_workers: int = 4) -> List[Any]:
+            self.results = []
+            self.timings = {}
+
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {}
+                for func in functions:
+                    start = time.perf_counter()
+                    future = executor.submit(func)
+                    futures[future] = (func.__name__, start)
+
+                for future in futures:
+                    func_name, start = futures[future]
+                    try:
+                        result = future.result(timeout=30)
+                        self.results.append(result)
+                        self.timings[func_name] = (time.perf_counter() - start) * 1000
+                    except Exception as e:
+                        self.results.append({"error": str(e)})
+                        self.timings[func_name] = None
+
+            return self.results
+
+        def get_timings(self) -> Dict[str, float]:
+            return self.timings
+
+    return ConcurrentExecutor()
+
+
+@pytest.fixture
+def platform_detector():
+    """Detect platform and return configuration."""
+    class PlatformDetector:
+        def __init__(self):
+            self.platform = sys.platform
+            self.is_ci = "CI" in sys.modules or "CI_ENVIRONMENT" in sys.modules or \
+                        any(x in os.environ for x in ["CI", "GITHUB_ACTIONS", "GITLAB_CI", "CIRCLECI"])
+
+        def get_info(self) -> Dict[str, Any]:
+            multipliers = {
+                "win32": 1.5,
+                "darwin": 1.0,
+                "linux": 1.0,
+                "ci": 2.0 if self.is_ci else 1.0
+            }
+
+            return {
+                "platform": self.platform,
+                "is_ci": self.is_ci,
+                "timeout_multiplier": multipliers["ci"] if self.is_ci else multipliers.get(self.platform, 1.0),
+                "is_windows": self.platform == "win32",
+                "is_macos": self.platform == "darwin",
+                "is_linux": self.platform == "linux"
+            }
+
+        def skip_if_not_platform(self, required_platform: str):
+            if required_platform == "windows" and not self.is_windows:
+                pytest.skip(f"Test requires Windows, current: {self.platform}")
+            elif required_platform == "macos" and not self.is_macos:
+                pytest.skip(f"Test requires macOS, current: {self.platform}")
+            elif required_platform == "linux" and not self.is_linux:
+                pytest.skip(f"Test requires Linux, current: {self.platform}")
+
+    return PlatformDetector()
+
+
+@pytest.fixture
+def memory_profiler():
+    """Profile memory usage with tracemalloc."""
+    class MemoryProfiler:
+        def __init__(self):
+            self.snapshots = []
+            self.current_snapshot = None
+
+        def start(self):
+            tracemalloc.start()
+            self.current_snapshot = tracemalloc.take_snapshot()
+
+        def stop(self) -> Dict[str, Any]:
+            if not tracemalloc.is_tracing():
+                return {}
+
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.compare_to(self.current_snapshot, 'lineno')
+
+            self.snapshots.append(snapshot)
+            tracemalloc.stop()
+
+            return {
+                "total_allocated_mb": sum(stat.size for stat in top_stats) / 1024 / 1024,
+                "peak_allocated_mb": tracemalloc.get_traced_memory()[1] / 1024 / 1024,
+                "top_allocations": [(stat.traceback, stat.size) for stat in top_stats[:5]]
+            }
+
+        def get_leak_analysis(self) -> Dict[str, Any]:
+            if len(self.snapshots) < 2:
+                return {}
+
+            first = self.snapshots[0]
+            last = self.snapshots[-1]
+            stats = last.compare_to(first, 'lineno')
+
+            leaked = sum(stat.size for stat in stats if stat.size_diff > 0)
+            return {
+                "leaked_mb": leaked / 1024 / 1024,
+                "top_leaked": [(stat.traceback, stat.size_diff) for stat in stats[:5] if stat.size_diff > 0]
+            }
+
+    return MemoryProfiler()
+
+
+@pytest.fixture
+def latency_tracker():
+    """Track hook callback latencies."""
+    class LatencyTracker:
+        def __init__(self):
+            self.latencies = defaultdict(list)
+            self.lock = threading.Lock()
+
+        def record(self, hook_name: str, latency_ms: float):
+            with self.lock:
+                self.latencies[hook_name].append(latency_ms)
+
+        def get_metrics(self, hook_name: str = None) -> Dict[str, Any]:
+            with self.lock:
+                if hook_name:
+                    latencies = self.latencies[hook_name]
+                else:
+                    latencies = [l for ls in self.latencies.values() for l in ls]
+
+                if not latencies:
+                    return {}
+
+                latencies = sorted(latencies)
+                return {
+                    "min_ms": min(latencies),
+                    "max_ms": max(latencies),
+                    "avg_ms": sum(latencies) / len(latencies),
+                    "p95_ms": latencies[int(len(latencies) * 0.95)],
+                    "p99_ms": latencies[int(len(latencies) * 0.99)],
+                    "count": len(latencies)
+                }
+
+        def get_cumulative_overhead(self, total_duration_ms: float) -> float:
+            with self.lock:
+                total_latency = sum(l for ls in self.latencies.values() for l in ls)
+            return (total_latency / total_duration_ms * 100) if total_duration_ms > 0 else 0
+
+        def reset(self):
+            with self.lock:
+                self.latencies.clear()
+
+    return LatencyTracker()
+
+
+@pytest.fixture
+def golden_performance_baseline(platform_detector):
+    """Load performance thresholds from configuration."""
+    info = platform_detector.get_info()
+    multiplier = info["timeout_multiplier"]
+
+    return {
+        "tree_generation": {
+            "1k": 1000 * multiplier,
+            "10k": 15000 * multiplier,
+            "50k": 60000 * multiplier,
+            "100k": 180000 * multiplier
+        },
+        "hook_latency": {
+            "single_max_ms": 100 * multiplier,
+            "cumulative_overhead_max_percent": 10
+        },
+        "cache_operations": {
+            "get_max_ms": 5 * multiplier,
+            "set_max_ms": 10 * multiplier,
+            "throughput_min_ops_per_sec": 1000
+        },
+        "platform_multiplier": multiplier
+    }
+
+
+import os
+import json
+from datetime import datetime
+
+
+# ============================================================================
+# TEST METRICS COLLECTION
+# ============================================================================
+
+class TestMetricsCollector:
+    """Collect and report test execution metrics."""
+
+    def __init__(self):
+        self.metrics = {
+            "timestamp": datetime.now().isoformat(),
+            "test_results": [],
+            "performance_metrics": {},
+            "platform_info": platform_detector().get_info() if 'platform_detector' in dir() else {}
+        }
+
+    def record_test(self, test_name, duration_ms, status):
+        """Record individual test result."""
+        self.metrics["test_results"].append({
+            "name": test_name,
+            "duration_ms": duration_ms,
+            "status": status
+        })
+
+    def record_performance(self, metric_name, value, unit):
+        """Record performance metric."""
+        if metric_name not in self.metrics["performance_metrics"]:
+            self.metrics["performance_metrics"][metric_name] = []
+        self.metrics["performance_metrics"][metric_name].append({
+            "value": value,
+            "unit": unit,
+            "timestamp": datetime.now().isoformat()
+        })
+
+    def get_summary(self):
+        """Get test execution summary."""
+        results = self.metrics["test_results"]
+        if not results:
+            return {}
+
+        total = len(results)
+        passed = sum(1 for r in results if r["status"] == "passed")
+        failed = sum(1 for r in results if r["status"] == "failed")
+        total_duration = sum(r["duration_ms"] for r in results)
+
+        return {
+            "total_tests": total,
+            "passed": passed,
+            "failed": failed,
+            "success_rate": (passed / total * 100) if total > 0 else 0,
+            "total_duration_ms": total_duration,
+            "average_test_duration_ms": total_duration / total if total > 0 else 0
+        }
+
+    def save_metrics(self, filepath):
+        """Save metrics to JSON file."""
+        summary = self.get_summary()
+        output = {
+            **self.metrics,
+            "summary": summary
+        }
+
+        with open(filepath, 'w') as f:
+            json.dump(output, f, indent=2)
+
+
+@pytest.fixture(scope="session")
+def metrics_collector():
+    """Session-wide metrics collector."""
+    return TestMetricsCollector()
+
+
+def pytest_runtest_logreport(report):
+    """Hook to collect metrics after each test."""
+    if report.when == "call":
+        # Could be extended to record metrics
+        pass
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Save metrics at end of test session."""
+    if hasattr(session, 'config') and hasattr(session.config, '_metrics'):
+        metrics_file = session.config.option.metrics_file
+        session.config._metrics.save_metrics(metrics_file)
+
+
+class PlatformDetector:
+    """Detect platform and return configuration."""
+    def __init__(self):
+        self.platform = sys.platform
+        self.is_ci = "CI" in os.environ
+
+    def get_info(self):
+        multipliers = {
+            "win32": 1.5,
+            "darwin": 1.0,
+            "linux": 1.0,
+            "ci": 2.0 if self.is_ci else 1.0
+        }
+        return {
+            "platform": self.platform,
+            "is_ci": self.is_ci,
+            "timeout_multiplier": multipliers["ci"] if self.is_ci else multipliers.get(self.platform, 1.0),
+            "is_windows": self.platform == "win32",
+            "is_macos": self.platform == "darwin",
+            "is_linux": self.platform == "linux"
+        }

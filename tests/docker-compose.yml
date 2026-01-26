@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  test-suite:
+    build: .
+    container_name: pseudo-code-test-suite
+    environment:
+      - CI=true
+      - CI_ENVIRONMENT=docker
+      - PYTEST_TIMEOUT=600
+    volumes:
+      - ..:/app
+      - /app/.pytest_cache
+    command: >
+      pytest .
+        -v
+        --tb=short
+        --color=yes
+        --cov=hooks
+        --cov-report=html
+        --cov-report=term-missing
+    ports:
+      - "8000:8000"
+
+  test-performance:
+    build: .
+    container_name: pseudo-code-performance-tests
+    environment:
+      - CI=true
+      - CI_ENVIRONMENT=docker
+    volumes:
+      - ..:/app
+    command: >
+      pytest test_performance_benchmarks/
+        -v
+        --tb=short
+        -m performance
+
+  test-cross-platform:
+    build: .
+    container_name: pseudo-code-cross-platform-tests
+    environment:
+      - CI=true
+    volumes:
+      - ..:/app
+    command: >
+      pytest test_cross_platform/
+        -v
+        --tb=short
+        -m integration
+
+  test-cache:
+    build: .
+    container_name: pseudo-code-cache-tests
+    environment:
+      - CI=true
+    volumes:
+      - ..:/app
+    command: >
+      pytest test_cache_validation/
+        -v
+        --tb=short
+        -m cache
+
+  test-parallel:
+    build: .
+    container_name: pseudo-code-parallel-tests
+    environment:
+      - CI=true
+    volumes:
+      - ..:/app
+    command: >
+      pytest test_parallel_execution/
+        -v
+        --tb=short
+        -m parallel

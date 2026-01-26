@@ -23,6 +23,9 @@ logs/
 *.temp
 .cache/
 
+# Memory logs (generated at runtime)
+.claude/pseudo-code-prompting/*.md
+
 # Hook logs (generated at runtime)
 .claude/hooks/logs/
 

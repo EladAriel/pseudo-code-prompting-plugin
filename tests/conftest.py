@@ -651,12 +651,15 @@ def memory_profiler():
             snapshot = tracemalloc.take_snapshot()
             top_stats = snapshot.compare_to(self.current_snapshot, 'lineno')
 
+            # Get traced memory BEFORE stopping tracemalloc
+            current, peak = tracemalloc.get_traced_memory()
+
             self.snapshots.append(snapshot)
             tracemalloc.stop()
 
             return {
                 "total_allocated_mb": sum(stat.size for stat in top_stats) / 1024 / 1024,
-                "peak_allocated_mb": tracemalloc.get_traced_memory()[1] / 1024 / 1024,
+                "peak_allocated_mb": peak / 1024 / 1024,
                 "top_allocations": [(stat.traceback, stat.size) for stat in top_stats[:5]]
             }
 

@@ -126,6 +126,8 @@ def hook_executor(plugin_root):
                 input=stdin_data,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 timeout=timeout
             )
             return result
@@ -136,6 +138,8 @@ def hook_executor(plugin_root):
                 input=stdin_data,
                 capture_output=True,
                 text=True,
+                encoding='utf-8',
+                errors='replace',
                 timeout=timeout
             )
             return result

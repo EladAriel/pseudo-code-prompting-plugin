@@ -19,7 +19,7 @@ class StageOutputFilter:
 
     # Regex patterns for detecting stage markers
     WORKFLOW_MARKER_PATTERN = r'WORKFLOW_CONTINUES:\s*("YES"|"NO"|YES|NO)'
-    NEXT_AGENT_PATTERN = r'NEXT_AGENT:\s*["\']?(\w+)["\']?'
+    NEXT_AGENT_PATTERN = r'NEXT_AGENT:\s*["\']?([\w-]+)["\']?'
     TODO_LIST_PATTERN = r'TODO_LIST:\s*\[(.*?)\](?:\s|$)'
     CHAIN_COMPLETE_PATTERN = r'CHAIN_COMPLETE:\s*(.+?)(?:\n|$)'
 
@@ -213,15 +213,24 @@ class StageOutputFilter:
         """
         todos = []
 
-        # Pattern 1: Quoted list items
-        quoted_items = re.findall(r'["\'](.*?)["\'](?:,|\s|$)', output)
-        todos.extend([item.strip() for item in quoted_items if item.strip()])
+        # Pattern 1: JSON array format - TODO_LIST: ["item1", "item2"]
+        array_match = re.search(r'TODO_LIST:\s*\[(.*?)\]', output)
+        if array_match:
+            array_content = array_match.group(1)
+            # Extract all quoted strings from the array
+            quoted_items = re.findall(r'"([^"]*)"', array_content)
+            todos.extend([item.strip() for item in quoted_items if item.strip()])
 
-        # Pattern 2: Markdown list items
+        # Pattern 2: Quoted list items (general format)
+        if not todos:
+            quoted_items = re.findall(r'["\'](.*?)["\'](?:,|\s|$)', output)
+            todos.extend([item.strip() for item in quoted_items if item.strip()])
+
+        # Pattern 3: Markdown list items
         md_items = re.findall(r'^\s*[-•*]\s+(.+?)$', output, re.MULTILINE)
         todos.extend([item.strip() for item in md_items if item.strip()])
 
-        # Pattern 3: Numbered items
+        # Pattern 4: Numbered items
         numbered_items = re.findall(r'^\s*\d+\.\s+(.+?)$', output, re.MULTILINE)
         todos.extend([item.strip() for item in numbered_items if item.strip()])
 

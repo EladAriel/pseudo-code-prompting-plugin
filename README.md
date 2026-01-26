@@ -2,7 +2,7 @@
 
 Transform natural language requirements into structured, validated pseudo-code for optimal LLM responses and implementation clarity.
 
-[![Version](https://img.shields.io/badge/version-1.1.6-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-%E2%89%A52.1.0-blue.svg)](https://claude.ai/code)
 
@@ -147,6 +147,40 @@ Learns your preferences and patterns across sessions with automatic project isol
 - Apply learned context during transformation
 - Update memory with discoveries at END
 - Project context validates automatically (prevents cross-project contamination)
+
+## Auto-Triggered Hooks
+
+The plugin includes 7 auto-triggered hooks that enhance your workflow **without any action needed**:
+
+### Complete-Process Pipeline Orchestration (NEW)
+
+When you use `/complete-process`, three specialized hooks work behind the scenes:
+
+1. **Pre-Execution Hook** - `complete-process-tree-injection.py`
+   - Automatically injects your project structure as context
+   - Helps Claude understand file organization and patterns
+   - Triggers on: `/complete-process` command detection
+
+2. **In-Process Monitor** - `complete-process-orchestrator.py`
+   - Filters outputs from each stage (Transform → Validate → Optimize)
+   - Each stage shows only relevant information:
+     - Transform: Just the pseudo-code (no verbose explanations)
+     - Validate: Full validation report (all checks)
+     - Optimize: Enhanced code + TODO list (no intermediate clutter)
+   - Triggers on: Each skill completion
+
+3. **Post-Execution Cleanup** - `complete-process-cleanup.py`
+   - After pipeline completes, formats final output
+   - Shows: Optimized pseudo-code + improvements applied + implementation TODOs
+   - Clears intermediate messages for clean conversation restart
+   - Triggers on: Pipeline completion signal
+
+### Other Auto-Triggered Hooks
+
+- **Command Detection** - Recognizes pseudo-code prompting commands
+- **Project Context Injection** - Adds file structure for architecture-aware suggestions
+- **Compression Helper** - Suggests compression for verbose inputs (>100 words)
+- **Post-Validation** - Validates Write/Edit tool outputs
 
 ## Performance Metrics
 

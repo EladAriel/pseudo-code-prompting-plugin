@@ -221,6 +221,150 @@ def gitignore_project(temp_dir):
 
 
 # ============================================================================
+# AGENT CHAINING FIXTURES
+# ============================================================================
+
+@pytest.fixture
+def mock_agent_response_factory():
+    """Factory for creating mock agent responses with workflow signals."""
+    def _create(
+        agent_name: str,
+        output_content: str,
+        workflow_continues: bool,
+        next_agent: str = None,
+        chain_progress: str = None,
+        todo_list: list = None
+    ) -> Dict[str, Any]:
+        response = {
+            "agent_name": agent_name,
+            "output": output_content,
+            "WORKFLOW_CONTINUES": "YES" if workflow_continues else "NO",
+        }
+        if next_agent:
+            response["NEXT_AGENT"] = next_agent
+        if chain_progress:
+            response["CHAIN_PROGRESS"] = chain_progress
+        if todo_list:
+            response["TODO_LIST"] = todo_list
+            response["CHAIN_COMPLETE"] = "All steps finished"
+        return response
+    return _create
+
+
+@pytest.fixture
+def mock_transform_agent(mock_agent_response_factory):
+    """Mock prompt-transformer agent output."""
+    def _invoke(query: str) -> Dict[str, Any]:
+        return mock_agent_response_factory(
+            agent_name="prompt-transformer",
+            output_content=f"implement_{query.replace(' ', '_')}(param=\"value\")",
+            workflow_continues=True,
+            next_agent="requirement-validator",
+            chain_progress="prompt-transformer [1/3] → requirement-validator → prompt-optimizer"
+        )
+    return _invoke
+
+
+@pytest.fixture
+def mock_validator_agent(mock_agent_response_factory):
+    """Mock requirement-validator agent output."""
+    def _invoke(pseudo_code: str) -> Dict[str, Any]:
+        return mock_agent_response_factory(
+            agent_name="requirement-validator",
+            output_content="Validation Report: ✓ PASSED\n- Security checks passed\n- Parameters complete",
+            workflow_continues=True,
+            next_agent="prompt-optimizer",
+            chain_progress="prompt-transformer ✓ → requirement-validator [2/3] → prompt-optimizer"
+        )
+    return _invoke
+
+
+@pytest.fixture
+def mock_optimizer_agent(mock_agent_response_factory):
+    """Mock prompt-optimizer agent output."""
+    def _invoke(pseudo_code: str, validation_report: str = None) -> Dict[str, Any]:
+        return mock_agent_response_factory(
+            agent_name="prompt-optimizer",
+            output_content="implement_auth(type=\"oauth\", security={\"mfa\": true})",
+            workflow_continues=False,
+            chain_progress="prompt-transformer ✓ → requirement-validator ✓ → prompt-optimizer [3/3] ✓",
+            todo_list=["Implement OAuth flow", "Add error handling", "Configure security headers"]
+        )
+    return _invoke
+
+
+@pytest.fixture
+def orchestrator_mock():
+    """Mock orchestrator that reads workflow signals and routes to next agent."""
+    class OrchestratorMock:
+        def __init__(self):
+            self.execution_log = []
+            self.memory_updates = []
+
+        def get_next_agent(self, agent_output: Dict[str, Any]) -> str:
+            """Extract NEXT_AGENT from agent output."""
+            self.execution_log.append(agent_output["agent_name"])
+            return agent_output.get("NEXT_AGENT")
+
+        def should_continue(self, agent_output: Dict[str, Any]) -> bool:
+            """Check if workflow should continue."""
+            return agent_output["WORKFLOW_CONTINUES"] == "YES"
+
+        def update_memory(self, key: str, value: str):
+            """Track memory updates during workflow."""
+            self.memory_updates.append({"key": key, "value": value})
+
+        def get_execution_order(self) -> list:
+            """Return order of agent invocations."""
+            return self.execution_log
+
+        def reset(self):
+            """Reset mock state for new test."""
+            self.execution_log = []
+            self.memory_updates = []
+
+    return OrchestratorMock()
+
+
+@pytest.fixture
+def workflow_memory_state(mock_memory_dir):
+    """Track memory state during workflow execution."""
+    class MemoryState:
+        def __init__(self, memory_dir):
+            self.memory_dir = memory_dir
+            self.snapshots = {}
+
+        def snapshot(self, label: str):
+            """Take snapshot of memory files."""
+            context_file = self.memory_dir / "activeContext.md"
+            patterns_file = self.memory_dir / "patterns.md"
+            progress_file = self.memory_dir / "progress.md"
+
+            self.snapshots[label] = {
+                "activeContext": context_file.read_text() if context_file.exists() else "",
+                "patterns": patterns_file.read_text() if patterns_file.exists() else "",
+                "progress": progress_file.read_text() if progress_file.exists() else ""
+            }
+
+        def get_snapshot(self, label: str) -> Dict[str, str]:
+            """Retrieve memory snapshot."""
+            return self.snapshots.get(label, {})
+
+        def compare_snapshots(self, label1: str, label2: str) -> Dict[str, bool]:
+            """Compare two memory snapshots."""
+            snap1 = self.get_snapshot(label1)
+            snap2 = self.get_snapshot(label2)
+
+            return {
+                "activeContext_changed": snap1.get("activeContext") != snap2.get("activeContext"),
+                "patterns_changed": snap1.get("patterns") != snap2.get("patterns"),
+                "progress_changed": snap1.get("progress") != snap2.get("progress")
+            }
+
+    return MemoryState(mock_memory_dir)
+
+
+# ============================================================================
 # MOCK CLAUDE CODE ENVIRONMENT
 # ============================================================================
 
@@ -251,4 +395,7 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "hook: mark test as a hook execution test"
+    )
+    config.addinivalue_line(
+        "markers", "chaining: mark test as an agent chaining protocol test"
     )

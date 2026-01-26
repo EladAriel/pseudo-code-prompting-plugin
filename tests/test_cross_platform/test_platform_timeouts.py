@@ -32,12 +32,14 @@ class TestPlatformTimeouts:
                 "macOS should use 1.0x multiplier"
 
     def test_linux_timeout_multiplier(self, platform_detector):
-        """Verify Linux uses 1.0x timeout multiplier."""
+        """Verify Linux uses 1.0x timeout multiplier (unless in CI)."""
         info = platform_detector.get_info()
 
         if info["is_linux"]:
-            assert info["timeout_multiplier"] == 1.0, \
-                "Linux should use 1.0x multiplier"
+            # In CI, multiplier is 2.0x; otherwise 1.0x for Linux
+            expected = 2.0 if info["is_ci"] else 1.0
+            assert info["timeout_multiplier"] == expected, \
+                f"Linux should use {expected}x multiplier"
 
     def test_ci_environment_detection(self, platform_detector):
         """Verify CI environment detection."""

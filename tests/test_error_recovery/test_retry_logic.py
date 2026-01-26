@@ -38,11 +38,14 @@ class TestRetryLogic:
             attempts += 1
             raise RuntimeError("Always fails")
 
-        try:
-            for i in range(max_retries + 1):
+        # Retry loop that respects max_retries limit
+        for retry_count in range(max_retries + 1):
+            try:
                 failing_operation()
-        except RuntimeError:
-            pass
+                break  # Success, exit loop
+            except RuntimeError:
+                if retry_count >= max_retries:
+                    break  # Exceeded retry limit
 
         assert attempts == max_retries + 1
 

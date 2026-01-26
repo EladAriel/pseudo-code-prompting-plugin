@@ -62,3 +62,6 @@ release_notes.md
 create-pr.sh
 check-ci.sh
 claude-code-official-ref/
+
+# Python installation (local use only)
+.pytest_cache

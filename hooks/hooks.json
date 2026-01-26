@@ -1,5 +1,5 @@
 {
-  "description": "Pseudo-code prompting plugin hooks for transformation and validation",
+  "description": "Pseudo-code prompting plugin hooks for transformation, validation, and orchestration",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -9,6 +9,17 @@
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/core/user-prompt-submit.py",
             "statusMessage": "Checking for pseudo-code transformation commands...",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "complete-process|/complete |/full-transform|/orchestrate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/orchestration/complete-process-tree-injection.py",
+            "statusMessage": "Preparing project context for complete-process pipeline...",
+            "timeout": 15
           }
         ]
       },
@@ -41,6 +52,28 @@
             "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/validation/post-transform-validation.py",
             "statusMessage": "Validating transformed output...",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Skill.*complete-process|Skill.*transform-query|Skill.*validate-requirements|Skill.*optimize-prompt|Skill.*prompt-structurer|Skill.*requirement-validator|Skill.*prompt-optimizer",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/orchestration/complete-process-orchestrator.py",
+            "statusMessage": "Processing complete-process pipeline stage...",
+            "timeout": 12
+          }
+        ]
+      },
+      {
+        "matcher": "WORKFLOW_CONTINUES.*NO|CHAIN_COMPLETE",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/orchestration/complete-process-cleanup.py",
+            "statusMessage": "Finalizing complete-process output...",
             "timeout": 10
           }
         ]

@@ -19,6 +19,7 @@ pytest tests/ -v
 pytest tests/ -m "hook" -v              # Hook execution tests
 pytest tests/ -m "memory" -v            # Memory persistence tests
 pytest tests/ -m "golden" -v            # Golden file comparison tests
+pytest tests/ -m "chaining" -v          # Agent chaining protocol tests
 pytest tests/ -m "unit" -v              # Unit tests
 pytest tests/ -m "integration" -v       # Integration tests
 ```
@@ -33,6 +34,9 @@ pytest tests/ --cov=hooks --cov-report=html
 ```
 tests/
 ├── conftest.py                         # Shared fixtures and configuration
+├── test_agent_chaining/                # Agent chaining protocol tests
+│   ├── test_workflow_continues.py      # WORKFLOW_CONTINUES protocol tests
+│   └── test_next_agent.py              # NEXT_AGENT protocol tests
 ├── test_hooks/                         # Hook execution tests
 │   ├── test_user_prompt_submit.py      # Command detection hook tests
 │   ├── test_get_context_tree.py        # Tree generation hook tests
@@ -46,6 +50,24 @@ tests/
 ```
 
 ## Test Categories
+
+### Agent Chaining Tests (`@pytest.mark.chaining`)
+Tests for multi-agent workflow protocols and coordination:
+- **WORKFLOW_CONTINUES**: Agent state transitions and workflow continuation
+- **NEXT_AGENT**: Agent delegation, routing, and context handoff
+
+**Coverage**:
+- Workflow signal parsing (WORKFLOW_CONTINUES: YES/NO)
+- Agent routing and delegation (NEXT_AGENT signals)
+- Context handoff between agents
+- Chain progress tracking
+- Error recovery and continuation
+- Memory state persistence across steps
+- Complete multi-step pipeline execution
+
+**Test Files**:
+- `test_workflow_continues.py`: 6 tests validating workflow state transitions
+- `test_next_agent.py`: 7 tests validating agent routing and delegation
 
 ### Hook Tests (`@pytest.mark.hook`)
 Tests for plugin hooks that execute in Claude Code lifecycle events:
@@ -143,6 +165,15 @@ Tests that execute actual code (hooks, subprocess calls):
 - `transformation_golden`: Load golden file by name
 - `golden_comparator`: Compare outputs with whitespace normalization
 
+### Agent Chaining Fixtures
+
+- `mock_agent_response_factory`: Factory for creating mock agent responses with workflow signals
+- `mock_transform_agent`: Mock prompt-transformer agent that outputs WORKFLOW_CONTINUES: YES
+- `mock_validator_agent`: Mock requirement-validator agent that outputs NEXT_AGENT signal
+- `mock_optimizer_agent`: Mock prompt-optimizer agent that terminates the workflow
+- `orchestrator_mock`: Mock orchestrator that reads signals and routes to next agent
+- `workflow_memory_state`: Tracker for memory file snapshots and comparisons
+
 ## Running Tests Locally
 
 ### Test all components
@@ -193,6 +224,21 @@ Tests run automatically on:
 **Coverage Report**: Generated in CI and available after test run
 
 ## Adding New Tests
+
+### New Agent Chaining Test
+```python
+@pytest.mark.chaining
+@pytest.mark.unit
+def test_agent_chaining_new_scenario(mock_transform_agent, orchestrator_mock):
+    """Test description."""
+    transform_output = mock_transform_agent("query")
+
+    should_continue = orchestrator_mock.should_continue(transform_output)
+    next_agent = orchestrator_mock.get_next_agent(transform_output)
+
+    assert should_continue is True
+    assert next_agent == "requirement-validator"
+```
 
 ### New Hook Test
 ```python
@@ -267,9 +313,11 @@ Ensure pytest has permission to create files in temp directory.
 ## Future Enhancements
 
 Potential additions to test suite:
-- Agent chaining protocol tests (WORKFLOW_CONTINUES, NEXT_AGENT)
+- ✅ Agent chaining protocol tests (WORKFLOW_CONTINUES, NEXT_AGENT) - **COMPLETED**
 - Smart router context caching validation
 - Performance benchmarks (tree generation on large projects)
 - Cross-platform testing (Windows, macOS)
 - Hook sequence and timing validation
 - Transformation quality metrics (semantic preservation)
+- Parallel agent execution testing
+- Agent error recovery and timeout scenarios

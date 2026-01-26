@@ -115,15 +115,26 @@ def test_tree_generation_invalid_path():
 
 @pytest.mark.hook
 @pytest.mark.integration
-def test_tree_generation_timeout():
+def test_tree_generation_timeout(tmp_path):
     """Test tree generation respects timeout."""
     script_path = Path(__file__).parent.parent.parent / "hooks/tree/get_context_tree.py"
 
-    # Should complete within timeout
+    # Create a large directory structure that will take longer to scan
+    large_dir = tmp_path / "large_project"
+    large_dir.mkdir()
+
+    # Create many nested directories to force longer scan time
+    for i in range(50):
+        subdir = large_dir / f"dir_{i}"
+        subdir.mkdir()
+        for j in range(20):
+            (subdir / f"file_{j}.txt").write_text("content")
+
+    # Should timeout with very short timeout on large directory
     with pytest.raises(subprocess.TimeoutExpired):
         subprocess.run(
-            ["python3", str(script_path), "/"],
+            ["python3", str(script_path), str(large_dir), "--max-files", "10000"],
             capture_output=True,
             text=True,
-            timeout=0.1  # Very short timeout to test timeout handling
+            timeout=0.05  # Very short timeout to test timeout handling
         )

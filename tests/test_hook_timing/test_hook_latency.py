@@ -130,23 +130,24 @@ class TestHookLatency:
         reset_metrics = latency_tracker.get_metrics("hook")
         assert reset_metrics.get("count", 0) == 0
 
-    @pytest.mark.parametrize("latency_ms,should_pass", [
-        (50, True),
-        (99, True),
-        (100, True),
-        (101, False),
-        (150, False),
+    @pytest.mark.parametrize("latency_ratio,should_pass", [
+        (0.5, True),    # 50% of max_latency - should pass
+        (0.99, True),   # 99% of max_latency - should pass
+        (1.0, True),    # Exactly at max_latency - should pass
+        (1.01, False),  # 1% over max_latency - should fail
+        (1.5, False),   # 50% over max_latency - should fail
     ])
-    def test_hook_latency_threshold_enforcement(self, latency_ms, should_pass, golden_performance_baseline):
+    def test_hook_latency_threshold_enforcement(self, latency_ratio, should_pass, golden_performance_baseline):
         """Verify hook latency threshold enforcement."""
         max_latency = golden_performance_baseline["hook_latency"]["single_max_ms"]
+        latency_ms = max_latency * latency_ratio
 
         if should_pass:
             assert latency_ms <= max_latency, \
-                f"Should pass: {latency_ms}ms <= {max_latency}ms"
+                f"Should pass: {latency_ms:.1f}ms <= {max_latency:.1f}ms"
         else:
             assert latency_ms > max_latency, \
-                f"Should fail: {latency_ms}ms > {max_latency}ms"
+                f"Should fail: {latency_ms:.1f}ms > {max_latency:.1f}ms"
 
     def test_hook_latency_across_types(self, latency_tracker):
         """Measure latencies of different hook types."""

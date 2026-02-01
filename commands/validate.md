@@ -1,3 +1,8 @@
+---
+name: "validate"
+description: "Check pseudo-code for production readiness"
+---
+
 # Validate: Check Pseudo-Code for Production Readiness
 
 Validate pseudo-code completeness, security, and implementation readiness. Identifies gaps, ambiguities, and critical issues.

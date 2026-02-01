@@ -1,12 +1,14 @@
 {
-  "hooks": [
-    {
-      "name": "user-prompt-submit",
+  "hooks": {
+    "UserPromptSubmit": {
       "description": "Auto-detects 'Run transform:' and 'Run validate:' patterns and routes to appropriate commands",
-      "file": "hooks/user-prompt-submit.py",
-      "trigger": "user-prompt-submit",
-      "enabled": true,
-      "debug": false
+      "hooks": [
+        {
+          "name": "user-prompt-submit",
+          "command": "hooks/user-prompt-submit.py",
+          "enabled": true
+        }
+      ]
     }
-  ]
+  }
 }

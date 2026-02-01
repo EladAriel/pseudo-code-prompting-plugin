@@ -1,3 +1,8 @@
+---
+name: "transform"
+description: "Transform requirements to production-ready pseudo-code"
+---
+
 # Transform: Requirement to Production-Ready Pseudo-Code
 
 Transform natural language requirements into production-ready pseudo-code with automatic context detection, compression, validation, optimization, and cc10x bridge integration.

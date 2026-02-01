@@ -1,5 +1,6 @@
 {
   "name": "pseudo-code-prompting-plugin",
+  "version": "2.0.0",
   "owner": {
     "name": "Elad Ariel",
     "url": "https://github.com/EladAriel"

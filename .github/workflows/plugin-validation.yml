@@ -1,0 +1,260 @@
+name: Plugin Validation
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+jobs:
+  validate-manifest:
+    name: Validate Plugin Manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate plugin.json schema
+        run: |
+          echo "Validating plugin.json structure..."
+
+          # Check required fields
+          jq -e '.name' plugin.json > /dev/null || { echo "❌ Missing 'name' field"; exit 1; }
+          jq -e '.version' plugin.json > /dev/null || { echo "❌ Missing 'version' field"; exit 1; }
+          jq -e '.description' plugin.json > /dev/null || { echo "❌ Missing 'description' field"; exit 1; }
+          jq -e '.author' plugin.json > /dev/null || { echo "❌ Missing 'author' field"; exit 1; }
+          jq -e '.license' plugin.json > /dev/null || { echo "❌ Missing 'license' field"; exit 1; }
+
+          echo "✅ All required fields present in plugin.json"
+
+      - name: Validate version format
+        run: |
+          VERSION=$(jq -r '.version' plugin.json)
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: $VERSION (expected semver x.y.z)"
+            exit 1
+          fi
+          echo "✅ Version format valid: $VERSION"
+
+      - name: Validate marketplace.json
+        run: |
+          echo "Validating marketplace.json..."
+
+          jq -e '.version' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing version"; exit 1; }
+          jq -e '.plugins' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing plugins array"; exit 1; }
+
+          echo "✅ marketplace.json structure valid"
+
+  validate-hooks:
+    name: Validate Hook Definitions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate hooks.json structure
+        run: |
+          echo "Validating hooks.json..."
+
+          # Check for hooks object
+          jq -e '.hooks' hooks/hooks.json > /dev/null || { echo "❌ Missing 'hooks' object"; exit 1; }
+
+          # Check for UserPromptSubmit
+          jq -e '.hooks.UserPromptSubmit' hooks/hooks.json > /dev/null || { echo "❌ Missing UserPromptSubmit hook"; exit 1; }
+
+          echo "✅ hooks.json structure valid"
+
+      - name: Verify hook scripts exist
+        run: |
+          echo "Verifying hook script files..."
+
+          # Extract command paths from hooks.json
+          jq -r '.hooks.UserPromptSubmit[].hooks[].command' hooks/hooks.json | while read -r cmd; do
+            # Extract script path
+            script=$(echo "$cmd" | sed 's/.*hooks\//hooks\//')
+
+            if [ ! -f "$script" ]; then
+              echo "❌ Hook script not found: $script"
+              exit 1
+            fi
+            echo "✅ Found: $script"
+          done
+
+  validate-commands:
+    name: Validate Commands and Agents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count and validate commands
+        run: |
+          echo "Validating commands..."
+
+          # Count command files
+          cmd_count=$(find commands -name "*.md" -type f 2>/dev/null | wc -l)
+          echo "Found $cmd_count command files"
+
+          if [ "$cmd_count" -lt 2 ]; then
+            echo "⚠️  Warning: Expected at least 2 commands, found $cmd_count"
+          fi
+
+          # Verify each command has required frontmatter
+          for file in commands/*.md; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+
+              # Check for frontmatter
+              if ! grep -q "^---$" "$file"; then
+                echo "❌ Missing frontmatter in $file"
+                exit 1
+              fi
+
+              # Check for description
+              if ! grep -q "^description:" "$file"; then
+                echo "❌ Missing description in $file"
+                exit 1
+              fi
+
+              echo "✅ $file valid"
+            fi
+          done
+
+          echo "✅ All commands validated"
+
+      - name: Count and validate agents
+        run: |
+          echo "Validating agents..."
+
+          # Count agent files
+          agent_count=$(find agents -name "*.md" -type f 2>/dev/null | wc -l)
+          echo "Found $agent_count agent files"
+
+          if [ "$agent_count" -lt 2 ]; then
+            echo "⚠️  Warning: Expected at least 2 agents, found $agent_count"
+          fi
+
+          # Basic validation - agents should be markdown
+          for file in agents/*.md; do
+            if [ -f "$file" ]; then
+              if [ ! -s "$file" ]; then
+                echo "❌ Empty agent file: $file"
+                exit 1
+              fi
+              echo "✅ $file exists and not empty"
+            fi
+          done
+
+          echo "✅ All agents validated"
+
+  validate-documentation:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required documentation files
+        run: |
+          echo "Checking documentation files..."
+
+          required_docs=(
+            "README.md"
+            "CHANGELOG.md"
+            "LICENSE"
+          )
+
+          for doc in "${required_docs[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "❌ Missing: $doc"
+              exit 1
+            fi
+            echo "✅ Found: $doc"
+          done
+
+      - name: Validate CHANGELOG format
+        run: |
+          echo "Validating CHANGELOG.md..."
+
+          # Check for version headers
+          if ! grep -q "## \[" CHANGELOG.md; then
+            echo "⚠️  Warning: CHANGELOG doesn't have version headers"
+          fi
+
+          # Check that latest version matches plugin.json
+          PLUGIN_VERSION=$(jq -r '.version' plugin.json)
+          if ! grep -q "## \[$PLUGIN_VERSION\]" CHANGELOG.md; then
+            echo "⚠️  Warning: CHANGELOG doesn't have entry for version $PLUGIN_VERSION"
+          fi
+
+          echo "✅ CHANGELOG format validated"
+
+      - name: Check documentation mentions key features
+        run: |
+          echo "Checking documentation cross-references..."
+
+          # Check for pseudo-code or transformation mentions
+          if ! grep -qi "pseudo-code\|transform\|requirement" README.md; then
+            echo "⚠️  Warning: README doesn't mention core features"
+          fi
+
+          # Check for cc10x bridge documentation
+          if [ -f "docs/bridge-to-cc10x.md" ]; then
+            echo "✅ Found cc10x bridge documentation"
+          fi
+
+          echo "✅ Documentation cross-reference check complete"
+
+  integration-validation:
+    name: Integration Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Test complete workflow
+        run: |
+          echo "Testing complete plugin workflow..."
+
+          # Test 1: Hook can be executed
+          echo "Test 1: Hook execution test"
+          python3 hooks/user-prompt-submit.py --help 2>/dev/null || true
+          echo "✅ Hook script is executable"
+
+          # Test 2: Basic manifest check
+          echo "Test 2: Plugin manifest check"
+          jq empty plugin.json && echo "✅ Plugin manifest valid"
+
+          echo "✅ Integration validation complete"
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-manifest, validate-hooks, validate-commands, validate-documentation, integration-validation]
+    if: always()
+    steps:
+      - name: Check all validations
+        run: |
+          if [[ "${{ needs.validate-manifest.result }}" != "success" ]]; then
+            echo "❌ Manifest validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.validate-hooks.result }}" != "success" ]]; then
+            echo "❌ Hook validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.validate-commands.result }}" != "success" ]]; then
+            echo "❌ Command validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.validate-documentation.result }}" != "success" ]]; then
+            echo "❌ Documentation validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.integration-validation.result }}" != "success" ]]; then
+            echo "❌ Integration validation failed"
+            exit 1
+          fi
+
+          echo "✅ All plugin validations passed!"

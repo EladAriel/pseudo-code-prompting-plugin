@@ -1,0 +1,38 @@
+{
+  "name": "pseudo-code-prompting-plugin",
+  "owner": {
+    "name": "Elad Ariel",
+    "url": "https://github.com/EladAriel"
+  },
+  "metadata": {
+    "description": "pseudo-code-prompting-plugin v2.0.0 - Transform requirements into production-ready pseudo-code with 70% less complexity",
+    "version": "2.0.0"
+  },
+  "plugins": [
+    {
+      "name": "pseudo-code-prompting-plugin-v2",
+      "description": "Simplified pseudo-code transformation engine with 6-step pipeline, architecture-aware generation, comprehensive validation across 6 dimensions, and seamless cc10x bridge integration for TDD workflows.",
+      "version": "2.0.0",
+      "author": {
+        "name": "Elad Ariel",
+        "url": "https://github.com/EladAriel"
+      },
+      "homepage": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
+      "repository": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
+      "license": "MIT",
+      "keywords": [
+        "prompt-engineering",
+        "pseudo-code",
+        "feature-development",
+        "requirement-engineering",
+        "validation",
+        "cc10x-bridge",
+        "tdd-workflow",
+        "simplification",
+        "architecture-aware",
+        "production-ready"
+      ],
+      "category": "development-tools"
+    }
+  ]
+}

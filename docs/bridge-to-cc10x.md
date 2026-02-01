@@ -362,7 +362,6 @@ If you want to understand the conversion process:
 
 - [Quick Start Guide](./quick-start.md) - Get started with basic commands
 - [Architecture & Design](./ARCHITECTURE.md) - Deep dive into system design
-- [cc10x Documentation](../../../cc10x/README.md) - TDD workflow details
 
 ## FAQ
 

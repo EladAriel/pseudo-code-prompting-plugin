@@ -26,27 +26,36 @@ IMPORTANT: Never bypass the router. It is the system.
 
 ## Bridge to cc10x (Specification-Driven Handoff Protocol)
 
-After TRANSFORM completes, pseudo-code is **automatically injected** into cc10x's activeContext:
+After TRANSFORM completes (Step 5), the requirement-structurer agent **automatically executes Step 6.5** to inject pseudo-code into cc10x's activeContext:
 
 ```
-AUTOMATIC INJECTION (v2.1.0+):
-├─ Specification saved: .claude/pseudo-code-prompting/specification.md
-├─ activeContext.md updated:
-│   ├─ Current Focus: pseudo-code structure
-│   ├─ References: linked to specification
-│   └─ Decisions: recorded specification as guide
-         ↓
-🚀 Ready to implement with cc10x? (Y/n)
+AUTOMATIC INJECTION (v2.1.1+ - REQUIRED STEP 6.5):
+│
+├─ Step 6.5 execution (CRITICAL):
+│  ├─ Save specification.md with full pseudo-code
+│  ├─ Create/update activeContext.md
+│  ├─ Link specification in Current Focus + References
+│  └─ Record decision in Decisions section
+│
+├─ Files created:
+│  ├─ .claude/pseudo-code-prompting/specification.md (persists pseudocode)
+│  └─ .claude/cc10x/activeContext.md (with specification reference)
+│
+└─ Bridge question shown:
+   🚀 Ready to implement with cc10x? (Y/n)
 ```
+
+**Implementation:** Agent calls `execute_specification_injection()` in `requirement-structurer.md` Step 6.5 section (see lines 411-475).
 
 **Option A: Answer YES**
-- Specification already injected into activeContext
-- Automatically invokes `/cc10x:cc10x-router`
-- cc10x loads memory (finds pseudo-code reference)
-- component-builder receives specification as primary input
-- TDD workflow starts: RED → GREEN → REFACTOR (per specification)
-- **Specification persists** across sessions, compaction, handoffs
-- **No ambiguity** - pseudo-code is source of truth
+- ✓ Specification already saved before cc10x invokes
+- ✓ cc10x loads activeContext.md automatically
+- ✓ Finds pseudo-code reference linked in memory
+- ✓ component-builder receives specification as primary input
+- ✓ TDD workflow starts: RED → GREEN → REFACTOR (per specification)
+- ✓ **Specification persists** across sessions, compaction, handoffs
+- ✓ **No ambiguity** - pseudo-code is source of truth
+- ✓ **No context loss** - specification not re-generated
 
 **Option B: Answer NO**
 - Pseudo-code returned as-is
@@ -131,7 +140,7 @@ Run transform: Build a Project Tracker
 # → Transform completes normally
 ```
 
-### Specification Injection Details (v2.1.0+)
+### Specification Injection Details (v2.1.1+)
 
 **Injection Flow:**
 1. Transform pipeline completes (6 steps)

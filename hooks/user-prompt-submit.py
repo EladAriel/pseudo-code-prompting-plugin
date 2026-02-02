@@ -10,7 +10,7 @@ Key features:
 - Routes to correct command file
 - Removes orchestration complexity from v1
 - No session memory, no context tree injection, no complex chaining
-- NEW (v2.1.0): Automatic pseudo-code injection into cc10x activeContext
+- NEW (v2.1.1): Automatic pseudo-code injection into cc10x activeContext
 """
 
 import re
@@ -21,7 +21,7 @@ from datetime import datetime
 
 def inject_pseudocode_to_cc10x(pseudocode_output: str, requirement: str) -> Path:
     """
-    Save pseudo-code specification to cc10x context (v2.1.0).
+    Save pseudo-code specification to cc10x context (v2.1.1).
 
     Implements specification-driven development by:
     1. Saving specification.md as persistent reference
@@ -186,7 +186,7 @@ def main():
     Reads user input from stdin, detects command, and outputs
     routing instructions.
 
-    NEW (v2.1.0): After agent produces pseudo-code output, this hook
+    NEW (v2.1.1): After agent produces pseudo-code output, this hook
     also triggers injection into cc10x's activeContext.md via a
     companion injection handler (currently handled by agent output).
     """
@@ -209,7 +209,7 @@ def main():
     print(f"PSEUDO_CODE_COMMAND={command}")
     print(f"TASK={task}")
 
-    # NEW (v2.1.0): Signal that injection may be needed after transform
+    # NEW (v2.1.1): Signal that injection may be needed after transform
     # The requirement-structurer agent will handle calling inject_pseudocode_to_cc10x()
     # after pseudo-code generation completes (Step 6 of pipeline)
     if command == 'transform':

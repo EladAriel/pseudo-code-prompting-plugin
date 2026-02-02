@@ -2,7 +2,7 @@
 
 Learn how to seamlessly integrate pseudo-code-prompting-plugin with cc10x component builder for test-driven development.
 
-## What's New in v2.1.0
+## What's New in v2.1.1
 
 **Specification-Driven Development:** Pseudo-code is now automatically injected into cc10x's activeContext before invocation.
 
@@ -11,7 +11,7 @@ Learn how to seamlessly integrate pseudo-code-prompting-plugin with cc10x compon
 - ✅ **Zero ambiguity** - cc10x loads specification as primary input
 - ✅ **Session persistence** - Survives context compaction and session resets
 
-See [Specification Injection (v2.1.0)](#specification-injection-v210-new) below for details.
+See [Specification Injection (v2.1.1)](#specification-injection-v210-new) below for details.
 
 ---
 
@@ -21,7 +21,7 @@ The bridge automatically converts your optimized pseudo-code into a detailed req
 
 **Goal:** Eliminate ambiguity between requirements and implementation. Build features correctly the first time.
 
-**NEW (v2.1.0):** Specification is automatically persisted in cc10x's memory for guaranteed context availability.
+**NEW (v2.1.1):** Specification is automatically persisted in cc10x's memory for guaranteed context availability.
 
 ## How It Works
 
@@ -360,7 +360,7 @@ If you want to understand the conversion process:
 
 ---
 
-## Specification Injection (v2.1.0 NEW)
+## Specification Injection (v2.1.1 NEW)
 
 ### What's Automatically Injected?
 
@@ -386,7 +386,7 @@ When you answer YES to the bridge question, your pseudo-code specification is au
 - cc10x had no persistent context
 - Context lost on session restart or compaction
 
-**After (v2.1.0):**
+**After (v2.1.1):**
 - Pseudo-code generated
 - Automatic injection into activeContext
 - cc10x loads memory (finds specification)

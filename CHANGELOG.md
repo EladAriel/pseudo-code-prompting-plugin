@@ -2,6 +2,41 @@
 
 All notable changes to pseudo-code-prompting-plugin are documented in this file.
 
+## [2.1.1] - Fix: Specification Injection Execution
+
+### Fixes
+
+#### 🔧 Step 6.5 Specification Injection Now Executes (CRITICAL)
+**Problem:** Specification injection was documented but never actually executed by the agent. This caused:
+- ✗ specification.md never created
+- ✗ activeContext.md created empty instead of populated
+- ✗ Pseudocode lost when cc10x invoked
+- ✗ Workflow coordination signals never used
+
+**Root Cause:** `requirement-structurer` agent had Step 6.5 documentation but no code calling the injection function. Hook emitted signal `INJECT_PSEUDOCODE_AFTER_TRANSFORM=true` but no handler executed it.
+
+**Solution:** Added explicit implementation to `requirement-structurer.md` Step 6.5:
+- ✓ Agent now calls `execute_specification_injection()` before bridge question
+- ✓ Creates/updates both specification.md and activeContext.md
+- ✓ Specification persists with full requirement + pseudocode
+- ✓ activeContext references specification file
+- ✓ cc10x receives complete context on invocation
+- ✓ No more context loss
+
+**Changed Files:**
+- `agents/requirement-structurer.md` - Added runnable Step 6.5 implementation (lines 411-475)
+- `AGENTS.md` - Updated bridge protocol documentation
+
+**Testing:**
+```bash
+Run transform: Create basic cap application for task management
+# After transform:
+ls .claude/pseudo-code-prompting/specification.md  # ✓ Now exists
+ls .claude/cc10x/activeContext.md                   # ✓ Populated with specification reference
+```
+
+---
+
 ## [2.1.0] - Specification-Driven Development: Pseudo-Code → activeContext Integration
 
 ### What's New

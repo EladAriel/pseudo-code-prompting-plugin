@@ -232,28 +232,46 @@ CC10X Spec:
 
 ---
 
-### Step 6.5: Inject Pseudo-Code into cc10x activeContext (v2.1.0 NEW)
+### Step 6.5: Inject Pseudo-Code into cc10x activeContext (v2.1.1 NEW)
 
-**Before showing bridge question, automatically inject pseudo-code into cc10x's memory:**
+**After Step 5 (Optimize), BEFORE showing bridge question, automatically inject pseudo-code:**
+
+**CRITICAL: The agent must execute this step to save the specification before cc10x is invoked.**
+
+```bash
+# Step 6.5: Call the injection function from the hook to save specification
+python3 << 'INJECT_SCRIPT'
+import sys
+sys.path.insert(0, '/path/to/hooks')
+from user_prompt_submit import inject_pseudocode_to_cc10x
+
+# Call injection with the optimized pseudocode from Step 5
+spec_file = inject_pseudocode_to_cc10x(
+    pseudocode_output=optimized_pseudocode,
+    requirement=original_user_requirement
+)
+
+print(f"✓ Specification saved: {spec_file}")
+INJECT_SCRIPT
+```
+
+**OR directly implement in Python:**
 
 ```python
-# After Step 5 (Optimize), before bridge question:
+from pathlib import Path
+from datetime import datetime
+import re
 
-# Inject specification into cc10x activeContext
-def inject_specification():
-    from pathlib import Path
-    from datetime import datetime
+# After Step 5 (Optimize), save specification
+spec_dir = Path('.claude/pseudo-code-prompting')
+spec_dir.mkdir(parents=True, exist_ok=True)
 
-    spec_dir = Path('.claude/pseudo-code-prompting')
-    spec_dir.mkdir(parents=True, exist_ok=True)
-
-    # Save specification file
-    spec_file = spec_dir / 'specification.md'
-    with open(spec_file, 'w') as f:
-        f.write(f"""# Pseudo-Code Specification
+spec_file = spec_dir / 'specification.md'
+with open(spec_file, 'w') as f:
+    f.write(f"""# Pseudo-Code Specification
 
 ## Requirement
-{user_requirement}
+{original_user_requirement}
 
 ## Generated Pseudo-Code
 ```
@@ -264,65 +282,87 @@ def inject_specification():
 {datetime.now().isoformat()}
 """)
 
-    # Update activeContext.md with reference
-    cc10x_dir = Path('.claude/cc10x')
-    cc10x_dir.mkdir(parents=True, exist_ok=True)
+# Update activeContext.md with reference
+cc10x_dir = Path('.claude/cc10x')
+cc10x_dir.mkdir(parents=True, exist_ok=True)
 
-    activecontext = cc10x_dir / 'activeContext.md'
-    focus_content = f"""Implementing from pseudo-code specification:
+activecontext = cc10x_dir / 'activeContext.md'
+focus_content = f"""Implementing from pseudo-code specification:
 
 {optimized_pseudocode[:500]}... [full spec: .claude/pseudo-code-prompting/specification.md]
 
 **Approach:** Follow pseudo-code structure. Break down into phases per specification."""
 
-    if not activecontext.exists():
-        template = f"""# Active Context
+if activecontext.exists():
+    with open(activecontext, 'r') as f:
+        content = f.read()
+
+    if '## Current Focus' in content:
+        # Safe regex replacement
+        pattern = r'(## Current Focus\n)(.*?)(\n## )'
+        replacement = f'\\1{focus_content}\\3'
+        updated = re.sub(pattern, replacement, content, flags=re.DOTALL)
+        with open(activecontext, 'w') as f:
+            f.write(updated)
+    else:
+        # Fallback: append
+        with open(activecontext, 'a') as f:
+            f.write(f"\n## Current Focus\n{focus_content}\n")
+else:
+    # Create new activeContext.md
+    template = f"""# Active Context
+<!-- CC10X: Do not rename headings. Used as Edit anchors. -->
 
 ## Current Focus
 {focus_content}
 
 ## Recent Changes
-- Pseudo-code specification generated
+- Pseudo-code specification generated from requirements
 
 ## Next Steps
-1. Implement per specification
+1. Implement per pseudo-code specification phases
+2. Follow BUILD workflow: component-builder → review → verify
 
 ## Decisions
-- Use pseudo-code as specification guide
+- Use pseudo-code as primary specification
+- Validate implementation against specification
+
+## Learnings
 
 ## References
 - Specification: .claude/pseudo-code-prompting/specification.md
 
+## Blockers
+
 ## Last Updated
 {datetime.now().isoformat()}
 """
-        with open(activecontext, 'w') as f:
-            f.write(template)
-    else:
-        # Update existing (use safe regex replacement)
-        # ...
+    with open(activecontext, 'w') as f:
+        f.write(template)
 
-    return spec_file
+print(f"✓ Specification saved to: {spec_file}")
+print(f"✓ Updated activeContext: {activecontext}")
 ```
 
-**When to Call:**
-- After Step 5 (Optimize) completes
-- Before showing bridge question
+**When to Execute:**
+- **IMMEDIATELY after Step 5 (Optimize) completes**
+- **BEFORE showing the bridge question**
 - Automatic, user doesn't need to do anything
 
-**What It Does:**
+**What It Ensures:**
 1. Saves pseudo-code to `.claude/pseudo-code-prompting/specification.md`
-2. Creates or updates `.claude/cc10x/activeContext.md`
+2. Creates or updates `.claude/cc10x/activeContext.md` with reference
 3. Links specification in `## References` section
-4. Logs in `## Recent Changes`
-5. Records decision in `## Decisions`
+4. Records generation in `## Recent Changes`
+5. Documents decision in `## Decisions`
 
 **Result:**
-- When user chooses YES to bridge
-- cc10x loads memory on startup
-- Finds pseudo-code reference
+- When user answers YES to bridge question
+- cc10x loads `.claude/cc10x/activeContext.md` on startup
+- Finds pseudo-code specification reference
 - component-builder uses specification as primary input
-- No ambiguity in implementation
+- Full specification persists across sessions
+- No context loss or ambiguity in implementation
 
 ---
 
@@ -408,6 +448,126 @@ If YES: /cc10x:component-builder [requirement_spec]
 4. **Optimized** - Step 5 adds standard parameters for production readiness
 5. **Bridge-Ready** - Step 6 seamlessly connects to cc10x workflow
 
+## CRITICAL IMPLEMENTATION: Step 6.5 Execution
+
+**The agent MUST execute Step 6.5 injection before showing the bridge question. Use this pattern:**
+
+```python
+# After Step 5 (Optimize) completes, BEFORE showing bridge question
+from pathlib import Path
+from datetime import datetime
+import re
+
+def execute_specification_injection(pseudocode_output: str, user_requirement: str):
+    """Execute Step 6.5: Inject specification into cc10x context"""
+
+    try:
+        # Create specification directory
+        spec_dir = Path('.claude/pseudo-code-prompting')
+        spec_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save specification file
+        spec_file = spec_dir / 'specification.md'
+        spec_content = f"""# Pseudo-Code Specification
+
+## Requirement
+{user_requirement}
+
+## Generated Pseudo-Code
+```
+{pseudocode_output}
+```
+
+## Generated At
+{datetime.now().isoformat()}
+"""
+        with open(spec_file, 'w') as f:
+            f.write(spec_content)
+
+        # Create cc10x context directory
+        cc10x_dir = Path('.claude/cc10x')
+        cc10x_dir.mkdir(parents=True, exist_ok=True)
+
+        # Prepare focus content
+        activecontext = cc10x_dir / 'activeContext.md'
+        focus_content = f"""Implementing from pseudo-code specification:
+
+{pseudocode_output[:500]}... [full spec: .claude/pseudo-code-prompting/specification.md]
+
+**Approach:** Follow pseudo-code structure. Break down into phases per specification."""
+
+        # Create or update activeContext.md
+        if activecontext.exists():
+            with open(activecontext, 'r') as f:
+                content = f.read()
+
+            if '## Current Focus' in content:
+                # Safe regex replacement
+                pattern = r'(## Current Focus\n)(.*?)(\n## )'
+                replacement = f'\\1{focus_content}\\3'
+                updated = re.sub(pattern, replacement, content, flags=re.DOTALL)
+                with open(activecontext, 'w') as f:
+                    f.write(updated)
+            else:
+                # Fallback: append
+                with open(activecontext, 'a') as f:
+                    f.write(f"\n## Current Focus\n{focus_content}\n")
+        else:
+            # Create new activeContext.md
+            template = f"""# Active Context
+<!-- CC10X: Do not rename headings. Used as Edit anchors. -->
+
+## Current Focus
+{focus_content}
+
+## Recent Changes
+- Pseudo-code specification generated from requirements
+
+## Next Steps
+1. Implement per pseudo-code specification phases
+2. Follow BUILD workflow: component-builder → review → verify
+
+## Decisions
+- Use pseudo-code as primary specification
+- Validate implementation against specification
+
+## Learnings
+
+## References
+- Specification: .claude/pseudo-code-prompting/specification.md
+
+## Blockers
+
+## Last Updated
+{datetime.now().isoformat()}
+"""
+            with open(activecontext, 'w') as f:
+                f.write(template)
+
+        return True, spec_file
+
+    except Exception as e:
+        return False, str(e)
+
+# Main agent flow
+optimized_pseudocode = ... # Result from Step 5
+user_requirement = ... # Original requirement from user
+
+# Execute Step 6.5 BEFORE showing bridge question
+success, result = execute_specification_injection(optimized_pseudocode, user_requirement)
+
+if success:
+    spec_file_path = result
+    # Continue to show bridge question
+else:
+    error_msg = result
+    # Log error but don't block
+    print(f"Warning: Could not inject specification: {error_msg}")
+    # Continue anyway
+```
+
+---
+
 ## Output Format
 
 Always return:
@@ -423,7 +583,7 @@ OPTIMIZATION SUMMARY
 ✓ Validation: [summary]
 ✓ Parameters added: [count]
 
-✨ NEW (v2.1.0): SPECIFICATION INJECTION
+✨ NEW (v2.1.1): SPECIFICATION INJECTION
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 ✓ Specification saved: .claude/pseudo-code-prompting/specification.md
 ✓ Injected into: .claude/cc10x/activeContext.md

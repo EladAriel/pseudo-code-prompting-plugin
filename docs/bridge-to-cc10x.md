@@ -2,11 +2,26 @@
 
 Learn how to seamlessly integrate pseudo-code-prompting-plugin with cc10x component builder for test-driven development.
 
+## What's New in v2.1.0
+
+**Specification-Driven Development:** Pseudo-code is now automatically injected into cc10x's activeContext before invocation.
+
+- ✅ **Automatic injection** - Specification saved to `.claude/pseudo-code-prompting/specification.md`
+- ✅ **Persistent context** - Injected into `.claude/cc10x/activeContext.md`
+- ✅ **Zero ambiguity** - cc10x loads specification as primary input
+- ✅ **Session persistence** - Survives context compaction and session resets
+
+See [Specification Injection (v2.1.0)](#specification-injection-v210-new) below for details.
+
+---
+
 ## What is the Bridge?
 
 The bridge automatically converts your optimized pseudo-code into a detailed requirement specification that cc10x can use for TDD workflows.
 
 **Goal:** Eliminate ambiguity between requirements and implementation. Build features correctly the first time.
+
+**NEW (v2.1.0):** Specification is automatically persisted in cc10x's memory for guaranteed context availability.
 
 ## How It Works
 
@@ -342,6 +357,85 @@ If you want to understand the conversion process:
    ```
    /cc10x:component-builder [spec]
    ```
+
+---
+
+## Specification Injection (v2.1.0 NEW)
+
+### What's Automatically Injected?
+
+When you answer YES to the bridge question, your pseudo-code specification is automatically injected into cc10x's memory:
+
+**Saved Files:**
+1. `.claude/pseudo-code-prompting/specification.md`
+   - Your original requirement
+   - Generated pseudo-code
+   - Timestamp
+
+2. `.claude/cc10x/activeContext.md` (updated with)
+   - `## Current Focus`: Pseudo-code summary
+   - `## References`: Link to specification.md
+   - `## Recent Changes`: Logs specification generation
+   - `## Decisions`: Records specification as implementation guide
+
+### Why This Matters
+
+**Before (v2.0.1):**
+- Pseudo-code generated
+- Bridge to cc10x
+- cc10x had no persistent context
+- Context lost on session restart or compaction
+
+**After (v2.1.0):**
+- Pseudo-code generated
+- Automatic injection into activeContext
+- cc10x loads memory (finds specification)
+- component-builder uses specification as primary input
+- Persists across sessions and context compaction
+
+### How cc10x Uses It
+
+```
+1. cc10x router starts
+2. Loads: .claude/cc10x/activeContext.md
+3. Reads: "## Current Focus" section
+4. Finds: Pseudo-code + specification link
+5. Loads full spec: .claude/pseudo-code-prompting/specification.md
+6. Passes to component-builder
+7. component-builder runs TDD per specification
+   - RED: Write tests per specification
+   - GREEN: Implement per specification
+   - REFACTOR: Maintain specification adherence
+8. Feature built exactly as specified ✅
+```
+
+### Manual Specification Access
+
+If you need to see what was saved:
+
+```bash
+# View specification
+cat .claude/pseudo-code-prompting/specification.md
+
+# View cc10x active context
+cat .claude/cc10x/activeContext.md
+
+# Manually delete if not needed
+rm -rf .claude/pseudo-code-prompting/
+```
+
+### Specification Persistence
+
+The specification is durable and will survive:
+- ✅ Session restarts
+- ✅ Context compaction
+- ✅ Agent handoffs
+- ✅ Long-running workflows
+- ✅ Multiple invocations
+
+This ensures cc10x always has access to your original pseudo-code specification.
+
+---
 
 ## Troubleshooting
 

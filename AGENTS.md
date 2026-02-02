@@ -24,25 +24,36 @@ IMPORTANT: Never bypass the router. It is the system.
 
 ---
 
-## Bridge to cc10x (Explicit Handoff Protocol)
+## Bridge to cc10x (Specification-Driven Handoff Protocol)
 
-After TRANSFORM completes:
+After TRANSFORM completes, pseudo-code is **automatically injected** into cc10x's activeContext:
+
 ```
+AUTOMATIC INJECTION (v2.1.0+):
+├─ Specification saved: .claude/pseudo-code-prompting/specification.md
+├─ activeContext.md updated:
+│   ├─ Current Focus: pseudo-code structure
+│   ├─ References: linked to specification
+│   └─ Decisions: recorded specification as guide
+         ↓
 🚀 Ready to implement with cc10x? (Y/n)
 ```
 
 **Option A: Answer YES**
-- Transform converts pseudo-code to cc10x requirement spec
+- Specification already injected into activeContext
 - Automatically invokes `/cc10x:cc10x-router`
-- cc10x receives clear, unambiguous specification
-- TDD workflow starts: RED → GREEN → REFACTOR
-- **No hijacking** (explicit handoff)
+- cc10x loads memory (finds pseudo-code reference)
+- component-builder receives specification as primary input
+- TDD workflow starts: RED → GREEN → REFACTOR (per specification)
+- **Specification persists** across sessions, compaction, handoffs
+- **No ambiguity** - pseudo-code is source of truth
 
 **Option B: Answer NO**
 - Pseudo-code returned as-is
+- Specification file saved for later reference
 - No cc10x invocation
 - Keep for documentation, tickets, or manual iteration
-- Invoke cc10x separately in next message if desired
+- Invoke cc10x separately in next message if desired (specification already in activeContext)
 
 ---
 
@@ -120,9 +131,41 @@ Run transform: Build a Project Tracker
 # → Transform completes normally
 ```
 
-### Implementation Details
+### Specification Injection Details (v2.1.0+)
 
-**Hook Configuration** (`hooks/hooks.json`):
+**Injection Flow:**
+1. Transform pipeline completes (6 steps)
+2. Before showing bridge question, injection triggered
+3. Specification saved to `.claude/pseudo-code-prompting/specification.md`
+4. activeContext.md created/updated with references
+5. Bridge question shown with injection confirmation
+6. User answers YES/NO
+
+**What Gets Injected into activeContext.md:**
+
+```markdown
+## Current Focus
+Implementing from pseudo-code specification:
+
+[Pseudo-code summary - first 500 chars]
+... [full spec: .claude/pseudo-code-prompting/specification.md]
+
+**Approach:** Follow pseudo-code structure. Break down into phases per specification.
+
+## References
+- Specification: .claude/pseudo-code-prompting/specification.md
+
+## Recent Changes
+- Pseudo-code specification generated from requirements
+
+## Decisions
+- Use pseudo-code as primary specification
+- Validate implementation against specification
+```
+
+**Result:** When cc10x starts, it loads activeContext and finds pseudo-code as context.
+
+### Hook Configuration (`hooks/hooks.json`):
 ```json
 {
   "UserPromptSubmit": [

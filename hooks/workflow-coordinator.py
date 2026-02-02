@@ -43,13 +43,17 @@ def is_pseudocode_command(user_input: str) -> bool:
     return False
 
 
-def get_command_type(user_input: str) -> str | None:
-    """Extract which pseudocode command is being run."""
+def get_command_type(user_input: str) -> tuple[str | None, str | None]:
+    """
+    Extract which pseudocode command is being run and map to agent.
+
+    Returns: (command_type, agent_name) or (None, None)
+    """
     if re.search(r'^Run\s+transform:', user_input, re.IGNORECASE):
-        return 'transform'
+        return ('transform', 'pseudo-code-prompting-plugin-v2:requirement-structurer')
     if re.search(r'^Run\s+validate:', user_input, re.IGNORECASE):
-        return 'validate'
-    return None
+        return ('validate', 'pseudo-code-prompting-plugin-v2:requirement-validator')
+    return (None, None)
 
 
 def emit_signal(signal_name: str, value: str) -> None:
@@ -95,7 +99,7 @@ def main():
     Main coordination logic.
 
     If pseudocode command detected:
-    1. Emit signals to block cc10x
+    1. Emit signals to block cc10x with correct agent mapping
     2. Save coordination state
     3. Allow pseudocode plugin to run
     4. Bridge handoff protocol takes over
@@ -115,12 +119,12 @@ def main():
         log_coordination("Not a pseudocode command, allowing normal flow")
         return
 
-    # Extract command type
-    command_type = get_command_type(user_input)
-    if not command_type:
+    # Extract command type and agent mapping
+    command_type, agent_name = get_command_type(user_input)
+    if not command_type or not agent_name:
         return
 
-    log_coordination(f"Detected pseudocode command: {command_type}")
+    log_coordination(f"Detected pseudocode command: {command_type} → {agent_name}")
 
     # Emit coordination signals
     emit_signal("PSEUDOCODE_PLUGIN_ACTIVE", "true")
@@ -128,6 +132,7 @@ def main():
     emit_signal("WORKFLOW_PRIORITY", "pseudocode-plugin")
     emit_signal("WORKFLOW_HANDOFF_EXPECTED", "true")
     emit_signal("COMMAND_TYPE", command_type)
+    emit_signal("PSEUDOCODE_AGENT", agent_name)
 
     # Create and save coordination state
     state = create_coordination_state(command_type)
@@ -135,7 +140,7 @@ def main():
 
     log_coordination(
         f"Coordination state saved. "
-        f"Command: {command_type}, "
+        f"Command: {command_type}, Agent: {agent_name}, "
         f"cc10x blocked until bridge handoff"
     )
 
@@ -145,6 +150,7 @@ def main():
             f"\n🔒 Workflow Coordinator: Pseudocode plugin active. "
             f"cc10x router blocked until transform completes."
             f"\n   Command: {command_type}"
+            f"\n   Agent: {agent_name}"
             f"\n   Bridge protocol: ENABLED"
             f"\n   When transform asks 'Ready to implement?', answer YES "
             f"to auto-invoke cc10x with specification."

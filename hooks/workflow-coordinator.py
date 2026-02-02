@@ -43,6 +43,15 @@ def is_pseudocode_command(user_input: str) -> bool:
     return False
 
 
+def extract_task_requirement(user_input: str) -> str:
+    """Extract the requirement/task from the command."""
+    # Match "Run transform: ..." or "Run validate: ..."
+    match = re.search(r'^Run\s+(?:transform|validate):\s+(.+)$', user_input, re.IGNORECASE | re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return ""
+
+
 def get_command_type(user_input: str) -> tuple[str | None, str | None]:
     """
     Extract which pseudocode command is being run and map to agent.
@@ -61,12 +70,13 @@ def emit_signal(signal_name: str, value: str) -> None:
     print(f"{signal_name}={value}")
 
 
-def create_coordination_state(command_type: str) -> dict:
+def create_coordination_state(command_type: str, requirement: str = "") -> dict:
     """Create workflow coordination state file."""
     state = {
         'workflow_active': True,
         'active_plugin': 'pseudo-code-prompting',
         'command_type': command_type,
+        'requirement': requirement,
         'cc10x_blocked': True,
         'bridge_expected': True,
         'timestamp': __import__('datetime').datetime.now().isoformat(),
@@ -126,6 +136,9 @@ def main():
 
     log_coordination(f"Detected pseudocode command: {command_type} → {agent_name}")
 
+    # Extract requirement for later injection
+    requirement = extract_task_requirement(user_input)
+
     # Emit coordination signals
     emit_signal("PSEUDOCODE_PLUGIN_ACTIVE", "true")
     emit_signal("BLOCK_CC10X_ROUTER", "true")
@@ -134,8 +147,8 @@ def main():
     emit_signal("COMMAND_TYPE", command_type)
     emit_signal("PSEUDOCODE_AGENT", agent_name)
 
-    # Create and save coordination state
-    state = create_coordination_state(command_type)
+    # Create and save coordination state with requirement
+    state = create_coordination_state(command_type, requirement)
     save_coordination_state(state)
 
     log_coordination(

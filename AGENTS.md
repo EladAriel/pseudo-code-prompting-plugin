@@ -26,26 +26,30 @@ IMPORTANT: Never bypass the router. It is the system.
 
 ## Bridge to cc10x (Specification-Driven Handoff Protocol)
 
-After TRANSFORM completes (Step 5), the requirement-structurer agent **automatically executes Step 6.5** to inject pseudo-code into cc10x's activeContext:
+After TRANSFORM completes (Step 5), pseudo-code is **automatically injected** into cc10x's activeContext via PostToolUse hook:
 
 ```
-AUTOMATIC INJECTION (v2.1.1+ - REQUIRED STEP 6.5):
+AUTOMATIC INJECTION (v2.1.1+ - PostToolUse Hook):
 │
-├─ Step 6.5 execution (CRITICAL):
-│  ├─ Save specification.md with full pseudo-code
+├─ PostToolUse Hook (post-tool-use.py) runs after agent output
+│  ├─ Detects pseudo-code in tool output (TRANSFORMED PSEUDO-CODE pattern)
+│  ├─ Checks workflow state (.claude/pseudo-code-prompting/workflow-state.json)
+│  ├─ Extracts requirement from state file
+│  ├─ Saves specification.md with full pseudo-code
 │  ├─ Create/update activeContext.md
 │  ├─ Link specification in Current Focus + References
 │  └─ Record decision in Decisions section
 │
 ├─ Files created:
 │  ├─ .claude/pseudo-code-prompting/specification.md (persists pseudocode)
+│  ├─ .claude/pseudo-code-prompting/workflow-state.json (workflow metadata)
 │  └─ .claude/cc10x/activeContext.md (with specification reference)
 │
 └─ Bridge question shown:
    🚀 Ready to implement with cc10x? (Y/n)
 ```
 
-**Implementation:** Agent calls `execute_specification_injection()` in `requirement-structurer.md` Step 6.5 section (see lines 411-475).
+**Implementation:** PostToolUse hook in `hooks/post-tool-use.py` automatically saves specification when pseudo-code is detected in tool output.
 
 **Option A: Answer YES**
 - ✓ Specification already saved before cc10x invokes
@@ -195,9 +199,29 @@ Implementing from pseudo-code specification:
         }
       ]
     }
+  ],
+  "PostToolUse": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use.py",
+          "statusMessage": "Injecting pseudo-code into specification...",
+          "timeout": 5,
+          "priority": "normal"  // ← RUNS AFTER TOOL OUTPUT
+        }
+      ]
+    }
   ]
 }
 ```
+
+**PostToolUse Hook Injection:**
+- Runs automatically after agent completes
+- Detects TRANSFORMED PSEUDO-CODE pattern
+- Extracts pseudo-code from output
+- Saves to `.claude/pseudo-code-prompting/specification.md`
+- Updates `.claude/cc10x/activeContext.md` with reference
 
 **Coordination Signals:**
 - `PSEUDOCODE_PLUGIN_ACTIVE=true` → Plugin is running
@@ -211,10 +235,30 @@ Implementing from pseudo-code specification:
   "workflow_active": true,
   "active_plugin": "pseudo-code-prompting",
   "command_type": "transform",
+  "requirement": "implement basic crud op in sap cap",
   "cc10x_blocked": true,
   "bridge_expected": true,
   "timestamp": "2026-02-02T12:34:56.789123"
 }
+```
+
+**Specification File** (`.claude/pseudo-code-prompting/specification.md`):
+```markdown
+# Pseudo-Code Specification
+
+## Requirement
+implement basic crud op in sap cap
+
+## Generated Pseudo-Code
+\`\`\`
+implement_sap_cap_crud_service(
+  entity_name="string",
+  ...
+)
+\`\`\`
+
+## Generated At
+2026-02-02T12:34:56.789123
 ```
 
 ### Debugging

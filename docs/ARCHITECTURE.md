@@ -74,25 +74,48 @@ Bridge Offer               Report
 
 ### 1. Hook System
 
-**File:** `hooks/user-prompt-submit.py`
+**Files:**
+- `hooks/workflow-coordinator.py` - Workflow coordination (priority=high)
+- `hooks/user-prompt-submit.py` - Command detection and routing
+- `hooks/post-tool-use.py` - Pseudo-code extraction and injection (v2.1.2+)
 
-**Purpose:** Auto-detect command patterns and route to appropriate handlers
+**Purpose:** Auto-detect commands, coordinate workflows, and inject specifications
 
 **Key Features:**
 - Pattern matching: "Run transform:" and "Run validate:"
+- Workflow coordination to prevent cc10x hijacking
+- PostToolUse hook for automatic specification injection (v2.1.2+)
 - Stateless design (no memory, no side effects)
-- Fast execution (<100ms)
+- Fast execution (<100ms per hook)
 
-**Code Flow:**
-```python
+**Hook Sequence:**
+```
+UserPromptSubmit Phase:
+  1. workflow-coordinator.py (priority=high, timeout=5s)
+     └─ Detects pseudocode command
+     └─ Emits: PSEUDOCODE_PLUGIN_ACTIVE=true, BLOCK_CC10X_ROUTER=true
+     └─ Saves: workflow-state.json with requirement
+
+  2. user-prompt-submit.py (timeout=10s)
+     └─ Detects command pattern
+     └─ Returns: PSEUDO_CODE_COMMAND, PSEUDO_CODE_AGENT, TASK
+
+PostToolUse Phase (NEW v2.1.2):
+  3. post-tool-use.py (timeout=5s)
+     └─ Runs after tool output
+     └─ Detects: "TRANSFORMED PSEUDO-CODE" pattern
+     └─ Saves: specification.md + updates activeContext.md
+
+Example Flow:
+```
 user_input = "Run transform: add auth"
-           ↓
-           # Regex patterns
-           if matches "Run transform:": return ('transform', task)
-           if matches "Run validate:":  return ('validate', task)
-           ↓
-output: PSEUDO_CODE_COMMAND=transform
-        TASK="add auth"
+           ↓ (UserPromptSubmit)
+           ├─ workflow-coordinator: BLOCK_CC10X_ROUTER=true
+           ├─ user-prompt-submit: PSEUDO_CODE_COMMAND=transform
+           ↓ (Agent processes)
+           └─ Agent outputs pseudo-code
+           ↓ (PostToolUse)
+           └─ post-tool-use: Saves specification.md
 ```
 
 ### 2. Commands

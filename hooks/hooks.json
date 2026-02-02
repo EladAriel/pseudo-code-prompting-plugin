@@ -6,6 +6,13 @@
         "hooks": [
           {
             "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/workflow-coordinator.py",
+            "statusMessage": "Coordinating workflow to prevent cc10x hijacking...",
+            "timeout": 5,
+            "priority": "high"
+          },
+          {
+            "type": "command",
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.py",
             "statusMessage": "Checking for pseudo-code transformation commands...",
             "timeout": 10

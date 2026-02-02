@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pseudo-code-prompting-plugin",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Simplified pseudo-code transformation engine with 6-step pipeline, architecture-aware generation, comprehensive validation across 6 dimensions, workflow coordination to prevent cc10x hijacking, and specification-driven cc10x integration via activeContext injection for TDD workflows.",
   "owner": {
     "name": "Elad Ariel"
@@ -10,7 +10,7 @@
     {
       "name": "pseudo-code-prompting-plugin-v2",
       "description": "Simplified pseudo-code transformation engine with 6-step pipeline, architecture-aware generation, comprehensive validation across 6 dimensions, workflow coordination to prevent cc10x hijacking, and specification-driven cc10x integration via activeContext injection for TDD workflows.",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "author": {
         "name": "Elad Ariel"
       },

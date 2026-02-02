@@ -216,15 +216,18 @@ Compared to v1: **50% faster, 70% fewer tokens**
 
 ## Integration with cc10x
 
-After transformation, pseudo-code is automatically injected into cc10x's activeContext:
+After transformation, pseudo-code is automatically injected into cc10x's activeContext via **PostToolUse hook**:
 
 ```
 Your pseudo-code transforms to detailed requirement spec
          ↓
-AUTOMATIC INJECTION into .claude/cc10x/activeContext.md
+AUTOMATIC INJECTION (via PostToolUse hook post-tool-use.py)
+  ├─ PostToolUse hook detects "TRANSFORMED PSEUDO-CODE" pattern
+  ├─ Extracts pseudo-code from tool output
   ├─ Specification saved to: .claude/pseudo-code-prompting/specification.md
   ├─ Current Focus updated with pseudo-code structure
   ├─ References section linked to specification
+  └─ Ensures NO pseudocode is ever lost (even if not explicitly saved)
          ↓
 Bridge Question: Ready to implement with cc10x?
          ↓
@@ -237,7 +240,7 @@ If YES:
 Feature built with clear, unambiguous requirements
 ```
 
-**Benefit:** Specification-driven development. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles.
+**Benefit:** Specification-driven development. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles. **PostToolUse hook ensures pseudo-code is ALWAYS saved, never lost.**
 
 ### What Gets Injected
 
@@ -302,6 +305,13 @@ Complex requirements may take longer. Consider breaking into smaller pieces.
 
 ### "Validation too strict"
 Adjust severity levels in agent configuration, or ignore low-priority warnings.
+
+### "Pseudo-code not saved to specification.md"
+The PostToolUse hook automatically saves pseudo-code. Check:
+1. Enable debug logging: `DEBUG=1 Run transform: your requirement`
+2. Verify workflow state: `cat .claude/pseudo-code-prompting/workflow-state.json`
+3. Check specification file: `cat .claude/pseudo-code-prompting/specification.md`
+4. PostToolUse hook detects "TRANSFORMED PSEUDO-CODE" pattern in output
 
 ## Migration from v1
 

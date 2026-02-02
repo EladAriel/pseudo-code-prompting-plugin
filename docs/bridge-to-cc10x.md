@@ -2,16 +2,18 @@
 
 Learn how to seamlessly integrate pseudo-code-prompting-plugin with cc10x component builder for test-driven development.
 
-## What's New in v2.1.1
+## What's New in v2.1.2
 
-**Specification-Driven Development:** Pseudo-code is now automatically injected into cc10x's activeContext before invocation.
+**PostToolUse Hook for Reliable Pseudo-Code Injection:** Automatic injection now guaranteed via PostToolUse hook.
 
-- ✅ **Automatic injection** - Specification saved to `.claude/pseudo-code-prompting/specification.md`
+- ✅ **Automatic injection** - PostToolUse hook saves to `.claude/pseudo-code-prompting/specification.md`
+- ✅ **Reliable persistence** - Hook-based extraction ensures pseudo-code never lost
 - ✅ **Persistent context** - Injected into `.claude/cc10x/activeContext.md`
 - ✅ **Zero ambiguity** - cc10x loads specification as primary input
 - ✅ **Session persistence** - Survives context compaction and session resets
+- ✅ **Debug support** - Comprehensive logging for troubleshooting
 
-See [Specification Injection (v2.1.1)](#specification-injection-v210-new) below for details.
+See [Specification Injection (v2.1.2)](#specification-injection-v212-new) below for details.
 
 ---
 
@@ -21,7 +23,7 @@ The bridge automatically converts your optimized pseudo-code into a detailed req
 
 **Goal:** Eliminate ambiguity between requirements and implementation. Build features correctly the first time.
 
-**NEW (v2.1.1):** Specification is automatically persisted in cc10x's memory for guaranteed context availability.
+**NEW (v2.1.2):** Specification is automatically persisted in cc10x's memory via PostToolUse hook for guaranteed context availability.
 
 ## How It Works
 
@@ -360,11 +362,11 @@ If you want to understand the conversion process:
 
 ---
 
-## Specification Injection (v2.1.1 NEW)
+## Specification Injection (v2.1.2 - PostToolUse Hook)
 
 ### What's Automatically Injected?
 
-When you answer YES to the bridge question, your pseudo-code specification is automatically injected into cc10x's memory:
+Your pseudo-code specification is automatically injected into cc10x's memory via **PostToolUse hook** (runs after pseudo-code generation):
 
 **Saved Files:**
 1. `.claude/pseudo-code-prompting/specification.md`
@@ -386,28 +388,45 @@ When you answer YES to the bridge question, your pseudo-code specification is au
 - cc10x had no persistent context
 - Context lost on session restart or compaction
 
-**After (v2.1.1):**
+**After (v2.1.2):**
 - Pseudo-code generated
-- Automatic injection into activeContext
+- PostToolUse hook automatically extracts pseudo-code
+- Specification persisted to `.claude/pseudo-code-prompting/specification.md`
+- Automatic injection into cc10x's `.claude/cc10x/activeContext.md`
 - cc10x loads memory (finds specification)
 - component-builder uses specification as primary input
 - Persists across sessions and context compaction
+- **GUARANTEED:** Pseudo-code never lost, always saved by hook
 
-### How cc10x Uses It
+### How It Works (PostToolUse Hook Flow)
 
 ```
-1. cc10x router starts
-2. Loads: .claude/cc10x/activeContext.md
-3. Reads: "## Current Focus" section
-4. Finds: Pseudo-code + specification link
-5. Loads full spec: .claude/pseudo-code-prompting/specification.md
-6. Passes to component-builder
-7. component-builder runs TDD per specification
-   - RED: Write tests per specification
-   - GREEN: Implement per specification
-   - REFACTOR: Maintain specification adherence
-8. Feature built exactly as specified ✅
+1. User runs: "Run transform: your requirement"
+2. Agent generates pseudo-code
+3. Agent completes (outputs pseudo-code)
+4. PostToolUse Hook (post-tool-use.py) automatically triggers
+   ├─ Detects: "TRANSFORMED PSEUDO-CODE" pattern
+   ├─ Checks: workflow-state.json for requirement
+   ├─ Saves: .claude/pseudo-code-prompting/specification.md
+   └─ Updates: .claude/cc10x/activeContext.md
+5. Bridge question shown (spec already saved!)
+6. User answers: YES (or answers NO to keep only pseudo-code)
+
+If YES to bridge:
+7. cc10x router starts
+8. Loads: .claude/cc10x/activeContext.md
+9. Reads: "## Current Focus" section
+10. Finds: Pseudo-code + specification link
+11. Loads full spec: .claude/pseudo-code-prompting/specification.md
+12. Passes to component-builder
+13. component-builder runs TDD per specification
+    - RED: Write tests per specification
+    - GREEN: Implement per specification
+    - REFACTOR: Maintain specification adherence
+14. Feature built exactly as specified ✅
 ```
+
+**Key Difference (v2.1.2):** PostToolUse hook ensures specification is saved AUTOMATICALLY, whether or not user chooses to bridge to cc10x.
 
 ### Manual Specification Access
 

@@ -232,6 +232,100 @@ CC10X Spec:
 
 ---
 
+### Step 6.5: Inject Pseudo-Code into cc10x activeContext (v2.1.0 NEW)
+
+**Before showing bridge question, automatically inject pseudo-code into cc10x's memory:**
+
+```python
+# After Step 5 (Optimize), before bridge question:
+
+# Inject specification into cc10x activeContext
+def inject_specification():
+    from pathlib import Path
+    from datetime import datetime
+
+    spec_dir = Path('.claude/pseudo-code-prompting')
+    spec_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save specification file
+    spec_file = spec_dir / 'specification.md'
+    with open(spec_file, 'w') as f:
+        f.write(f"""# Pseudo-Code Specification
+
+## Requirement
+{user_requirement}
+
+## Generated Pseudo-Code
+```
+{optimized_pseudocode}
+```
+
+## Generated At
+{datetime.now().isoformat()}
+""")
+
+    # Update activeContext.md with reference
+    cc10x_dir = Path('.claude/cc10x')
+    cc10x_dir.mkdir(parents=True, exist_ok=True)
+
+    activecontext = cc10x_dir / 'activeContext.md'
+    focus_content = f"""Implementing from pseudo-code specification:
+
+{optimized_pseudocode[:500]}... [full spec: .claude/pseudo-code-prompting/specification.md]
+
+**Approach:** Follow pseudo-code structure. Break down into phases per specification."""
+
+    if not activecontext.exists():
+        template = f"""# Active Context
+
+## Current Focus
+{focus_content}
+
+## Recent Changes
+- Pseudo-code specification generated
+
+## Next Steps
+1. Implement per specification
+
+## Decisions
+- Use pseudo-code as specification guide
+
+## References
+- Specification: .claude/pseudo-code-prompting/specification.md
+
+## Last Updated
+{datetime.now().isoformat()}
+"""
+        with open(activecontext, 'w') as f:
+            f.write(template)
+    else:
+        # Update existing (use safe regex replacement)
+        # ...
+
+    return spec_file
+```
+
+**When to Call:**
+- After Step 5 (Optimize) completes
+- Before showing bridge question
+- Automatic, user doesn't need to do anything
+
+**What It Does:**
+1. Saves pseudo-code to `.claude/pseudo-code-prompting/specification.md`
+2. Creates or updates `.claude/cc10x/activeContext.md`
+3. Links specification in `## References` section
+4. Logs in `## Recent Changes`
+5. Records decision in `## Decisions`
+
+**Result:**
+- When user chooses YES to bridge
+- cc10x loads memory on startup
+- Finds pseudo-code reference
+- component-builder uses specification as primary input
+- No ambiguity in implementation
+
+---
+
 ## Complete Workflow Example
 
 **Input:**
@@ -329,7 +423,17 @@ OPTIMIZATION SUMMARY
 ✓ Validation: [summary]
 ✓ Parameters added: [count]
 
+✨ NEW (v2.1.0): SPECIFICATION INJECTION
+━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Specification saved: .claude/pseudo-code-prompting/specification.md
+✓ Injected into: .claude/cc10x/activeContext.md
+✓ References linked: Current Focus, References, Decisions
+
 🚀 READY TO IMPLEMENT?
 Auto-invoke cc10x? (Y/n)
+
+Note: Pseudo-code specification automatically persists for cc10x.
+If YES: cc10x will load specification as primary input.
+If NO: Specification saved for later reference.
 ```
 

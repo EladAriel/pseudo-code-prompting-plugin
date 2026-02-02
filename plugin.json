@@ -1,7 +1,7 @@
 {
   "name": "pseudo-code-prompting-plugin",
-  "version": "2.0.1",
-  "description": "Simplified pseudo-code transformation engine. Transform requirements to production-ready pseudo-code (70% less complexity). 2 commands, 2 agents, 4 skills, auto-detection with workflow coordination. Built-in bridge to cc10x for TDD workflow.",
+  "version": "2.1.0",
+  "description": "Simplified pseudo-code transformation engine. Transform requirements to production-ready pseudo-code (70% less complexity). 2 commands, 2 agents, 4 skills, auto-detection with workflow coordination. Pseudo-code injected into cc10x activeContext for seamless specification-driven TDD workflows.",
   "author": {
     "name": "Elad Ariel",
     "url": "https://github.com/EladAriel/pseudo-code-prompting-plugin"
@@ -18,8 +18,10 @@
     "simplification",
     "cc10x-bridge",
     "tdd-workflow",
+    "specification-driven",
     "architecture-aware",
     "production-ready",
-    "workflow-coordination"
+    "workflow-coordination",
+    "activecontext-integration"
   ]
 }

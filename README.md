@@ -216,19 +216,47 @@ Compared to v1: **50% faster, 70% fewer tokens**
 
 ## Integration with cc10x
 
-After transformation, optionally auto-invoke cc10x:
+After transformation, pseudo-code is automatically injected into cc10x's activeContext:
 
 ```
 Your pseudo-code transforms to detailed requirement spec
          ↓
-/cc10x:component-builder auto-invoked with spec
+AUTOMATIC INJECTION into .claude/cc10x/activeContext.md
+  ├─ Specification saved to: .claude/pseudo-code-prompting/specification.md
+  ├─ Current Focus updated with pseudo-code structure
+  ├─ References section linked to specification
          ↓
-TDD Workflow: RED → GREEN → REFACTOR
+Bridge Question: Ready to implement with cc10x?
+         ↓
+If YES:
+  ├─ cc10x router loads memory (finds pseudo-code reference)
+  ├─ component-builder receives specification as primary input
+  ├─ TDD Workflow: RED → GREEN → REFACTOR
+  └─ Feature built with specification as acceptance criteria
          ↓
 Feature built with clear, unambiguous requirements
 ```
 
-**Benefit:** No misunderstanding between requirements and implementation. Feature built correctly first time.
+**Benefit:** Specification-driven development. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles.
+
+### What Gets Injected
+
+When you choose YES to the bridge question:
+1. **Specification File** → `.claude/pseudo-code-prompting/specification.md`
+   - Full pseudo-code output
+   - Timestamp and original requirement
+
+2. **activeContext.md Updates**:
+   - `## Current Focus`: Pseudo-code summary + implementation guidance
+   - `## References`: Link to specification file
+   - `## Recent Changes`: Logs specification generation
+   - `## Decisions`: Records to use pseudo-code as guide
+
+3. **cc10x Workflow**:
+   - component-builder reads activeContext on startup
+   - Uses specification as primary acceptance criteria
+   - TDD cycles validate against specification
+   - Memory persists across sessions
 
 ## Advanced Usage
 

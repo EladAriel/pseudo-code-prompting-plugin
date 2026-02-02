@@ -1,8 +1,9 @@
 {
   "skill_id": "requirement-validator",
   "name": "Requirement Validator",
-  "description": "Validate transformed pseudo-code has all necessary requirements and parameters",
-  "version": "1.0.0",
+  "description": "Validate transformed pseudo-code has all necessary requirements and parameters for production readiness",
+  "agent_name": "pseudo-code-prompting-plugin-v2:requirement-validator",
+  "version": "2.1.1",
   "tier": "discovery",
   "tokens_estimate": 108,
   "triggers": {
@@ -12,20 +13,24 @@
       "check requirements",
       "completeness",
       "missing",
-      "review"
+      "review",
+      "security",
+      "error handling"
     ],
     "patterns": [
       "validate.*requirements",
       "check.*completeness",
       "verify.*parameters",
       "review.*pseudo.*code",
-      "missing.*requirements"
+      "missing.*requirements",
+      "run validate:"
     ],
     "contexts": [
       "after transformation",
       "before implementation",
       "requirement review",
-      "quality check"
+      "quality check",
+      "security audit"
     ]
   },
   "capabilities": [
@@ -33,18 +38,23 @@
     "constraint-validation",
     "parameter-verification",
     "edge-case-identification",
-    "dependency-analysis"
+    "dependency-analysis",
+    "security-validation",
+    "error-handling-validation",
+    "production-readiness-check"
   ],
   "use_cases": [
     "Validating transformed pseudo-code has all necessary parameters",
     "Identifying missing requirements or constraints",
     "Checking for edge cases and error conditions",
-    "Verifying dependencies and integrations are specified"
+    "Verifying dependencies and integrations are specified",
+    "Ensuring security and error handling compliance"
   ],
   "when_to_load_tier_2": [
     "After pseudo-code transformation",
     "Before implementation starts",
     "User requests validation",
-    "Quality gate before proceeding"
+    "Quality gate before proceeding",
+    "User runs 'Run validate:' command"
   ]
 }

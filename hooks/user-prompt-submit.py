@@ -145,11 +145,11 @@ def inject_pseudocode_to_cc10x(pseudocode_output: str, requirement: str) -> Path
         raise
 
 
-def detect_command(user_input: str) -> tuple[str | None, str | None]:
+def detect_command(user_input: str) -> tuple[str | None, str | None, str | None]:
     """
-    Detect command pattern and extract task.
+    Detect command pattern and extract task with agent mapping.
 
-    Returns: (command_name, task_description) or (None, None)
+    Returns: (command_name, task_description, agent_name) or (None, None, None)
 
     Supported patterns:
     - "Run transform: {requirement}"
@@ -164,7 +164,7 @@ def detect_command(user_input: str) -> tuple[str | None, str | None]:
     )
     if transform_match:
         task = transform_match.group(1).strip()
-        return ('transform', task)
+        return ('transform', task, 'pseudo-code-prompting-plugin-v2:requirement-structurer')
 
     # Pattern 2: Validate command
     validate_match = re.match(
@@ -174,9 +174,9 @@ def detect_command(user_input: str) -> tuple[str | None, str | None]:
     )
     if validate_match:
         task = validate_match.group(1).strip()
-        return ('validate', task)
+        return ('validate', task, 'pseudo-code-prompting-plugin-v2:requirement-validator')
 
-    return (None, None)
+    return (None, None, None)
 
 
 def main():
@@ -184,7 +184,7 @@ def main():
     Entry point for hook execution.
 
     Reads user input from stdin, detects command, and outputs
-    routing instructions.
+    routing instructions with correct agent mapping.
 
     NEW (v2.1.1): After agent produces pseudo-code output, this hook
     also triggers injection into cc10x's activeContext.md via a
@@ -198,15 +198,16 @@ def main():
         return
 
     # Detect command
-    command, task = detect_command(user_input)
+    command, task, agent = detect_command(user_input)
 
     if command is None:
         # Not a pseudo-code-prompting command, skip hook
         return
 
-    # Output routing instruction
-    # This will be picked up by Claude Code to route to the appropriate command
+    # Output routing instruction with correct agent mapping
+    # This will be picked up by Claude Code to route to the appropriate agent
     print(f"PSEUDO_CODE_COMMAND={command}")
+    print(f"PSEUDO_CODE_AGENT={agent}")
     print(f"TASK={task}")
 
     # NEW (v2.1.1): Signal that injection may be needed after transform
@@ -219,6 +220,7 @@ def main():
     if os.environ.get('DEBUG'):
         print(f"DEBUG: Detected command '{command}' with task: {task[:100]}...",
               file=sys.stderr)
+        print(f"DEBUG: Routing to agent '{agent}'", file=sys.stderr)
         if command == 'transform':
             print(f"DEBUG: Injection will be triggered after pseudo-code generation",
                   file=sys.stderr)

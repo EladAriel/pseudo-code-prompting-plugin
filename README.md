@@ -9,7 +9,7 @@ Transform natural language requirements into production-ready pseudo-code with a
 ```bash
 # From Marketplace
 /plugin marketplace add EladAriel/pseudo-code-prompting-plugin
-/plugin install /plugin install pseudo-code-prompting-plugin-v2
+/plugin install pseudo-code-prompting-plugin-v2
 
 # From Github
 ## 1. Clone repo

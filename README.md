@@ -217,18 +217,28 @@ Compared to v1: **50% faster, 70% fewer tokens**
 
 ## Integration with cc10x
 
-After transformation, pseudo-code is automatically injected into cc10x's activeContext via **PostToolUse hook**:
+After transformation, pseudo-code is automatically injected into cc10x's activeContext via **three-layer context protection**:
 
 ```
 Your pseudo-code transforms to detailed requirement spec
          ↓
-AUTOMATIC INJECTION (via PostToolUse hook post-tool-use.py)
-  ├─ PostToolUse hook detects "TRANSFORMED PSEUDO-CODE" pattern
-  ├─ Extracts pseudo-code from tool output
-  ├─ Specification saved to: .claude/pseudo-code-prompting/specification.md
-  ├─ Current Focus updated with pseudo-code structure
-  ├─ References section linked to specification
-  └─ Ensures NO pseudocode is ever lost (even if not explicitly saved)
+LAYER 1: SPECIFICATION MARKERS (Prevention)
+  ├─ PostToolUse hook adds ## Specification section
+  ├─ Includes PSEUDO-CODE-CONTEXT preservation markers
+  ├─ Makes context "sticky" so it survives cc10x overwrites
+  └─ Specification saved to: .claude/pseudo-code-prompting/specification.md
+         ↓
+LAYER 2: CONTEXT MERGING (Smart Merge)
+  ├─ Intelligent merging prevents cc10x from overwriting specification
+  ├─ Uses context-merger.py utility to combine contexts
+  ├─ Preserves both pseudo-code and cc10x contexts in one file
+  └─ References section linked to specification
+         ↓
+LAYER 3: RECOVERY HOOK (Safety Net)
+  ├─ post-cc10x-context-write.py runs after cc10x writes
+  ├─ Detects if specification reference was lost
+  ├─ Automatically restores specification if needed
+  └─ Ensures specification never permanently lost
          ↓
 Bridge Question: Ready to implement with cc10x?
          ↓
@@ -241,7 +251,7 @@ If YES:
 Feature built with clear, unambiguous requirements
 ```
 
-**Benefit:** Specification-driven development. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles. **PostToolUse hook ensures pseudo-code is ALWAYS saved, never lost.**
+**Benefit:** Three-layer protection ensures specification is ALWAYS available. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles. **Context preservation guarantees no data loss even if cc10x rewrites activeContext.md.**
 
 ### What Gets Injected
 

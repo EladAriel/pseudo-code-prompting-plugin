@@ -96,8 +96,49 @@ def save_specification(pseudocode: str, requirement: str) -> Path:
         raise
 
 
+def add_specification_reference_section(spec_summary: str) -> str:
+    """
+    Create a specification reference section with preservation markers.
+
+    This section includes special markers that signal to cc10x and other tools
+    to preserve this section when updating context. The section is self-contained
+    and references the specification file.
+
+    Args:
+        spec_summary: Brief summary of the specification
+
+    Returns:
+        Formatted specification section with preservation markers
+    """
+    spec_section = f"""## Specification
+<!-- PSEUDO-CODE-CONTEXT: DO NOT REMOVE. Persisted specification reference. -->
+<!-- This section contains critical implementation guidance and should be preserved. -->
+
+**Source:** Pseudo-code specification
+**File:** .claude/pseudo-code-prompting/specification.md
+**Purpose:** Primary implementation guide generated from requirements
+**Generated:** {datetime.now().isoformat()}
+
+### Summary
+{spec_summary[:400]}...
+
+### How to Use
+1. Review full specification at: `.claude/pseudo-code-prompting/specification.md`
+2. Follow the pseudo-code phases and structure
+3. Reference specification section in this context for quick access
+
+<!-- END PSEUDO-CODE-CONTEXT -->
+"""
+    return spec_section
+
+
 def inject_into_activecontext(pseudocode_summary: str) -> None:
-    """Update cc10x activeContext.md with pseudo-code summary."""
+    """
+    Update cc10x activeContext.md with pseudo-code summary and specification reference.
+
+    Strategy: Adds specification reference as a dedicated section with preservation
+    markers. This makes the context "sticky" so it survives cc10x rewrites.
+    """
     try:
         cc10x_dir = Path('.claude/cc10x')
         cc10x_dir.mkdir(parents=True, exist_ok=True)
@@ -110,20 +151,80 @@ def inject_into_activecontext(pseudocode_summary: str) -> None:
 
 **Approach:** Follow pseudo-code structure. Break down into phases per specification."""
 
+        spec_section = add_specification_reference_section(pseudocode_summary)
+
         if activecontext.exists():
             with open(activecontext, 'r') as f:
                 content = f.read()
 
+            # Strategy 1: Update Current Focus section
             if '## Current Focus' in content:
                 pattern = r'(## Current Focus\n)(.*?)(\n## )'
                 replacement = f'\\1{focus_content}\\3'
                 updated = re.sub(pattern, replacement, content, flags=re.DOTALL)
+            else:
+                updated = content
 
-                with open(activecontext, 'w') as f:
-                    f.write(updated)
+            # Strategy 2: Add or update Specification section
+            # Check if specification section already exists
+            if '## Specification' in updated:
+                # Replace existing specification section
+                pattern = r'(## Specification\n).*?(## |\Z)'
+                replacement = f'{spec_section}\\2'
+                updated = re.sub(pattern, replacement, updated, flags=re.DOTALL)
+            else:
+                # Append specification section before last section or at end
+                # Insert before ## Blockers or ## Last Updated if they exist
+                if '## Blockers' in updated:
+                    pattern = r'(## Blockers)'
+                    replacement = f'{spec_section}\\1'
+                    updated = re.sub(pattern, replacement, updated)
+                else:
+                    # Append at end
+                    updated = updated.rstrip() + '\n\n' + spec_section
 
-                if os.environ.get('DEBUG'):
-                    print(f"DEBUG: Updated Current Focus in {activecontext}", file=sys.stderr)
+            with open(activecontext, 'w') as f:
+                f.write(updated)
+
+            if os.environ.get('DEBUG'):
+                print(f"DEBUG: Updated activeContext with Current Focus and Specification section", file=sys.stderr)
+
+        else:
+            # Create new activeContext with both sections
+            new_context = f"""# Active Context
+<!-- CC10X: Do not rename headings. Used as Edit anchors. -->
+
+## Current Focus
+{focus_content}
+
+{spec_section}
+
+## Recent Changes
+- Pseudo-code specification generated from requirements
+
+## Next Steps
+1. Implement per pseudo-code specification phases
+2. Follow BUILD workflow: component-builder → review → verify
+
+## Decisions
+- Use pseudo-code as primary specification
+- Validate implementation against specification
+
+## Learnings
+
+## References
+- Specification: .claude/pseudo-code-prompting/specification.md
+
+## Blockers
+
+## Last Updated
+{datetime.now().isoformat()}
+"""
+            with open(activecontext, 'w') as f:
+                f.write(new_context)
+
+            if os.environ.get('DEBUG'):
+                print(f"DEBUG: Created new activeContext with Specification section", file=sys.stderr)
 
     except Exception as e:
         if os.environ.get('DEBUG'):

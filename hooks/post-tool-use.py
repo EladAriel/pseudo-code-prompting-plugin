@@ -96,6 +96,63 @@ def save_specification(pseudocode: str, requirement: str) -> Path:
         raise
 
 
+def create_specification_reference() -> Path:
+    """
+    Create a mandatory specification reference that cc10x MUST load.
+
+    This ensures cc10x always loads the specification regardless of
+    race conditions or timing issues. The reference file is the
+    single source of truth for the specification location.
+    """
+    try:
+        cc10x_dir = Path('.claude/cc10x')
+        cc10x_dir.mkdir(parents=True, exist_ok=True)
+
+        spec_ref_file = cc10x_dir / 'specification-reference.md'
+        spec_ref_content = f"""<!-- MANDATORY: Load this specification before proceeding with implementation -->
+<!-- CC10X Session Memory: Load .claude/pseudo-code-prompting/specification.md -->
+
+# Specification Reference
+
+**Status:** ACTIVE - Must load specification before creating context
+**Source:** .claude/pseudo-code-prompting/specification.md
+**Created:** {datetime.now().isoformat()}
+
+## IMPORTANT
+This file serves as the mandatory entry point for cc10x.
+Load the specification from the referenced path BEFORE creating your activeContext.md
+
+## Location
+📍 Full Specification: `.claude/pseudo-code-prompting/specification.md`
+
+## Usage
+1. Read this file first
+2. Load specification.md from path above
+3. Extract pseudo-code parameters
+4. Merge into activeContext.md ## Specification section
+5. Proceed with BUILD workflow
+
+## Verification
+✓ Specification file exists
+✓ Path is accessible: .claude/pseudo-code-prompting/specification.md
+✓ Ready for component-builder to read
+
+---
+**Do not modify this file manually. It is regenerated on each transform.**
+"""
+        with open(spec_ref_file, 'w') as f:
+            f.write(spec_ref_content)
+
+        if os.environ.get('DEBUG'):
+            print(f"DEBUG: Created specification reference at {spec_ref_file}", file=sys.stderr)
+
+        return spec_ref_file
+    except Exception as e:
+        if os.environ.get('DEBUG'):
+            print(f"DEBUG: Failed to create specification reference: {e}", file=sys.stderr)
+        raise
+
+
 def add_specification_reference_section(spec_summary: str) -> str:
     """
     Create a specification reference section with preservation markers.
@@ -269,6 +326,7 @@ def main():
     # Save the specification
     try:
         save_specification(pseudocode, requirement)
+        create_specification_reference()  # Create mandatory reference file
         inject_into_activecontext(pseudocode)
 
         if os.environ.get('DEBUG'):

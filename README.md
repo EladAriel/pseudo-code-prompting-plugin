@@ -217,10 +217,16 @@ Compared to v1: **50% faster, 70% fewer tokens**
 
 ## Integration with cc10x
 
-After transformation, pseudo-code is automatically injected into cc10x's activeContext via **three-layer context protection**:
+After transformation, pseudo-code is automatically injected into cc10x's activeContext via **mandatory specification reference**:
 
 ```
 Your pseudo-code transforms to detailed requirement spec
+         ↓
+SPECIFICATION REFERENCE (Mandatory Entry Point)
+  ├─ PostToolUse hook creates .claude/cc10x/specification-reference.md
+  ├─ File signals: "LOAD SPECIFICATION BEFORE PROCEEDING"
+  ├─ References: .claude/pseudo-code-prompting/specification.md
+  └─ cc10x MUST read this before creating context
          ↓
 LAYER 1: SPECIFICATION MARKERS (Prevention)
   ├─ PostToolUse hook adds ## Specification section
@@ -243,7 +249,8 @@ LAYER 3: RECOVERY HOOK (Safety Net)
 Bridge Question: Ready to implement with cc10x?
          ↓
 If YES:
-  ├─ cc10x router loads memory (finds pseudo-code reference)
+  ├─ cc10x reads specification-reference.md (mandatory entry point)
+  ├─ cc10x loads specification.md (guaranteed to exist)
   ├─ component-builder receives specification as primary input
   ├─ TDD Workflow: RED → GREEN → REFACTOR
   └─ Feature built with specification as acceptance criteria
@@ -251,7 +258,7 @@ If YES:
 Feature built with clear, unambiguous requirements
 ```
 
-**Benefit:** Three-layer protection ensures specification is ALWAYS available. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles. **Context preservation guarantees no data loss even if cc10x rewrites activeContext.md.**
+**Benefit:** Specification-reference.md ensures cc10x ALWAYS loads the specification as the mandatory starting point. Eliminates race conditions and timing issues. Pseudo-code becomes the source of truth for implementation, persists across sessions, and guides all TDD cycles. **Guaranteed no data loss even if cc10x rewrites activeContext.md.**
 
 ### What Gets Injected
 

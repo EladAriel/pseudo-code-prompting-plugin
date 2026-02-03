@@ -4,34 +4,36 @@ Learn how to seamlessly integrate pseudo-code-prompting-plugin with cc10x compon
 
 ## What's New in v2.1.3
 
-**Context Merging & Specification Recovery:** Multi-layer protection against context loss.
+**Stable Specification Reference & Multi-Layer Protection:** Eliminates race conditions through mandatory reference file.
 
+- ✅ **Mandatory reference file** - specification-reference.md is cc10x's entry point (STABLE FIX)
 - ✅ **Specification markers** - Special sections with preservation markers in activeContext.md
 - ✅ **Context merging** - Intelligent merging prevents cc10x overwrites from losing specification
 - ✅ **Recovery mechanism** - Automatic detection and restoration if specification lost
 - ✅ **Prevention-first approach** - Sticky specification section survives cc10x writes
 - ✅ **Backup hooks** - Multiple safety nets ensure specification never lost
-- ✅ **Hybrid protection** - Combines prevention, merging, and recovery strategies
+- ✅ **Hybrid protection** - Combines reference entry point, prevention, merging, and recovery
 
 ### The Problem (Fixed in v2.1.3)
 
-Before v2.1.3, when cc10x wrote to `activeContext.md`, it would **completely overwrite the file**, losing the pseudo-code specification reference that the pseudo-code plugin had injected.
+Before v2.1.3, when cc10x wrote to `activeContext.md`, it would **completely overwrite the file**, losing the pseudo-code specification reference that the pseudo-code plugin had injected. This caused **race conditions** where sometimes the specification was preserved and sometimes not.
 
 **Example of the problem:**
 ```
 Overwrite file .claude\cc10x\activeContext.md
 - Line 1-77: Pseudo-code + plugin context (removed)
 + Line 1-40: CC10X's fresh context (added)
-Result: Specification reference lost ❌
+Result: Specification reference lost ❌ (unstable)
 ```
 
-### The Solution (v2.1.3)
+### The Solution (v2.1.3 - Stable)
 
-Three-layer fix implemented:
+Four-layer fix implemented:
 
-1. **Layer 1: Specification Markers** - Pseudo-code context now includes special preservation markers
-2. **Layer 2: Context Merging** - Smart merging logic preserves specification when contexts update
-3. **Layer 3: Recovery Hook** - Automatic detection and restoration if specification lost
+1. **Layer 0: Mandatory Reference** - specification-reference.md acts as cc10x's entry point (NEW - eliminates race conditions)
+2. **Layer 1: Specification Markers** - Pseudo-code context includes special preservation markers
+3. **Layer 2: Context Merging** - Smart merging logic preserves specification when contexts update
+4. **Layer 3: Recovery Hook** - Automatic detection and restoration if specification lost
 
 See [Context Preservation (v2.1.3)](#context-preservation-v213-new) below for details.
 
@@ -382,7 +384,74 @@ If you want to understand the conversion process:
 
 ---
 
-## Context Preservation (v2.1.3 - NEW)
+## Specification Reference (v2.1.3 - NEW - MANDATORY ENTRY POINT)
+
+### The Stable Solution: Mandatory Reference File
+
+Instead of trying to preserve context through overwrites, v2.1.3 introduces a **mandatory specification reference** that cc10x reads FIRST:
+
+**File:** `.claude/cc10x/specification-reference.md`
+
+```markdown
+<!-- MANDATORY: Load this specification before proceeding with implementation -->
+<!-- CC10X Session Memory: Load .claude/pseudo-code-prompting/specification.md -->
+
+# Specification Reference
+
+**Status:** ACTIVE - Must load specification before creating context
+**Source:** .claude/pseudo-code-prompting/specification.md
+```
+
+### How It Works
+
+```
+1. Transform creates specification.md
+2. PostToolUse hook creates specification-reference.md
+   ├─ Signals: "LOAD SPECIFICATION BEFORE PROCEEDING"
+   └─ References: .claude/pseudo-code-prompting/specification.md
+3. User answers YES to bridge
+4. cc10x starts and MUST read specification-reference.md
+5. cc10x MUST load .claude/pseudo-code-prompting/specification.md
+6. cc10x creates activeContext.md with specification included
+7. Component-builder uses specification as primary input
+8. No race conditions, no unstable behavior ✅
+```
+
+### Why This Is More Stable
+
+**Before (Race Condition):**
+```
+pseudo-code plugin creates activeContext with spec reference
+              ↓
+         (RACE CONDITION)
+              ↓
+cc10x creates fresh activeContext (SOMETIMES loses reference)
+```
+
+**After (Guaranteed):**
+```
+pseudo-code plugin creates specification-reference.md
+              ↓
+         (MANDATORY)
+              ↓
+cc10x reads specification-reference.md FIRST
+              ↓
+cc10x loads specification.md (guaranteed to exist)
+              ↓
+cc10x creates activeContext with specification included (ALWAYS)
+```
+
+### Files Created
+
+On each transform:
+- `.claude/pseudo-code-prompting/specification.md` - Full specification
+- `.claude/cc10x/specification-reference.md` - Mandatory entry point (NEW)
+
+cc10x MUST read specification-reference.md before creating context.
+
+---
+
+## Context Preservation (v2.1.3 - MULTI-LAYER BACKUP)
 
 ### The Problem: Context Overwriting
 

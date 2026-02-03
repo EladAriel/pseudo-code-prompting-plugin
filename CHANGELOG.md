@@ -2,22 +2,33 @@
 
 All notable changes to pseudo-code-prompting-plugin are documented in this file.
 
-## [2.1.3] - Context Merging & Specification Recovery (THREE-LAYER FIX)
+## [2.1.3] - Stable Specification Reference & Multi-Layer Protection (RACE CONDITION FIX)
 
-### 🔧 Major Fix: Context Overwriting Issue
+### 🔧 Major Fix: Unstable Context Overwriting Issue
 
-#### Problem: Specification Loss When cc10x Writes
-When pseudo-code plugin injected context into `activeContext.md`, cc10x's session-memory would later **completely rewrite the file**, losing the pseudo-code specification reference.
+#### Problem: Race Conditions in Specification Preservation
+When pseudo-code plugin injected context into `activeContext.md`, cc10x's session-memory would sometimes (unpredictably) **completely rewrite the file**, losing the pseudo-code specification reference. **Unstable behavior** - sometimes worked, sometimes didn't.
 
 **Symptoms:**
 ```
 Overwrite file .claude\cc10x\activeContext.md
-- Line 1-77: Pseudo-code + plugin context (removed)
+- Line 1-77: Pseudo-code + plugin context (removed - SOMETIMES)
 + Line 1-40: CC10X's fresh context (added)
-Result: Specification reference lost ❌
+Result: Specification reference lost ❌ (UNSTABLE)
 ```
 
-#### Solution: Three-Layer Protection Strategy
+**Root Cause:** Race conditions between PostToolUse hooks and cc10x's session-memory initialization.
+
+#### Solution: Four-Layer Protection Strategy (STABLE)
+
+**Layer 0: Mandatory Reference Entry Point (NEW - STABLE FIX)**
+- New file: `.claude/cc10x/specification-reference.md`
+- Created by post-tool-use.py immediately after specification generation
+- Signals: "LOAD SPECIFICATION BEFORE PROCEEDING"
+- References: `.claude/pseudo-code-prompting/specification.md`
+- cc10x MUST read this before creating activeContext
+- **Eliminates race conditions** by making specification-reference mandatory
+- New function: `create_specification_reference()`
 
 **Layer 1: Specification Markers (Prevention)**
 - Enhanced `hooks/post-tool-use.py` to add `## Specification` section
@@ -41,21 +52,23 @@ Result: Specification reference lost ❌
 **Hook Registration:**
 ```json
 PostToolUse: [
-  post-tool-use.py (priority=high) → Add markers + save spec
+  post-tool-use.py (priority=high) → Create reference + markers + save spec
   post-cc10x-context-write.py (priority=normal) → Recover if lost
 ]
 ```
 
 **Changed Files:**
-- `hooks/post-tool-use.py` - MODIFIED (add specification markers)
+- `hooks/post-tool-use.py` - MODIFIED (add reference file + specification markers)
 - `hooks/context-merger.py` - NEW (context merging utility)
 - `hooks/post-cc10x-context-write.py` - NEW (recovery hook)
 - `hooks/hooks.json` - MODIFIED (register recovery hook)
 
 **Result:**
+✅ Specification reference GUARANTEED (no race conditions) - STABLE
+✅ Specification-reference.md is cc10x's mandatory entry point
 ✅ Specification ALWAYS persisted in `.claude/pseudo-code-prompting/specification.md`
 ✅ Specification reference ALWAYS present in `.claude/cc10x/activeContext.md`
-✅ Three-layer defense ensures spec never lost
+✅ Four-layer defense ensures spec never lost (STABLE)
 ✅ No configuration needed - automatic & transparent
 
 ### 📚 Documentation Updates

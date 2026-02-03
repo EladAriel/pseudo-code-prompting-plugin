@@ -2,18 +2,38 @@
 
 Learn how to seamlessly integrate pseudo-code-prompting-plugin with cc10x component builder for test-driven development.
 
-## What's New in v2.1.2
+## What's New in v2.1.3
 
-**PostToolUse Hook for Reliable Pseudo-Code Injection:** Automatic injection now guaranteed via PostToolUse hook.
+**Context Merging & Specification Recovery:** Multi-layer protection against context loss.
 
-- ✅ **Automatic injection** - PostToolUse hook saves to `.claude/pseudo-code-prompting/specification.md`
-- ✅ **Reliable persistence** - Hook-based extraction ensures pseudo-code never lost
-- ✅ **Persistent context** - Injected into `.claude/cc10x/activeContext.md`
-- ✅ **Zero ambiguity** - cc10x loads specification as primary input
-- ✅ **Session persistence** - Survives context compaction and session resets
-- ✅ **Debug support** - Comprehensive logging for troubleshooting
+- ✅ **Specification markers** - Special sections with preservation markers in activeContext.md
+- ✅ **Context merging** - Intelligent merging prevents cc10x overwrites from losing specification
+- ✅ **Recovery mechanism** - Automatic detection and restoration if specification lost
+- ✅ **Prevention-first approach** - Sticky specification section survives cc10x writes
+- ✅ **Backup hooks** - Multiple safety nets ensure specification never lost
+- ✅ **Hybrid protection** - Combines prevention, merging, and recovery strategies
 
-See [Specification Injection (v2.1.2)](#specification-injection-v212-new) below for details.
+### The Problem (Fixed in v2.1.3)
+
+Before v2.1.3, when cc10x wrote to `activeContext.md`, it would **completely overwrite the file**, losing the pseudo-code specification reference that the pseudo-code plugin had injected.
+
+**Example of the problem:**
+```
+Overwrite file .claude\cc10x\activeContext.md
+- Line 1-77: Pseudo-code + plugin context (removed)
++ Line 1-40: CC10X's fresh context (added)
+Result: Specification reference lost ❌
+```
+
+### The Solution (v2.1.3)
+
+Three-layer fix implemented:
+
+1. **Layer 1: Specification Markers** - Pseudo-code context now includes special preservation markers
+2. **Layer 2: Context Merging** - Smart merging logic preserves specification when contexts update
+3. **Layer 3: Recovery Hook** - Automatic detection and restoration if specification lost
+
+See [Context Preservation (v2.1.3)](#context-preservation-v213-new) below for details.
 
 ---
 
@@ -362,6 +382,137 @@ If you want to understand the conversion process:
 
 ---
 
+## Context Preservation (v2.1.3 - NEW)
+
+### The Problem: Context Overwriting
+
+When pseudo-code plugin injected context into `activeContext.md`, cc10x's session-memory system would later load and **completely rewrite** the file with its own structure, losing the pseudo-code reference.
+
+**What happened:**
+```
+1. Pseudo-code plugin: Injects "## Specification" section into activeContext.md
+   Result: activeContext.md has specification reference ✓
+
+2. User answers YES to bridge
+3. cc10x loads activeContext.md and OVERWRITES it completely
+   Result: activeContext.md loses specification reference ✗
+
+4. cc10x component-builder runs without specification context
+   Result: Implementation loses guidance from pseudo-code ✗
+```
+
+### The Solution: Three-Layer Protection
+
+#### Layer 1: Specification Markers (Prevention)
+
+The `## Specification` section now includes preservation markers that signal to other tools:
+```markdown
+## Specification
+<!-- PSEUDO-CODE-CONTEXT: DO NOT REMOVE. Persisted specification reference. -->
+<!-- This section contains critical implementation guidance and should be preserved. -->
+
+**Source:** Pseudo-code specification
+**File:** .claude/pseudo-code-prompting/specification.md
+...
+<!-- END PSEUDO-CODE-CONTEXT -->
+```
+
+**Benefits:**
+- Clear signal that this section is critical
+- Self-contained and easy to identify
+- Survived across context writes
+
+#### Layer 2: Context Merging (Smart Merge)
+
+New `context-merger.py` utility intelligently merges contexts:
+```python
+merged = merge_contexts(
+    cc10x_context,      # Fresh context from cc10x
+    pseudo_context      # Preserved pseudo-code context
+)
+# Result: Both contexts preserved in one file
+```
+
+**How it works:**
+1. Extract pseudo-code context before cc10x writes
+2. After cc10x writes fresh context
+3. Check if pseudo-context is missing
+4. If missing, intelligently merge it back
+5. Insert before `## Blockers` section for readability
+
+#### Layer 3: Recovery Hook (Safety Net)
+
+New `post-cc10x-context-write.py` hook runs after cc10x writes:
+```
+1. Checks if specification reference exists
+2. If missing: loads specification.md
+3. Rebuilds specification section
+4. Injects back into activeContext.md
+5. Ensures specification never lost
+```
+
+**Triggers only when needed** - if specification is already present, hook does nothing.
+
+### How It Works End-to-End
+
+```
+1. User: "Run transform: [requirement]"
+2. Transform completes, generates pseudo-code
+
+3. PostToolUse Hook (PHASE 1):
+   ├─ Saves specification to .claude/pseudo-code-prompting/specification.md
+   ├─ Adds ## Specification section to activeContext.md
+   └─ Marks with PSEUDO-CODE-CONTEXT preservation markers
+
+4. User answers YES to bridge
+
+5. cc10x starts and writes to activeContext.md
+
+6. PostToolUse Hook (PHASE 2 - Recovery):
+   ├─ Detects if specification reference was lost
+   ├─ If lost: loads specification.md
+   ├─ Rebuilds ## Specification section
+   ├─ Injects back into activeContext.md
+   └─ Ensures specification always found
+
+7. cc10x component-builder:
+   ├─ Loads activeContext.md
+   ├─ Finds ## Specification section
+   ├─ Loads full spec from specification.md
+   ├─ Runs TDD per specification
+   └─ Builds correctly ✅
+```
+
+### Files Involved
+
+**New/Modified Files:**
+- `hooks/post-tool-use.py` (MODIFIED) - Adds specification markers
+- `hooks/context-merger.py` (NEW) - Utility for intelligent merging
+- `hooks/post-cc10x-context-write.py` (NEW) - Recovery mechanism
+- `hooks/hooks.json` (MODIFIED) - Registers recovery hook
+
+**Specification Files:**
+- `.claude/pseudo-code-prompting/specification.md` - Persistent specification
+- `.claude/cc10x/activeContext.md` - Context with specification reference
+
+### Benefits of Three-Layer Approach
+
+| Layer | Problem | Solution | Benefit |
+|-------|---------|----------|---------|
+| **Prevention** | Context not marked as persistent | Specification markers added | Other tools know not to remove |
+| **Merging** | Contexts overwrite each other | Smart merge logic | Both contexts preserved |
+| **Recovery** | Even with prevention, might get lost | Auto-detection & restoration | Safety net catches edge cases |
+
+### No Configuration Needed
+
+The three-layer protection is **automatic**:
+- No extra commands needed
+- No manual file management
+- Just answer YES to bridge offer
+- Specification stays available ✅
+
+---
+
 ## Specification Injection (v2.1.2 - PostToolUse Hook)
 
 ### What's Automatically Injected?
@@ -470,6 +621,36 @@ This ensures cc10x always has access to your original pseudo-code specification.
 - Bridge converts pseudo-code properly
 - cc10x might have specific format preferences
 - Run validate on pseudo-code first
+
+### "Specification reference missing from activeContext?"
+- Recovery hook should have restored it automatically
+- Check `.claude/pseudo-code-prompting/specification.md` exists
+- If missing: Re-run transform to generate specification
+- If present but not in activeContext: Check hook logs with `DEBUG=1`
+
+### "How do I verify specification was saved?"
+```bash
+# Check specification file exists
+ls -la .claude/pseudo-code-prompting/specification.md
+
+# Check activeContext has specification section
+cat .claude/cc10x/activeContext.md | grep -A5 "## Specification"
+
+# Verify preservation markers
+cat .claude/cc10x/activeContext.md | grep "PSEUDO-CODE-CONTEXT"
+```
+
+### "Debug context preservation issues"
+```bash
+# Enable debug logging
+export DEBUG=1
+
+# Run transform again
+# Watch for debug messages about:
+# - "Added specification section"
+# - "Recovered specification reference"
+# - Context merger operations
+```
 
 ## Learn More
 

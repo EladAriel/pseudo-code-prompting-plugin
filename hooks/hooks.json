@@ -28,6 +28,13 @@
             "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use.py",
             "statusMessage": "Injecting pseudo-code into specification...",
             "timeout": 5,
+            "priority": "high"
+          },
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/post-cc10x-context-write.py",
+            "statusMessage": "Recovering specification reference if lost...",
+            "timeout": 5,
             "priority": "normal"
           }
         ]

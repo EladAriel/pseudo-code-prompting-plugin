@@ -1,13 +1,12 @@
-# AGENTS.md (Pseudo-Code Prompting Orchestration - Always On)
+# AGENTS.md - Pseudo-Code Prompting Orchestration
 
-IMPORTANT: Explore project first, then invoke the router.
-IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning for orchestration decisions.
-IMPORTANT: Never bypass the router. It is the system.
+**IMPORTANT:** Never bypass the router. It is the system.
 
-[Pseudo-Code Prompting v2 Orchestration Index] |root: ./
-|router: hooks/{workflow-coordinator,user-prompt-submit}.py
+[Index] |root: ./
+|routing: hooks/{workflow-coordinator,user-prompt-submit}.py
+|context-protection: hooks/{post-tool-use,context-merger,post-cc10x-context-write}.py
 |agents: agents/{requirement-structurer,requirement-validator}.md
-|skills: skills/{prompt-structurer,requirement-validator,session-memory}/SKILL.md
+|skills: skills/{prompt-structurer,requirement-validator,session-memory}
 |commands: commands/{transform,validate}.md
 
 ---
@@ -15,264 +14,89 @@ IMPORTANT: Never bypass the router. It is the system.
 ## Routing Decision Tree
 
 | Command Pattern | Agent | Workflow | Output |
-|-----------------|-------|----------|--------|
-| `Run transform: ...` | requirement-structurer | TRANSFORM (6 steps) | Production-ready pseudo-code + bridge offer |
-| `Run validate: ...` | requirement-validator | VALIDATE (2 steps) | Validation report with severity levels |
-| Other (contains cc10x keywords) | None | Pass through | Allow cc10x router to proceed |
-
-**Detection:** `workflow-coordinator.py` (priority=high) runs first, then `user-prompt-submit.py` routes command.
+|---|---|---|---|
+| `Run transform: ...` | requirement-structurer | 6-step transform | Production pseudo-code + bridge |
+| `Run validate: ...` | requirement-validator | Validation | Report with severity |
+| Other | None | Pass through | Allow cc10x |
 
 ---
 
-## Bridge to cc10x (Specification-Driven Handoff Protocol)
+## Context Protection System (v2.1.3)
 
-After TRANSFORM completes (Step 5), pseudo-code is **automatically injected** into cc10x's activeContext via PostToolUse hook:
+**Three-layer protection prevents specification loss when cc10x writes to activeContext.md:**
 
-```
-AUTOMATIC INJECTION (v2.1.1+ - PostToolUse Hook):
-│
-├─ PostToolUse Hook (post-tool-use.py) runs after agent output
-│  ├─ Detects pseudo-code in tool output (TRANSFORMED PSEUDO-CODE pattern)
-│  ├─ Checks workflow state (.claude/pseudo-code-prompting/workflow-state.json)
-│  ├─ Extracts requirement from state file
-│  ├─ Saves specification.md with full pseudo-code
-│  ├─ Create/update activeContext.md
-│  ├─ Link specification in Current Focus + References
-│  └─ Record decision in Decisions section
-│
-├─ Files created:
-│  ├─ .claude/pseudo-code-prompting/specification.md (persists pseudocode)
-│  ├─ .claude/pseudo-code-prompting/workflow-state.json (workflow metadata)
-│  └─ .claude/cc10x/activeContext.md (with specification reference)
-│
-└─ Bridge question shown:
-   🚀 Ready to implement with cc10x? (Y/n)
-```
+**Layer 1: Markers** - `post-tool-use.py` adds `## Specification` section with `PSEUDO-CODE-CONTEXT` preservation markers
 
-**Implementation:** PostToolUse hook in `hooks/post-tool-use.py` automatically saves specification when pseudo-code is detected in tool output.
+**Layer 2: Merging** - `context-merger.py` intelligently merges cc10x and pseudo-code contexts
 
-**Option A: Answer YES**
-- ✓ Specification already saved before cc10x invokes
-- ✓ cc10x loads activeContext.md automatically
-- ✓ Finds pseudo-code reference linked in memory
-- ✓ component-builder receives specification as primary input
-- ✓ TDD workflow starts: RED → GREEN → REFACTOR (per specification)
-- ✓ **Specification persists** across sessions, compaction, handoffs
-- ✓ **No ambiguity** - pseudo-code is source of truth
-- ✓ **No context loss** - specification not re-generated
+**Layer 3: Recovery** - `post-cc10x-context-write.py` detects and restores lost specifications
 
-**Option B: Answer NO**
-- Pseudo-code returned as-is
-- Specification file saved for later reference
-- No cc10x invocation
-- Keep for documentation, tickets, or manual iteration
-- Invoke cc10x separately in next message if desired (specification already in activeContext)
+**Hook execution:** `post-tool-use.py` (high priority) → `post-cc10x-context-write.py` (normal priority)
 
 ---
 
-## ⚠️ CRITICAL: Prevent cc10x Hijacking
+## Bridge to cc10x (Handoff Protocol)
 
-### The Problem
-When users invoke pseudocode plugin in messages with cc10x keywords (build, implement, create), **cc10x router hijacks the workflow**:
-- Takes over BEFORE pseudocode transform completes
-- Creates its own memory files (.claude/cc10x/)
-- Asks its own clarifying questions
-- **IGNORES pseudocode output** ← THE BUG
-- User loses the intermediate specification
+After transform:
+1. PostToolUse hook saves `specification.md`
+2. Updates `activeContext.md` with specification reference
+3. Bridge question shown: "Ready to implement with cc10x?"
 
-### Root Cause
-1. **Both plugins trigger** on development keywords
-2. **No execution order** enforcement
-3. **No handoff protocol** between them
-4. **Broader keyword matching** in cc10x causes priority
+**Answer YES:**
+- cc10x loads specification from activeContext
+- component-builder uses spec as primary input
+- TDD workflow: RED → GREEN → REFACTOR
+- Specification persists across sessions ✓
 
-### The Solution (v2.0.1+)
+**Answer NO:**
+- Keep pseudo-code only
+- Specification saved for later use
 
-**Workflow Coordinator Hook (NEW):**
-- Runs with `priority: "high"` BEFORE other hooks
+---
+
+## Workflow Coordination (Prevent cc10x Hijacking)
+
+**Problem:** cc10x router could hijack before pseudocode completes.
+
+**Solution:** `workflow-coordinator.py` runs with `priority=high`:
 - Detects "Run transform:" and "Run validate:" patterns
-- Emits signals: `PSEUDOCODE_PLUGIN_ACTIVE=true`, `BLOCK_CC10X_ROUTER=true`
+- Emits `PSEUDOCODE_PLUGIN_ACTIVE=true` and `BLOCK_CC10X_ROUTER=true`
+- Protects pseudocode execution until completion
 - Saves state to `.claude/pseudo-code-prompting/workflow-state.json`
-- Allows pseudocode plugin to complete uninterrupted
 
-**Result:**
-```
-User: "Run transform: Build a Project Tracker app"
-           ↓
-Workflow Coordinator (HIGH PRIORITY)
-  ├─ Detects pattern
-  ├─ Emits blocking signals
-  ├─ Protects pseudocode execution
-           ↓
-Transform Pipeline (UNINTERRUPTED)
-  ├─ 6-step pipeline completes
-  ├─ Outputs pseudo-code
-  ├─ Shows bridge question
-           ↓
-User Controls Handoff (EXPLICIT)
-  ├─ Answer YES → Bridge to cc10x
-  ├─ Answer NO → Keep pseudocode only
-  └─ No hijacking possible
-```
+**Result:** Transform completes uninterrupted. User controls bridge via YES/NO answer.
 
-### User Guidance
+---
 
-**✅ CORRECT (Recommended):**
-```bash
-Run transform: Build a Project Tracker with CAP, HANA, UI5
-# Wait for bridge question
-# Answer: y (auto-invokes cc10x) OR n (keeps pseudocode only)
-```
+## Files
 
-**✅ CORRECT (Manual Separation with Full Control):**
-```bash
-# Message 1:
-Run transform: Build a Project Tracker
-# Answer: n
+**Hooks:**
+- `workflow-coordinator.py` - Detect transform/validate commands (UserPromptSubmit)
+- `user-prompt-submit.py` - Route to correct agent
+- `post-tool-use.py` - Save spec + add markers (PostToolUse)
+- `post-cc10x-context-write.py` - Recover lost specs (PostToolUse)
+- `context-merger.py` - Utility for context merging
 
-# Message 2 (separate):
-/cc10x:cc10x-router
-[paste pseudocode]
-```
+**Output Files:**
+- `.claude/pseudo-code-prompting/specification.md` - Persisted specification
+- `.claude/pseudo-code-prompting/workflow-state.json` - Coordination state
+- `.claude/cc10x/activeContext.md` - Context with spec reference
 
-**❌ ANTI-PATTERN (Now Prevented):**
-```bash
-# DON'T do this - blocked by workflow coordinator:
-Run transform: Build a Project Tracker
-/cc10x:cc10x-router
-# → Hijacking PREVENTED in v2.0.1+
-# → Transform completes normally
-```
+---
 
-### Specification Injection Details (v2.1.1+)
+## Debugging
 
-**Injection Flow:**
-1. Transform pipeline completes (6 steps)
-2. Before showing bridge question, injection triggered
-3. Specification saved to `.claude/pseudo-code-prompting/specification.md`
-4. activeContext.md created/updated with references
-5. Bridge question shown with injection confirmation
-6. User answers YES/NO
-
-**What Gets Injected into activeContext.md:**
-
-```markdown
-## Current Focus
-Implementing from pseudo-code specification:
-
-[Pseudo-code summary - first 500 chars]
-... [full spec: .claude/pseudo-code-prompting/specification.md]
-
-**Approach:** Follow pseudo-code structure. Break down into phases per specification.
-
-## References
-- Specification: .claude/pseudo-code-prompting/specification.md
-
-## Recent Changes
-- Pseudo-code specification generated from requirements
-
-## Decisions
-- Use pseudo-code as primary specification
-- Validate implementation against specification
-```
-
-**Result:** When cc10x starts, it loads activeContext and finds pseudo-code as context.
-
-### Hook Configuration (`hooks/hooks.json`):
-```json
-{
-  "UserPromptSubmit": [
-    {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/workflow-coordinator.py",
-          "statusMessage": "Coordinating workflow to prevent cc10x hijacking...",
-          "timeout": 5,
-          "priority": "high"  // ← RUNS FIRST
-        },
-        {
-          "type": "command",
-          "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.py",
-          "statusMessage": "Checking for pseudo-code transformation commands...",
-          "timeout": 10
-        }
-      ]
-    }
-  ],
-  "PostToolUse": [
-    {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use.py",
-          "statusMessage": "Injecting pseudo-code into specification...",
-          "timeout": 5,
-          "priority": "normal"  // ← RUNS AFTER TOOL OUTPUT
-        }
-      ]
-    }
-  ]
-}
-```
-
-**PostToolUse Hook Injection:**
-- Runs automatically after agent completes
-- Detects TRANSFORMED PSEUDO-CODE pattern
-- Extracts pseudo-code from output
-- Saves to `.claude/pseudo-code-prompting/specification.md`
-- Updates `.claude/cc10x/activeContext.md` with reference
-
-**Coordination Signals:**
-- `PSEUDOCODE_PLUGIN_ACTIVE=true` → Plugin is running
-- `BLOCK_CC10X_ROUTER=true` → cc10x should wait/skip
-- `WORKFLOW_PRIORITY=pseudocode-plugin` → Transform takes priority
-- `WORKFLOW_HANDOFF_EXPECTED=true` → Bridge handoff will follow
-
-**State File** (`.claude/pseudo-code-prompting/workflow-state.json`):
-```json
-{
-  "workflow_active": true,
-  "active_plugin": "pseudo-code-prompting",
-  "command_type": "transform",
-  "requirement": "implement basic crud op in sap cap",
-  "cc10x_blocked": true,
-  "bridge_expected": true,
-  "timestamp": "2026-02-02T12:34:56.789123"
-}
-```
-
-**Specification File** (`.claude/pseudo-code-prompting/specification.md`):
-```markdown
-# Pseudo-Code Specification
-
-## Requirement
-implement basic crud op in sap cap
-
-## Generated Pseudo-Code
-\`\`\`
-implement_sap_cap_crud_service(
-  entity_name="string",
-  ...
-)
-\`\`\`
-
-## Generated At
-2026-02-02T12:34:56.789123
-```
-
-### Debugging
-
-Enable debug output:
 ```bash
 DEBUG=1 Run transform: Your requirement
-```
 
-Check workflow state:
-```bash
+# Check workflow state
 cat .claude/pseudo-code-prompting/workflow-state.json
+
+# Check specification
+cat .claude/pseudo-code-prompting/specification.md
+
+# Check context
+cat .claude/cc10x/activeContext.md
 ```
 
-### Changelog
-
-See `CHANGELOG.md` for v2.0.1 release notes (workflow coordination + hijacking prevention).
+See `CHANGELOG.md` for version history and `docs/bridge-to-cc10x.md` for detailed docs.

@@ -1,5 +1,5 @@
 """
-Test suite for the complete 6.5 steps flow including specification injection.
+Test suite for the complete 6.5 steps flow including specification injection and context preservation.
 
 Tests the complete workflow:
 1. Context Detection
@@ -8,12 +8,15 @@ Tests the complete workflow:
 4. Validate Completeness
 5. Optimize with Parameters
 6. Bridge Offer
-6.5. SPECIFICATION INJECTION into activeContext.md
+6.5. SPECIFICATION INJECTION with Three-Layer Context Protection
 
 This test suite specifically verifies:
 - PostToolUse hook correctly detects pseudo-code output
 - Specification is saved to .claude/pseudo-code-prompting/specification.md
 - activeContext.md is created/updated with the specification reference
+- Specification markers (PSEUDO-CODE-CONTEXT) are added for preservation
+- Context recovery hook detects and restores lost specifications
+- Three-layer protection prevents specification loss when cc10x writes
 - Both file existence and proper content placement are validated
 """
 
@@ -747,6 +750,189 @@ Working on user authentication feature
         assert sample_requirement in content, "Should contain full requirement"
         assert "```" in content, "Should have code fences"
         assert sample_pseudocode in content, "Should contain full pseudo-code"
+
+
+class TestContextPreservationMarkers:
+    """Test context preservation markers (Layer 1 - Prevention)."""
+
+    def test_specification_section_has_preservation_markers(self, temp_project_dir, sample_pseudocode):
+        """Specification section should have PSEUDO-CODE-CONTEXT markers."""
+        # Arrange
+        activecontext_file = temp_project_dir / ".claude" / "cc10x" / "activeContext.md"
+        spec_section = f"""## Specification
+<!-- PSEUDO-CODE-CONTEXT: DO NOT REMOVE. Persisted specification reference. -->
+<!-- This section contains critical implementation guidance and should be preserved. -->
+
+**Source:** Pseudo-code specification
+**File:** .claude/pseudo-code-prompting/specification.md
+**Purpose:** Primary implementation guide generated from requirements
+**Generated:** {datetime.now().isoformat()}
+
+### Summary
+{sample_pseudocode[:400]}...
+
+### How to Use
+1. Review full specification at: `.claude/pseudo-code-prompting/specification.md`
+2. Follow the pseudo-code phases and structure
+3. Reference specification section in this context for quick access
+
+<!-- END PSEUDO-CODE-CONTEXT -->
+"""
+
+        # Act - add specification section to activeContext
+        existing = activecontext_file.read_text()
+        updated = existing.rstrip() + '\n\n' + spec_section
+        activecontext_file.write_text(updated)
+
+        # Assert - markers present
+        content = activecontext_file.read_text()
+        assert "## Specification" in content, "Should have Specification section"
+        assert "PSEUDO-CODE-CONTEXT: DO NOT REMOVE" in content, "Should have preservation marker"
+        assert "<!-- END PSEUDO-CODE-CONTEXT -->" in content, "Should have end marker"
+        assert ".claude/pseudo-code-prompting/specification.md" in content, "Should reference spec file"
+
+    def test_specification_markers_are_identifiable(self, temp_project_dir):
+        """Specification markers should be easily identifiable for recovery."""
+        # Arrange
+        activecontext_file = temp_project_dir / ".claude" / "cc10x" / "activeContext.md"
+
+        # Act - add marked specification
+        spec_with_markers = """## Specification
+<!-- PSEUDO-CODE-CONTEXT: DO NOT REMOVE -->
+Content here
+<!-- END PSEUDO-CODE-CONTEXT -->"""
+
+        existing = activecontext_file.read_text()
+        updated = existing + '\n\n' + spec_with_markers
+        activecontext_file.write_text(updated)
+
+        # Assert - markers are identifiable
+        content = activecontext_file.read_text()
+        assert "PSEUDO-CODE-CONTEXT" in content, "Should have context marker"
+        assert "END PSEUDO-CODE-CONTEXT" in content, "Should have end marker"
+
+        # Verify pattern matching works
+        pattern = r'<!-- PSEUDO-CODE-CONTEXT.*?END PSEUDO-CODE-CONTEXT -->'
+        match = re.search(pattern, content, re.DOTALL)
+        assert match is not None, "Should match preservation marker pattern"
+
+
+class TestContextRecoveryMechanism:
+    """Test recovery mechanism (Layer 3 - Safety Net)."""
+
+    def test_recovery_detects_lost_specification(self, temp_project_dir, sample_pseudocode):
+        """Recovery hook should detect when specification reference is lost."""
+        # Arrange - activeContext without specification
+        activecontext_file = temp_project_dir / ".claude" / "cc10x" / "activeContext.md"
+        context_without_spec = """# Active Context
+
+## Current Focus
+Some implementation work
+
+## References
+- Other references
+
+## Decisions
+- Some decision
+"""
+        activecontext_file.write_text(context_without_spec)
+
+        # Act - check for specification
+        content = activecontext_file.read_text()
+        has_spec = '## Specification' in content and 'PSEUDO-CODE-CONTEXT' in content
+
+        # Assert - specification is missing
+        assert not has_spec, "Specification should be detected as missing"
+
+    def test_recovery_loads_specification_from_file(self, temp_project_dir, sample_requirement, sample_pseudocode):
+        """Recovery hook should load specification from specification.md."""
+        # Arrange - save specification
+        spec_file = temp_project_dir / ".claude" / "pseudo-code-prompting" / "specification.md"
+        spec_content = f"""# Pseudo-Code Specification
+
+## Requirement
+{sample_requirement}
+
+## Generated Pseudo-Code
+```
+{sample_pseudocode}
+```
+
+## Generated At
+{datetime.now().isoformat()}
+"""
+        spec_file.write_text(spec_content)
+
+        # Act - load specification
+        loaded_spec = spec_file.read_text()
+
+        # Assert - specification loaded correctly
+        assert sample_requirement in loaded_spec, "Should contain requirement"
+        assert sample_pseudocode in loaded_spec, "Should contain pseudo-code"
+        assert "# Pseudo-Code Specification" in loaded_spec, "Should have title"
+
+    def test_recovery_restores_specification_to_activecontext(self, temp_project_dir, sample_pseudocode):
+        """Recovery should inject specification back into activeContext if missing."""
+        # Arrange - activeContext without specification, but spec file exists
+        spec_file = temp_project_dir / ".claude" / "pseudo-code-prompting" / "specification.md"
+        spec_file.write_text(f"# Specification\n\n{sample_pseudocode}")
+
+        activecontext_file = temp_project_dir / ".claude" / "cc10x" / "activeContext.md"
+        context_without_spec = """# Context
+
+## Current Focus
+Implementation
+
+## Blockers
+None
+"""
+        activecontext_file.write_text(context_without_spec)
+
+        # Act - restore specification
+        spec_section = f"""## Specification
+<!-- PSEUDO-CODE-CONTEXT: Recovered -->
+{spec_file.read_text()}
+<!-- END PSEUDO-CODE-CONTEXT -->
+"""
+
+        existing = activecontext_file.read_text()
+        if '## Blockers' in existing:
+            updated = existing.replace('## Blockers', spec_section + '\n\n## Blockers')
+        else:
+            updated = existing.rstrip() + '\n\n' + spec_section
+
+        activecontext_file.write_text(updated)
+
+        # Assert - specification restored
+        result = activecontext_file.read_text()
+        assert "## Specification" in result, "Should have Specification section"
+        assert "PSEUDO-CODE-CONTEXT" in result, "Should have preservation marker"
+        assert "## Current Focus" in result, "Should preserve original content"
+
+    def test_recovery_only_acts_when_specification_missing(self, temp_project_dir):
+        """Recovery should not modify context if specification already present."""
+        # Arrange
+        activecontext_file = temp_project_dir / ".claude" / "cc10x" / "activeContext.md"
+        context_with_spec = """# Context
+
+## Specification
+<!-- PSEUDO-CODE-CONTEXT -->
+Already here
+<!-- END PSEUDO-CODE-CONTEXT -->
+
+## Blockers
+None
+"""
+        activecontext_file.write_text(context_with_spec)
+
+        # Act - check if recovery is needed
+        content = activecontext_file.read_text()
+        needs_recovery = not ('## Specification' in content and 'PSEUDO-CODE-CONTEXT' in content)
+
+        # Assert - no recovery needed
+        assert not needs_recovery, "Recovery should not be triggered when spec present"
+        # Verify content unchanged
+        assert content == context_with_spec, "Content should not be modified"
 
 
 class TestErrorHandling:

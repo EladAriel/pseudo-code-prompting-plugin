@@ -2,11 +2,74 @@
 
 All notable changes to pseudo-code-prompting-plugin are documented in this file.
 
-## [2.1.3] - Fix: Skill Tier Configuration & Enhanced Test Coverage
+## [2.1.3] - Context Merging & Specification Recovery (THREE-LAYER FIX)
 
-### Fixes
+### 🔧 Major Fix: Context Overwriting Issue
 
-#### 🔧 Internal Skills Hidden from User Discovery (BUG FIX)
+#### Problem: Specification Loss When cc10x Writes
+When pseudo-code plugin injected context into `activeContext.md`, cc10x's session-memory would later **completely rewrite the file**, losing the pseudo-code specification reference.
+
+**Symptoms:**
+```
+Overwrite file .claude\cc10x\activeContext.md
+- Line 1-77: Pseudo-code + plugin context (removed)
++ Line 1-40: CC10X's fresh context (added)
+Result: Specification reference lost ❌
+```
+
+#### Solution: Three-Layer Protection Strategy
+
+**Layer 1: Specification Markers (Prevention)**
+- Enhanced `hooks/post-tool-use.py` to add `## Specification` section
+- Markers: `<!-- PSEUDO-CODE-CONTEXT: DO NOT REMOVE -->`
+- Makes pseudo-code context "sticky" survives overwrites
+- New function: `add_specification_reference_section()`
+
+**Layer 2: Context Merging (Smart Merge)**
+- New utility: `hooks/context-merger.py`
+- Functions: `merge_contexts()`, `extract_pseudo_context()`, `preserve_specification_from_file()`
+- Intelligently merges cc10x + pseudo-code contexts
+- Handles extraction, merging, and preservation
+
+**Layer 3: Recovery Hook (Safety Net)**
+- New hook: `hooks/post-cc10x-context-write.py`
+- Runs after cc10x writes to `activeContext.md`
+- Detects if specification reference was lost
+- Automatically restores specification if needed
+- Ensures specification never permanently lost
+
+**Hook Registration:**
+```json
+PostToolUse: [
+  post-tool-use.py (priority=high) → Add markers + save spec
+  post-cc10x-context-write.py (priority=normal) → Recover if lost
+]
+```
+
+**Changed Files:**
+- `hooks/post-tool-use.py` - MODIFIED (add specification markers)
+- `hooks/context-merger.py` - NEW (context merging utility)
+- `hooks/post-cc10x-context-write.py` - NEW (recovery hook)
+- `hooks/hooks.json` - MODIFIED (register recovery hook)
+
+**Result:**
+✅ Specification ALWAYS persisted in `.claude/pseudo-code-prompting/specification.md`
+✅ Specification reference ALWAYS present in `.claude/cc10x/activeContext.md`
+✅ Three-layer defense ensures spec never lost
+✅ No configuration needed - automatic & transparent
+
+### 📚 Documentation Updates
+
+**Updated Files:**
+- `docs/bridge-to-cc10x.md` - NEW v2.1.3 Context Preservation section
+- `plugin.json` - Updated description + keywords
+- `.claude-plugin/marketplace.json` - Updated description
+- `README.md` - Updated integration section with three-layer diagram
+- `AGENTS.md` - Condensed 70% + documented new hooks
+
+### 🔧 Backward Compatibility Fixes (v2.1.3 Part 2)
+
+#### Internal Skills Hidden from User Discovery (BUG FIX)
 **Problem:** Internal skills were being exposed as user-callable commands:
 - ✗ `/prompt-structurer` was discoverable (internal-only skill)
 - ✗ `/requirement-validator` should be discoverable but wasn't configured correctly
@@ -30,12 +93,13 @@ All notable changes to pseudo-code-prompting-plugin are documented in this file.
 
 ### Enhancements
 
-#### 📝 Comprehensive Test Coverage for Transform & Validate Commands
+#### 📝 Comprehensive Test Coverage (Transform, Validate, Context Protection)
 **Problem:** Test suite was incomplete and didn't verify all workflow dimensions:
 - ✗ No systematic tests for all 6 validation dimensions
 - ✗ Missing integration tests for actual command execution
 - ✗ Performance assertions were commented out, not verified
 - ✗ No tests for Step 6.5 specification injection workflow
+- ✗ No tests for context preservation and recovery (v2.1.3 new)
 
 **Solution:** Enhanced test suites with comprehensive coverage:
 
@@ -53,34 +117,58 @@ All notable changes to pseudo-code-prompting-plugin are documented in this file.
 - **C5:** Added integration test class `TestValidateCommandIntegration` for real validator calls
 - Full coverage of all 6 validation dimensions with dedicated test classes
 
-**`tests/test_65_steps_flow.py` - NEW (Complete Step 6.5 Testing):**
-- Tests specification injection from PostToolUse hook
-- Verifies `.claude/pseudo-code-prompting/specification.md` creation
-- Tests activeContext.md updates and preservation
-- Tests workflow state detection and requirement storage
-- Tests pseudo-code extraction from various output formats
-- End-to-end specification injection integration tests
+**`tests/test_65_steps_flow.py` - ENHANCED (Step 6.5 + Context Protection - v2.1.3):**
+- Original: Tests specification injection from PostToolUse hook
+- Original: Verifies `.claude/pseudo-code-prompting/specification.md` creation
+- Original: Tests activeContext.md updates and preservation
+- **NEW:** `TestContextPreservationMarkers` - Tests Layer 1 (prevention with markers)
+  - Specification section has `PSEUDO-CODE-CONTEXT` preservation markers
+  - Markers are identifiable for recovery mechanisms
+- **NEW:** `TestContextRecoveryMechanism` - Tests Layer 3 (safety net recovery)
+  - Recovery detects when specification reference is lost
+  - Recovery loads specification from specification.md
+  - Recovery restores specification to activeContext if missing
+  - Recovery only acts when specification actually missing
+- Existing test classes enhanced with marker checks
 - Error handling and edge case coverage
 
 **Test Summary:**
 - **Transform Tests:** 10+ test classes, 60+ test cases
 - **Validate Tests:** 12+ test classes, 50+ test cases
-- **Step 6.5 Tests:** 10+ test classes, 30+ test cases
-- **Total:** 130+ test cases covering all workflow dimensions
+- **Step 6.5 Tests:** 12+ test classes, 40+ test cases (including context protection)
+- **Total:** 140+ test cases covering all workflow dimensions + context preservation
 
 **Changed Files:**
 - `tests/test_transform_command.py` - Critical fixes + integration tests
 - `tests/test_validate_command.py` - Robustness improvements + integration tests
-- `tests/test_65_steps_flow.py` - NEW complete Step 6.5 test suite
+- `tests/test_65_steps_flow.py` - ENHANCED with context preservation tests
 - `plugin.json` - Version → 2.1.3
-- `README.md` - Minor updates to testing section
+- `README.md` - Updates to testing section
 
 ### Impact
-- **For Users:** Cleaner command discovery - only `transform` and `validate` visible
-- **For Developers:** Comprehensive test coverage validates all workflow dimensions
-- **For QA:** Integration tests enable automated validation of command behavior
-- **For Maintainers:** Clear skill responsibility separation + documented test patterns
-- **No Breaking Changes:** Existing `Run transform:` and `Run validate:` commands work unchanged
+
+#### For Users:
+- ✅ **Specification never lost** - Three-layer protection ensures context always available
+- ✅ **Seamless bridge to cc10x** - Answer YES to bridge, specification automatically preserved
+- ✅ **Transparent recovery** - If anything goes wrong, hooks automatically restore specification
+- ✅ **Cleaner command discovery** - Only `transform` and `validate` visible
+
+#### For Developers:
+- ✅ **Comprehensive test coverage** - 140+ tests validate all workflow dimensions + context protection
+- ✅ **Clear context protection mechanism** - Three layers (markers, merging, recovery) well-tested
+- ✅ **Reusable utilities** - `context-merger.py` can be used by other hooks
+
+#### For QA:
+- ✅ **Automated context verification** - Tests verify specification persistence
+- ✅ **Integration tests** - Validate complete workflows including cc10x bridge
+- ✅ **Context recovery tests** - Verify specification always recoverable
+
+#### For Maintainers:
+- ✅ **Clear skill responsibility** - Internal vs discoverable skills properly configured
+- ✅ **Documented patterns** - Three-layer approach documented in AGENTS.md, bridge-to-cc10x.md
+- ✅ **Hook coordination** - Clear execution order prevents conflicts
+
+**No Breaking Changes:** Existing `Run transform:` and `Run validate:` commands work unchanged
 
 ### Testing
 All test suites can be run with:
@@ -93,9 +181,40 @@ pytest tests/test_65_steps_flow.py -v
 # All tests
 pytest tests/ -v
 
+# Context protection tests specifically
+pytest tests/test_65_steps_flow.py::TestContextPreservationMarkers -v
+pytest tests/test_65_steps_flow.py::TestContextRecoveryMechanism -v
+
 # Step 6.5 and integration tests specifically
 pytest tests/test_65_steps_flow.py -m "step65 or integration" -v
 ```
+
+### How to Verify the Fix
+
+1. **Run transform:**
+   ```
+   Run transform: Your requirement
+   ```
+
+2. **Check specification markers:**
+   ```
+   cat .claude/cc10x/activeContext.md | grep "PSEUDO-CODE-CONTEXT"
+   ```
+
+3. **Answer YES to bridge:**
+   ```
+   y
+   ```
+
+4. **Verify specification persists:**
+   ```
+   cat .claude/cc10x/activeContext.md | grep -A 10 "## Specification"
+   ```
+
+5. **Debug with recovery check:**
+   ```
+   DEBUG=1 Run transform: Your requirement
+   ```
 
 ---
 

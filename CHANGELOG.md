@@ -2,6 +2,23 @@
 
 All notable changes to pseudo-code-prompting-plugin are documented in this file.
 
+## 1.0.0 (2026-02-03)
+
+
+### Features
+
+* Add specification-driven cc10x integration (v2.1.0) ([20324da](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/20324dadceffd26e503907780fb75fcf907e8016))
+* Add workflow coordination to prevent cc10x hijacking (v2.0.1) ([37bede0](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/37bede001a30ad0106198c9504048a0160612adf))
+* Implement context merging & recovery with comprehensive tests (v2.1.3) ([f18ee4e](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/f18ee4ea82592d49dec2c4da969807055bcc4358))
+* Release v2.1.3 - Skill Tier Fixes & Comprehensive Test Coverage ([a3de16c](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/a3de16c03db5a0ea014c60111dd343deaf1cdeb8))
+
+
+### Bug Fixes
+
+* Correct skill-to-agent mapping for transform and validate commands ([886ce38](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/886ce3856a23fe7cd97c3bc8129b46ebb8fd1a13))
+* Stable specification reference entry point (eliminates race conditions) ([5debaf2](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/5debaf25bacfb437a8a5306f1e42b9d98af15f85))
+* Step 6.5 specification injection now executes (v2.1.1) ([81b49f9](https://github.com/EladAriel/pseudo-code-prompting-plugin/commit/81b49f91849fece0d6d6bae869d1be6415dd53f3))
+
 ## [2.1.3] - Stable Specification Reference & Multi-Layer Protection (RACE CONDITION FIX)
 
 ### 🔧 Major Fix: Unstable Context Overwriting Issue

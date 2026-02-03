@@ -2,6 +2,103 @@
 
 All notable changes to pseudo-code-prompting-plugin are documented in this file.
 
+## [2.1.3] - Fix: Skill Tier Configuration & Enhanced Test Coverage
+
+### Fixes
+
+#### 🔧 Internal Skills Hidden from User Discovery (BUG FIX)
+**Problem:** Internal skills were being exposed as user-callable commands:
+- ✗ `/prompt-structurer` was discoverable (internal-only skill)
+- ✗ `/requirement-validator` should be discoverable but wasn't configured correctly
+- ✗ Users confused about which skills to invoke vs commands to use
+
+**Root Cause:** Skills had `"tier": "discovery"` which made them visible as commands when they should either be internal (hidden) or command-tier (discoverable as main entry points).
+
+**Solution:** Fixed skill tier configuration:
+- ✓ `prompt-structurer` skill: Changed to `"tier": "internal"` (hidden from users)
+  - Only used internally by the transform workflow
+  - Users invoke via `Run transform:` command, not `/prompt-structurer`
+
+- ✓ `requirement-validator` skill: Changed to `"tier": "command"` (discoverable)
+  - Users can now invoke via `/validate` command
+  - Properly discoverable alongside `/transform`
+  - Supports both `/validate` and `Run validate:` patterns
+
+**Changed Files:**
+- `skills/prompt-structurer/capabilities.json` - tier: discovery → internal
+- `skills/requirement-validator/capabilities.json` - tier: discovery → command
+
+### Enhancements
+
+#### 📝 Comprehensive Test Coverage for Transform & Validate Commands
+**Problem:** Test suite was incomplete and didn't verify all workflow dimensions:
+- ✗ No systematic tests for all 6 validation dimensions
+- ✗ Missing integration tests for actual command execution
+- ✗ Performance assertions were commented out, not verified
+- ✗ No tests for Step 6.5 specification injection workflow
+
+**Solution:** Enhanced test suites with comprehensive coverage:
+
+**`tests/test_transform_command.py` - Major Fixes (C1-C5):**
+- **C1:** Fixed pseudo-code validation to use `re.match()` instead of `re.search()` for proper format enforcement
+- **C2:** Improved parameter extraction with better nested structure handling using try/except with `ast.literal_eval`
+- **C3:** Uncommented and enforced performance assertions (15-25s simple, 25-45s complex, 600-1300 token limits)
+- **C5:** Added integration test class `TestTransformCommandIntegration` for real command calls
+- Full test coverage for all 6 pipeline steps with separate test classes
+
+**`tests/test_validate_command.py` - Major Fixes (C4-C5):**
+- **C4:** Enhanced validation report parser with robustness checks and fallback parsing
+- Added `parse_errors` tracking for better debugging
+- Implemented case-insensitive emoji detection for robustness
+- **C5:** Added integration test class `TestValidateCommandIntegration` for real validator calls
+- Full coverage of all 6 validation dimensions with dedicated test classes
+
+**`tests/test_65_steps_flow.py` - NEW (Complete Step 6.5 Testing):**
+- Tests specification injection from PostToolUse hook
+- Verifies `.claude/pseudo-code-prompting/specification.md` creation
+- Tests activeContext.md updates and preservation
+- Tests workflow state detection and requirement storage
+- Tests pseudo-code extraction from various output formats
+- End-to-end specification injection integration tests
+- Error handling and edge case coverage
+
+**Test Summary:**
+- **Transform Tests:** 10+ test classes, 60+ test cases
+- **Validate Tests:** 12+ test classes, 50+ test cases
+- **Step 6.5 Tests:** 10+ test classes, 30+ test cases
+- **Total:** 130+ test cases covering all workflow dimensions
+
+**Changed Files:**
+- `tests/test_transform_command.py` - Critical fixes + integration tests
+- `tests/test_validate_command.py` - Robustness improvements + integration tests
+- `tests/test_65_steps_flow.py` - NEW complete Step 6.5 test suite
+- `plugin.json` - Version → 2.1.3
+- `README.md` - Minor updates to testing section
+
+### Impact
+- **For Users:** Cleaner command discovery - only `transform` and `validate` visible
+- **For Developers:** Comprehensive test coverage validates all workflow dimensions
+- **For QA:** Integration tests enable automated validation of command behavior
+- **For Maintainers:** Clear skill responsibility separation + documented test patterns
+- **No Breaking Changes:** Existing `Run transform:` and `Run validate:` commands work unchanged
+
+### Testing
+All test suites can be run with:
+```bash
+# Individual test files
+pytest tests/test_transform_command.py -v
+pytest tests/test_validate_command.py -v
+pytest tests/test_65_steps_flow.py -v
+
+# All tests
+pytest tests/ -v
+
+# Step 6.5 and integration tests specifically
+pytest tests/test_65_steps_flow.py -m "step65 or integration" -v
+```
+
+---
+
 ## [2.1.2] - Fix: PostToolUse Hook for Automatic Pseudo-Code Injection
 
 ### Fixes

@@ -4,7 +4,7 @@
   "description": "Validate transformed pseudo-code has all necessary requirements and parameters for production readiness",
   "agent_name": "pseudo-code-prompting-plugin-v2:requirement-validator",
   "version": "2.1.2",
-  "tier": "discovery",
+  "tier": "command",
   "tokens_estimate": 108,
   "triggers": {
     "keywords": [

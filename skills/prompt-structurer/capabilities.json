@@ -4,7 +4,7 @@
   "description": "Transform natural language to pseudo-code using PROMPTCONVERTER methodology",
   "agent_name": "pseudo-code-prompting-plugin-v2:requirement-structurer",
   "version": "2.1.2",
-  "tier": "discovery",
+  "tier": "internal",
   "tokens_estimate": 105,
   "triggers": {
     "keywords": [

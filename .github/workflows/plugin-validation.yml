@@ -1,0 +1,227 @@
+name: Plugin Validation
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:
+
+jobs:
+  validate-manifest:
+    name: Validate Plugin Manifest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate plugin.json schema
+        run: |
+          echo "Validating plugin.json structure..."
+
+          # Check required fields
+          jq -e '.name' plugin.json > /dev/null || { echo "❌ Missing 'name' field"; exit 1; }
+          jq -e '.version' plugin.json > /dev/null || { echo "❌ Missing 'version' field"; exit 1; }
+          jq -e '.description' plugin.json > /dev/null || { echo "❌ Missing 'description' field"; exit 1; }
+          jq -e '.author' plugin.json > /dev/null || { echo "❌ Missing 'author' field"; exit 1; }
+          jq -e '.license' plugin.json > /dev/null || { echo "❌ Missing 'license' field"; exit 1; }
+
+          echo "✅ All required fields present in plugin.json"
+
+      - name: Validate version format
+        run: |
+          VERSION=$(jq -r '.version' plugin.json)
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid version format: $VERSION (expected semver x.y.z)"
+            exit 1
+          fi
+          echo "✅ Version format valid: $VERSION"
+
+      - name: Validate marketplace.json
+        run: |
+          echo "Validating marketplace.json..."
+
+          jq -e '.version' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing version"; exit 1; }
+          jq -e '.name' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing name"; exit 1; }
+          jq -e '.commands' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing commands"; exit 1; }
+          jq -e '.agents' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing agents"; exit 1; }
+
+          echo "✅ marketplace.json structure valid"
+
+  validate-commands:
+    name: Validate Commands and Agents
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count and validate commands
+        run: |
+          echo "Validating commands..."
+
+          # Count command files
+          cmd_count=$(find commands -name "*.md" -type f 2>/dev/null | wc -l)
+          echo "Found $cmd_count command files"
+
+          if [ "$cmd_count" -lt 2 ]; then
+            echo "⚠️  Warning: Expected at least 2 commands, found $cmd_count"
+          fi
+
+          # Verify each command has required frontmatter
+          for file in commands/*.md; do
+            if [ -f "$file" ]; then
+              echo "Checking $file..."
+
+              # Check for frontmatter
+              if ! grep -q "^---$" "$file"; then
+                echo "❌ Missing frontmatter in $file"
+                exit 1
+              fi
+
+              # Check for description
+              if ! grep -q "^description:" "$file"; then
+                echo "❌ Missing description in $file"
+                exit 1
+              fi
+
+              echo "✅ $file valid"
+            fi
+          done
+
+          echo "✅ All commands validated"
+
+      - name: Count and validate agents
+        run: |
+          echo "Validating agents..."
+
+          # Count agent files
+          agent_count=$(find agents -name "*.md" -type f 2>/dev/null | wc -l)
+          echo "Found $agent_count agent files"
+
+          if [ "$agent_count" -lt 2 ]; then
+            echo "⚠️  Warning: Expected at least 2 agents, found $agent_count"
+          fi
+
+          # Basic validation - agents should be markdown
+          for file in agents/*.md; do
+            if [ -f "$file" ]; then
+              if [ ! -s "$file" ]; then
+                echo "❌ Empty agent file: $file"
+                exit 1
+              fi
+              echo "✅ $file exists and not empty"
+            fi
+          done
+
+          echo "✅ All agents validated"
+
+  validate-documentation:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required documentation files
+        run: |
+          echo "Checking documentation files..."
+
+          required_docs=(
+            "README.md"
+            "CHANGELOG.md"
+            "LICENSE"
+          )
+
+          for doc in "${required_docs[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "❌ Missing: $doc"
+              exit 1
+            fi
+            echo "✅ Found: $doc"
+          done
+
+      - name: Validate CHANGELOG format
+        run: |
+          echo "Validating CHANGELOG.md..."
+
+          # Check for version headers
+          if ! grep -q "## \[" CHANGELOG.md; then
+            echo "⚠️  Warning: CHANGELOG doesn't have version headers"
+          fi
+
+          # Check that latest version matches plugin.json
+          PLUGIN_VERSION=$(jq -r '.version' plugin.json)
+          if ! grep -q "## \[$PLUGIN_VERSION\]" CHANGELOG.md; then
+            echo "⚠️  Warning: CHANGELOG doesn't have entry for version $PLUGIN_VERSION"
+          fi
+
+          echo "✅ CHANGELOG format validated"
+
+      - name: Check documentation mentions key features
+        run: |
+          echo "Checking documentation cross-references..."
+
+          # Check for pseudo-code or transformation mentions
+          if ! grep -qi "pseudo-code\|transform\|requirement" README.md; then
+            echo "⚠️  Warning: README doesn't mention core features"
+          fi
+
+          # Check for cc10x bridge documentation
+          if [ -f "docs/bridge-to-cc10x.md" ]; then
+            echo "✅ Found cc10x bridge documentation"
+          fi
+
+          echo "✅ Documentation cross-reference check complete"
+
+  integration-validation:
+    name: Integration Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test complete workflow
+        run: |
+          echo "Testing complete plugin workflow..."
+
+          # Test 1: Basic manifest check
+          echo "Test 1: Plugin manifest check"
+          jq empty plugin.json && echo "✅ Plugin manifest valid"
+
+          # Test 2: Marketplace manifest check
+          echo "Test 2: Marketplace manifest check"
+          jq empty .claude-plugin/marketplace.json && echo "✅ Marketplace manifest valid"
+
+          # Test 3: Verify component counts
+          echo "Test 3: Component verification"
+          COMMANDS=$(find commands -name "*.md" -type f 2>/dev/null | wc -l)
+          AGENTS=$(find agents -name "*.md" -type f 2>/dev/null | wc -l)
+          SKILLS=$(find skills -name "*.md" -type f 2>/dev/null | wc -l)
+          echo "  📋 Commands: $COMMANDS"
+          echo "  🤖 Agents: $AGENTS"
+          echo "  🛠️  Skills: $SKILLS"
+
+          echo "✅ Integration validation complete"
+
+  summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [validate-manifest, validate-commands, validate-documentation, integration-validation]
+    if: always()
+    steps:
+      - name: Check all validations
+        run: |
+          if [[ "${{ needs.validate-manifest.result }}" != "success" ]]; then
+            echo "❌ Manifest validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.validate-commands.result }}" != "success" ]]; then
+            echo "❌ Command validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.validate-documentation.result }}" != "success" ]]; then
+            echo "❌ Documentation validation failed"
+            exit 1
+          fi
+          if [[ "${{ needs.integration-validation.result }}" != "success" ]]; then
+            echo "❌ Integration validation failed"
+            exit 1
+          fi
+
+          echo "✅ All plugin validations passed!"

@@ -1,6 +1,6 @@
 {
   "name": "pseudo-code-prompting",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "Transform fuzzy requirements into crystal-clear pseudo-code specifications, validate them for production readiness, and generate engaging technical explanations of projects",
   "author": {
     "name": "Elad Ariel",

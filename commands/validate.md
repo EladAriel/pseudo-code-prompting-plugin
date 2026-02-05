@@ -33,16 +33,8 @@ Each dimension returns severity levels:
 
 ## Usage
 
-```
-/pseudo-code:validate
-
-Enter pseudo-code to validate (press Enter twice to complete):
-implement_oauth_authentication(
-  providers=["google", "github"],
-  token_type="jwt",
-  ...
-)
-```
+Simply say:
+> **Validate my pseudocode:** implement_oauth_authentication( providers=["google", "github"], token_type="jwt", ... )
 
 ## Output Example
 
@@ -157,6 +149,6 @@ These are optimizations and edge case considerations:
 
 ## See Also
 
-- `/pseudo-code:transform` - Convert requirements to pseudo-code
-- `/pseudo-code:explain_my_project` - Generate project explanations
+- **Transform to pseudocode:** - Convert requirements to pseudo-code
+- **Explain my project:** - Generate project explanations
 - `skills/requirement-validator/references/validation-checklist.md` - Validation patterns and checklists

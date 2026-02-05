@@ -28,16 +28,8 @@ This command runs a 6-step pipeline:
 
 ## Usage
 
-```
-/pseudo-code:transform authentication
-
-Enter your requirement (press Enter twice to complete):
-Add OAuth with Google and GitHub providers. Users should be able to:
-- Log in via OAuth
-- Have tokens automatically refresh
-- Be logged out after 24 hours
-- Get rate limited to 10 login attempts per hour
-```
+Simply say:
+> **Transform to pseudocode:** Add OAuth with Google and GitHub providers. Users should be able to log in via OAuth, have tokens automatically refresh, be logged out after 24 hours, and get rate limited to 10 login attempts per hour.
 
 ## What You Get
 
@@ -108,7 +100,7 @@ Would you like to save this to cc10x for specification-driven TDD?
 
 ## See Also
 
-- `/pseudo-code:validate` - Validate existing pseudo-code across 6 dimensions
-- `/pseudo-code:explain_my_project` - Generate project explanations
+- **Validate my pseudocode:** - Validate existing pseudo-code across 6 dimensions
+- **Explain my project:** - Generate project explanations
 - Documentation: `docs/examples.md` for real-world examples
 - Integration: `docs/cc10x-bridge.md` for cc10x setup

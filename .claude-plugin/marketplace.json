@@ -1,143 +1,21 @@
 {
-  "id": "pseudo-code-prompting",
-  "name": "Pseudo-Code Prompting",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pseudo-code-prompting-plugin",
   "version": "3.0.0",
-  "author": "Elad Ariel",
-  "description": "Transform requirements into crystal-clear pseudo-code specifications and validate them for production readiness across 6 critical dimensions: security, completeness, error handling, data handling, performance, and edge cases.",
-  "longDescription": "The Pseudo-Code Prompting plugin eliminates ambiguity in requirements by transforming vague specifications into precise, production-ready pseudo-code. It then validates the specifications across 6 critical dimensions to catch issues before implementation.\n\nKey Features:\n- Requirements → Pseudo-Code: 6-step pipeline that detects your tech stack and generates architecture-aware specifications\n- Pseudo-Code Validation: Comprehensive checks across security, completeness, error handling, data handling, performance, and edge cases\n- Tech Stack Detection: Supports Node.js, Python, Go, Rust, Java, and more with appropriate file paths and patterns\n- Auto-Compression: Intelligently compresses verbose requirements while preserving critical details\n- cc10x Integration: Specification-driven TDD workflow support\n\nUsage:\n- `/pseudo-code:transform` - Convert requirements to pseudo-code\n- `/pseudo-code:validate` - Validate pseudo-code across 6 dimensions\n\nPerfect for:\n- Engineers who want crystal-clear specifications before implementation\n- Teams aligning on requirements\n- Specification-driven development workflows\n- Quality assurance and code review\n- Integration with cc10x for TDD workflows",
-  "repository": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
-  "homepage": "https://github.com/EladAriel/pseudo-code-prompting-plugin",
-  "documentation": "https://github.com/EladAriel/pseudo-code-prompting-plugin/blob/main/README.md",
-  "license": "MIT",
-  "keywords": [
-    "requirements",
-    "pseudo-code",
-    "specification",
-    "validation",
-    "tdd",
-    "quality",
-    "security",
-    "architecture"
-  ],
-  "category": "requirements-engineering",
-  "categories": [
-    "requirements-engineering",
-    "quality-assurance",
-    "development-tools",
-    "specification"
-  ],
-  "tags": [
-    "pseudo-code",
-    "requirements",
-    "specification",
-    "validation",
-    "tdd",
-    "quality",
-    "security",
-    "production-ready"
-  ],
-  "minimumClaudeCodeVersion": "1.0.0",
-  "commands": [
-    {
-      "name": "transform",
-      "description": "Convert requirements to production-ready pseudo-code"
-    },
-    {
-      "name": "validate",
-      "description": "Validate pseudo-code across 6 critical dimensions"
-    },
-    {
-      "name": "explain",
-      "description": "Generate comprehensive technical explanation of your project with architecture, decisions, and lessons learned"
-    }
-  ],
-  "agents": [
-    {
-      "name": "requirement-structurer",
-      "description": "Transforms requirements into production-ready pseudo-code through a 6-step pipeline"
-    },
-    {
-      "name": "requirement-validator",
-      "description": "Validates pseudo-code across 6 critical dimensions with severity levels"
-    },
-    {
-      "name": "project-explainer",
-      "description": "Analyzes project codebase and generates engaging technical explanations (EXPLAIN files)"
-    }
-  ],
-  "skills": [
-    {
-      "name": "prompt-structurer",
-      "description": "Converts natural language to PROMPTCONVERTER-style pseudo-code with tech stack awareness"
-    },
-    {
-      "name": "requirement-validator",
-      "description": "Validates specifications across security, completeness, error handling, data handling, performance, and edge cases"
-    },
-    {
-      "name": "project-explanation",
-      "description": "Technical writing patterns, templates, and best practices for creating engaging project explanations (EXPLAIN files)"
-    }
-  ],
-  "features": [
-    "6-step transformation pipeline (transform requirements to pseudo-code)",
-    "6-dimension validation (security, completeness, error handling, data handling, performance, edge cases)",
-    "Tech stack detection (Node.js, Python, Go, Rust, Java)",
-    "Auto-compression for verbose requirements",
-    "cc10x integration for specification-driven TDD",
-    "Project explanation generation (EXPLAIN files with architecture, decisions, lessons)",
-    "Production-ready parameter sets",
-    "Architecture-aware file paths",
-    "Engaging technical writing with analogies and anecdotes",
-    "Comprehensive error handling"
-  ],
-  "screenshots": [],
-  "quickStart": "1. Run `/pseudo-code:transform` with your requirement\n2. Get back production-ready pseudo-code\n3. Run `/pseudo-code:validate` to check quality across 6 dimensions\n4. Optionally save to cc10x for specification-driven TDD",
-  "changelog": {
-    "3.0.0": {
-      "date": "2026-02-04",
-      "changes": [
-        "Complete plugin creation and publication",
-        "Simplified architecture (removed hooks, session memory)",
-        "2 commands: transform and validate",
-        "2 agents: requirement-structurer and requirement-validator",
-        "2 skills: prompt-structurer and requirement-validator",
-        "Tech stack detection (5+ languages)",
-        "6-dimension validation",
-        "cc10x integration",
-        "Comprehensive documentation (~2,500 lines)",
-        "4 real-world examples",
-        "60+ test specifications"
-      ]
-    }
+  "description": "Simplified pseudo-code transformation engine with stable specification reference. 6-step pipeline, architecture-aware generation, comprehensive validation, workflow coordination, mandatory specification-reference.md entry point, and four-layer context protection (reference file + markers + merging + recovery) with 140+ test cases validating stable context preservation.",
+  "owner": {
+    "name": "Elad Ariel"
   },
-  "requirements": [],
-  "dependencies": [],
-  "configuration": {
-    "optional": true,
-    "schema": {
-      "cc10x_bridge_auto_save": {
-        "type": "boolean",
-        "description": "Automatically save to cc10x without prompting",
-        "default": false
+  "plugins": [
+    {
+      "name": "pseudo-code-prompting-plugin",
+      "description": "Simplified pseudo-code transformation engine with stable specification reference. 6-step pipeline, architecture-aware generation, comprehensive validation across 6 dimensions, workflow coordination to prevent cc10x hijacking, mandatory specification-reference.md entry point, four-layer context protection (reference + markers + merging + recovery) for stable specification-driven TDD workflows. 140+ test cases validating stable context preservation.",
+      "version": "3.0.0",
+      "author": {
+        "name": "Elad Ariel"
       },
-      "compression_target": {
-        "type": "number",
-        "description": "Target compression ratio (0.0 - 1.0)",
-        "default": 0.8
-      }
+      "source": "./",
+      "category": "development"
     }
-  },
-  "support": {
-    "issues": "https://github.com/EladAriel/pseudo-code-prompting-plugin/issues",
-    "discussions": "https://github.com/EladAriel/pseudo-code-prompting-plugin/discussions"
-  },
-  "stats": {
-    "downloads": 0,
-    "rating": 0,
-    "reviews": 0
-  },
-  "verified": false,
-  "featured": false,
-  "published": "2026-02-04"
+  ]
 }

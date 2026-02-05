@@ -168,8 +168,6 @@ Transform: "Rate limit API to 1000 req/hour per user. Return 429 when exceeded."
 Transform: "Stripe payments. Validate before charging. Retry 3x. Support refunds."
 → Complete spec with error handling, webhook validation, idempotency
 
-See [examples](./.claude-plugin/docs/examples.md) for complete workflows.
-
 ## Who Should Use This
 
 - **Engineers** who want crystal-clear specifications before implementation

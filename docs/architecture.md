@@ -154,7 +154,7 @@ User Requirement Text
 - Output: Compressed requirement (70-80% of original)
     ↓
 [Step 3: PROMPTCONVERTER Format]
-- Converts to function notation: [verb]_[subject](params)
+- Converts to function notation: `[verb]_[subject](params)`
 - Extracts parameters from compressed requirement
 - Names function clearly (e.g., implement_oauth_authentication)
 - Output: Function stub with parameters identified

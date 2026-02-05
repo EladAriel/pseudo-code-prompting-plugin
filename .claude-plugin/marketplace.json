@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "pseudo-code-prompting-plugin",
-  "version": "3.0.0",
+  "version": "3.0.2",
   "description": "Simplified pseudo-code transformation engine with stable specification reference. 6-step pipeline, architecture-aware generation, comprehensive validation, workflow coordination, mandatory specification-reference.md entry point, and four-layer context protection (reference file + markers + merging + recovery) with 140+ test cases validating stable context preservation.",
   "owner": {
     "name": "Elad Ariel"
@@ -10,7 +10,7 @@
     {
       "name": "pseudo-code-prompting-plugin",
       "description": "Simplified pseudo-code transformation engine with stable specification reference. 6-step pipeline, architecture-aware generation, comprehensive validation across 6 dimensions, workflow coordination to prevent cc10x hijacking, mandatory specification-reference.md entry point, four-layer context protection (reference + markers + merging + recovery) for stable specification-driven TDD workflows. 140+ test cases validating stable context preservation.",
-      "version": "3.0.0",
+      "version": "3.0.2",
       "author": {
         "name": "Elad Ariel"
       },

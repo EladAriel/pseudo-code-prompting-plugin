@@ -78,25 +78,21 @@ implement_oauth_authentication(
 
 ### Transform Requirements to Pseudo-Code
 
+Simply say:
+> **Transform to pseudocode:** Add OAuth with Google and GitHub. JWT tokens 15m TTL. Rate limit 10/hour.
+
+Get back production-ready pseudo-code:
 ```
-/pseudo-code:transform
-
-Enter your requirement:
-Add OAuth with Google and GitHub. JWT tokens 15m TTL. Rate limit 10/hour.
-
-Get back:
 implement_oauth_authentication(...)  ✓
 ```
 
 ### Validate Pseudo-Code
 
+Simply say:
+> **Validate my pseudocode:** [paste your pseudo-code]
+
+Get back a quality report:
 ```
-/pseudo-code:validate
-
-Paste pseudo-code:
-implement_oauth_authentication(...)
-
-Get report:
 ✓ PASSED CHECKS
 ✗ CRITICAL ISSUES
 ⚠ WARNINGS
@@ -105,13 +101,14 @@ OVERALL STATUS: READY
 
 ### Explain Your Project
 
-```
-/pseudo-code:explain_my_project
+Simply say:
+> **Explain my project**
 
-Describe your project:
-Payment processing system with Stripe integration, webhooks, and refund handling.
+Then describe your project:
+> Payment processing system with Stripe integration, webhooks, and refund handling.
 
 Get back:
+```
 EXPLAIN_payment_system.md ✓
 
 With:
@@ -125,10 +122,10 @@ With:
 ### Specification-Driven TDD with cc10x
 
 ```
-1. /pseudo-code:transform
-2. Validate if needed
+1. Say: "Transform to pseudocode: [your requirement]"
+2. Validate if needed: "Validate my pseudocode: [your spec]"
 3. Say "Yes" to save to cc10x
-4. /cc10x:router
+4. Optionally invoke cc10x for TDD workflow
 5. Follow RED-GREEN-REFACTOR using specification
 ```
 

@@ -63,17 +63,14 @@ A file: `EXPLAIN_{project_name}.md`
 
 ## Usage
 
-```
-/pseudo-code:explain_my_project
+Simply say:
+> **Explain my project**
 
-Enter project name/description (press Enter twice):
-Payment processing system that handles Stripe integration, webhook callbacks,
-transaction storage, and refund management for our e-commerce platform.
-
-Optional: Any specific areas to focus on? (or press Enter to skip):
-Focus on webhook handling and error recovery
+Or optionally be more specific:
+> **Explain my project:** Payment processing system that handles Stripe integration, webhook callbacks, transaction storage, and refund management. Focus on webhook handling and error recovery.
 
 Get back:
+```
 EXPLAIN_payment_processing.md ✓
 With comprehensive technical explanation
 ```
@@ -169,6 +166,6 @@ See `skills/project-explanation/` for technical writing patterns and templates.
 
 ## See Also
 
-- `/pseudo-code:transform` - Convert requirements to pseudo-code
-- `/pseudo-code:validate` - Validate specifications
+- **Transform to pseudocode:** - Convert requirements to pseudo-code
+- **Validate my pseudocode:** - Validate specifications
 - `skills/project-explanation/SKILL.md` - Technical writing patterns

@@ -28,27 +28,14 @@ Then validates the specification across **6 critical dimensions**: Security, Com
 
 ## Your First Transform
 
-### Step 1: Invoke Transform
+### Step 1: Say the Magic Words
 
-```
-/pseudo-code:transform
-```
+Simply write:
+> **Transform to pseudocode:** Add OAuth authentication with Google and GitHub. Support JWT tokens with 15-minute TTL. Rate limit login to 10 attempts per hour.
 
-### Step 2: Enter Your Requirement
+### Step 2: Get Pseudo-Code
 
-When prompted, type or paste your requirement. Press Enter twice to complete:
-
-```
-Add OAuth authentication with Google and GitHub.
-Support JWT tokens with 15-minute TTL.
-Rate limit login to 10 attempts per hour.
-
-(Press Enter twice)
-```
-
-### Step 3: Get Pseudo-Code
-
-Plugin returns production-ready pseudo-code:
+You get back production-ready pseudo-code:
 
 ```
 implement_oauth_authentication(
@@ -65,44 +52,24 @@ implement_oauth_authentication(
 )
 ```
 
-### Step 4: Save to cc10x (Optional)
+### Step 3: Save to cc10x (Optional)
 
-Plugin asks:
-```
-Save this pseudo-code to cc10x for specification-driven TDD?
-→ Yes: Saves to .claude/cc10x/specification-reference.md
-→ No: Just returns pseudo-code
-```
+You'll be asked if you want to save this pseudo-code to cc10x for specification-driven TDD.
 
-**If YES**: Pseudo-code becomes your specification. When you invoke cc10x, it uses this as the source of truth.
+**If YES**: Pseudo-code becomes your specification. When you use cc10x, it uses this as the source of truth.
 
 **If NO**: Use pseudo-code for manual iteration.
 
 ## Your First Validation
 
-### Step 1: Invoke Validate
+### Step 1: Say the Magic Words
 
-```
-/pseudo-code:validate
-```
+Simply write:
+> **Validate my pseudocode:** implement_payment_processing( provider="stripe", amount=user_input["amount"], ...)
 
-### Step 2: Paste Pseudo-Code
+### Step 2: Get Validation Report
 
-When prompted, paste pseudo-code to review:
-
-```
-implement_payment_processing(
-  provider="stripe",
-  amount=user_input["amount"],
-  ...
-)
-
-(Press Enter twice)
-```
-
-### Step 3: Get Validation Report
-
-Plugin returns structured report:
+You get back a structured report:
 
 ```
 ✓ PASSED CHECKS
@@ -160,10 +127,9 @@ Plugin detects your project type and generates appropriate file paths:
 ### Workflow 1: Quick Transform
 
 ```
-1. /pseudo-code:transform
-2. Paste requirement
-3. Get pseudo-code
-4. Iterate if needed
+1. "Transform to pseudocode: [your requirement]"
+2. Get pseudo-code
+3. Iterate if needed
 ```
 
 **Use when**: You want to see how a requirement converts to specification.
@@ -171,11 +137,11 @@ Plugin detects your project type and generates appropriate file paths:
 ### Workflow 2: Validation-First
 
 ```
-1. /pseudo-code:transform
+1. "Transform to pseudocode: [your requirement]"
 2. Review pseudo-code
-3. /pseudo-code:validate
+3. "Validate my pseudocode: [the spec]"
 4. Fix CRITICAL issues
-5. Save to cc10x
+5. Say "Yes" to save to cc10x
 ```
 
 **Use when**: You want to catch issues before implementing.
@@ -183,10 +149,10 @@ Plugin detects your project type and generates appropriate file paths:
 ### Workflow 3: Specification-Driven Development
 
 ```
-1. /pseudo-code:transform
+1. "Transform to pseudocode: [your requirement]"
 2. Fix any validation issues
-3. Say "Yes" to cc10x bridge
-4. Invoke cc10x
+3. Say "Yes" to save to cc10x
+4. Optionally invoke cc10x
 5. cc10x guides RED-GREEN-REFACTOR using specification
 ```
 
@@ -292,9 +258,9 @@ implement_data_export(
 
 ## Next Steps
 
-1. **Quick Test**: Transform a simple requirement
+1. **Quick Test**: "Transform to pseudocode: [simple requirement]"
 2. **Review Output**: Check pseudo-code makes sense
-3. **Validate It**: Use `/pseudo-code:validate` to find issues
+3. **Validate It**: "Validate my pseudocode: [the spec]" to find issues
 4. **Save to cc10x**: Test the cc10x bridge (optional)
 5. **Iterate**: Refine requirement and transform again
 
@@ -329,8 +295,7 @@ A: Yes! Transform your requirement first to get specification, then validate to 
 
 **Ready to transform your first requirement?**
 
-```
-/pseudo-code:transform
-```
+Simply say:
+> **Transform to pseudocode:** [your requirement]
 
 Go! 🚀

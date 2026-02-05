@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.2] - 2026-02-05
+
+### Changed
+- Updated all documentation to use natural language patterns instead of slash commands for invoking features
+- Changed examples from `/pseudo-code:transform` to "Transform to pseudocode: [requirement]"
+- Changed examples from `/pseudo-code:validate` to "Validate my pseudocode: [spec]"
+- Changed examples from `/pseudo-code:explain_my_project` to "Explain my project"
+- Updated: README.md, QUICK_START.md, all command documentation, and INDEX.md
+- User feedback indicates natural language invocation works more reliably than command syntax
+
 ## [3.0.1] - 2026-02-05
 
 ### Fixed

@@ -40,10 +40,17 @@ jobs:
         run: |
           echo "Validating marketplace.json..."
 
+          # Check marketplace schema fields
           jq -e '.version' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing version"; exit 1; }
           jq -e '.name' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing name"; exit 1; }
-          jq -e '.commands' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing commands"; exit 1; }
-          jq -e '.agents' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing agents"; exit 1; }
+          jq -e '.description' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing description"; exit 1; }
+          jq -e '.owner' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing owner object"; exit 1; }
+
+          # Check marketplace plugins array
+          jq -e '.plugins | length > 0' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Missing or empty plugins array"; exit 1; }
+
+          # Verify each plugin has required fields
+          jq -e '.plugins[] | select(.name and .description and .version)' .claude-plugin/marketplace.json > /dev/null || { echo "❌ Plugins missing required fields"; exit 1; }
 
           echo "✅ marketplace.json structure valid"
 
